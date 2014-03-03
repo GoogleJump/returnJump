@@ -15,7 +15,6 @@ public class Fridge extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-    	//first push
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.fridge, menu);
         return true;
