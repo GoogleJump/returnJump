@@ -1,0 +1,4 @@
+INDEX VERSION 1.126+C:\Users\Kelsey\Documents\GitHub\returnJump\.metadata\.plugins\org.eclipse.jdt.core
+651488899.index
+2422805018.index
+3986294267.index
