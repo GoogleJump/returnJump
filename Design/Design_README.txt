@@ -15,8 +15,8 @@ Whenever you want to commit a change, do the following:
 
     5) git push origin master
 
-CHANGES ON MARCH 5:
-===================
+CHANGES ON MARCH 5 (DO THIS ONLY ONCE):
+=======================================
 
 I made some changes to the android skeleton to allow easier individual development of our first tasks before we put it together. I created a seperate activity for each of us, so work within your own activity for now (YournameActivity).
 
