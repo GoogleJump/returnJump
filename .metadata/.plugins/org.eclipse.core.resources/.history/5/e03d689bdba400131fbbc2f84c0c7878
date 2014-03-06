@@ -1,0 +1,14 @@
+package com.returnjump.spoilfoil;
+
+import android.app.Application;
+
+public class MyApplication extends Application {
+
+	@Override
+	protected void onCreate() {
+		super.onCreate();
+		
+		
+	}
+
+}

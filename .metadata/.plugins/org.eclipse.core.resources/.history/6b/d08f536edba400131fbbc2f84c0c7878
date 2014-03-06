@@ -1,0 +1,10 @@
+package com.returnjump.spoilfoil;
+
+public class ApplicationActivity extends Application {
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_application);
+	}
+}
