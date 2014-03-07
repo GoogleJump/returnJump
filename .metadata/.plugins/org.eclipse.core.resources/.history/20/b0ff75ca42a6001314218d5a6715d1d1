@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="parse_app_id">EnterParseApplicationIDHere</string>
+    <string name="parse_client_id">EnterParseApplicationIDHere</string>
+
+</resources>
