@@ -4,4 +4,6 @@
 <fullyQualifiedTypeName name="android.view.View.OnClickListener"/>
 <fullyQualifiedTypeName name="android.content.Intent"/>
 <fullyQualifiedTypeName name="com.returnjump.spoilfoil.R.id"/>
+<fullyQualifiedTypeName name="com.returnjump.spoilfoil.R.string"/>
+<fullyQualifiedTypeName name="com.parse.Parse"/>
 </qualifiedTypeNameHistroy>
