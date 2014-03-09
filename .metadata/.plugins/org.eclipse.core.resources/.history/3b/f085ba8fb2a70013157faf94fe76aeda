@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SpoilFoil</string>
+    <string name="action_settings">Settings</string>
+<<<<<<< HEAD
+    <string name="hello_world">Hello world!</string>
+    <string name="processing_image">Your image is being processed&#8230;</string>
+=======
+    <string name="your_food_items">Your food items...</string>
+>>>>>>> 59214ac6f7e018b5890457fab309492fa351e458
+    <string name="title_activity_tasti">TastiActivity</string>
+    <string name="title_activity_arturo">ArturoActivity</string>
+    <string name="title_activity_kelsey">KelseyActivity</string>
+    <string name="title_activity_jeffrey">JeffreyActivity</string>
+<<<<<<< HEAD
+    <string name="captured_image">Captured Image</string>
+=======
+    <string name="edit_text_new_foodItem">new food item | number of days good</string>
+>>>>>>> 59214ac6f7e018b5890457fab309492fa351e458
+
+</resources>
