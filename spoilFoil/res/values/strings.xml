@@ -4,6 +4,7 @@
     <string name="app_name">SpoilFoil</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="processing_image">Your image is being processed&#8230;</string>
     <string name="title_activity_tasti">TastiActivity</string>
     <string name="title_activity_arturo">ArturoActivity</string>
     <string name="title_activity_kelsey">KelseyActivity</string>

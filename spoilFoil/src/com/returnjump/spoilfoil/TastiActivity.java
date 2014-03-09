@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -13,13 +12,16 @@ import com.googlecode.tesseract.android.TessBaseAPI;
 
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.app.Activity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.NavUtils;
@@ -172,94 +174,55 @@ public class TastiActivity extends Activity {
 	    return mediaFile;
 	}
 	
-	// USE ASYNCHRONOUS TASK FOR IMAGE PROCESSING AND OCR
+	// Correct orientation of image
+	private static Bitmap fixImageOrientation(Bitmap image, final String PATH) {
+        try {
+			ExifInterface exif = new ExifInterface(PATH);
+			int exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+			int rotate = 0;
+			
+			switch (exifOrientation) {
+				case ExifInterface.ORIENTATION_ROTATE_90:
+					rotate = 90;
+					break;
+				case ExifInterface.ORIENTATION_ROTATE_180:
+					rotate = 180;
+					break;
+				case ExifInterface.ORIENTATION_ROTATE_270:
+					rotate = 270;
+					break;
+			}
+			
+			//Toast.makeText(context, "ROTATION: " + rotate, Toast.LENGTH_LONG).show();
+			
+			if (rotate != 0) {
+				int w = image.getWidth();
+				int h = image.getHeight();
+				
+				// Setting pre rotate
+				Matrix mtx = new Matrix();
+				mtx.preRotate(rotate);
+				
+				Log.e("SpoilFoil", "WIDTH: " + Integer.toString(w));
+				Log.e("SpoilFoil", "HEIGHT: " + Integer.toString(h));
+				
+				// Rotating image
+			    return Bitmap.createBitmap(image, 0, 0, w, h, mtx, false);
+			}
+			
+		} catch (IOException e) {
+			// Couldn't correct orientation
+		}
+        
+        return image;
+	}
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
 	        if (resultCode == RESULT_OK) {
-	            // Image captured and saved to fileUri specified in the Intent
-	            Toast.makeText(this, "Image saved to:\n" + IMAGE_PATH, Toast.LENGTH_LONG).show();
-	            
-	            //Bundle extras = data.getExtras();
-	            //Bitmap imageBitmap = (Bitmap) extras.get("data");
-	            Bitmap imageBitmap = BitmapFactory.decodeFile(IMAGE_PATH);
-	            
-	            // Scale image to reduce memory usage
-	            imageBitmap = Bitmap.createScaledBitmap(imageBitmap, imageBitmap.getWidth() / 2, imageBitmap.getHeight() / 2, false);
-	            
-	            
-	            ImageView imageView = (ImageView) findViewById(R.id.image_thumbnail);
-	          
-	            imageView.setImageBitmap(imageBitmap);
-	            
-	            // Correct orientation of image (Still needs some fixing)
-	            try {
-					ExifInterface exif = new ExifInterface(IMAGE_PATH);
-					int exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-					int rotate = 0;
-					
-					switch (exifOrientation) {
-						case ExifInterface.ORIENTATION_ROTATE_90:
-							rotate = 90;
-							break;
-						case ExifInterface.ORIENTATION_ROTATE_180:
-							rotate = 180;
-							break;
-						case ExifInterface.ORIENTATION_ROTATE_270:
-							rotate = 270;
-							break;
-					}
-					Toast.makeText(this, "ROTATION: " + rotate, Toast.LENGTH_LONG).show();
-					if (rotate != 0) {
-						int w = imageBitmap.getWidth();
-						int h = imageBitmap.getHeight();
-						
-						// Setting pre rotate
-						Matrix mtx = new Matrix();
-						mtx.preRotate(rotate);
-						
-						Log.e("SpoilFoil", "WIDTH: " + Integer.toString(w));
-						Log.e("SpoilFoil", "HEIGHT: " + Integer.toString(h));
-						
-						// Rotating image
-					    imageBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, w, h, mtx, false);
-					}
-					
-				} catch (IOException e) {
-					// Couldn't correct orientation
-				}
-	            
-	            // Convert to ARGB_8888, required by tess
-	            imageBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
-	            
-	            TessBaseAPI baseApi = new TessBaseAPI();
-				
-				// To be safe, you should check that the SDCard is mounted
-			    // using Environment.getExternalStorageState() before doing this.
-
-			    File dataStorageDir = new File(Environment.getExternalStorageDirectory(), "SpoilFoil");
-			    // This location works best if you want the created images to be shared
-			    // between applications and persist after your app has been uninstalled.
-
-			    // Create the storage directory if it does not exist
-			    if (!dataStorageDir.exists()){
-			        if (!dataStorageDir.mkdirs()){
-			            Toast.makeText(context, "Failed to create directory.", Toast.LENGTH_LONG).show();
-			        }
-			    }
-			    
-			    String DATA_PATH = dataStorageDir.getPath();
-				baseApi.init(DATA_PATH, LANG);
-				baseApi.setImage(imageBitmap);
-				String recognizedText = baseApi.getUTF8Text();
-				baseApi.end();
-				
-				// Optimize text
-				recognizedText = recognizedText.replaceAll("[^a-zA-Z0-9]+", " ").trim();
-				
-				TextView textView = (TextView) findViewById(R.id.recognized_text);
-				textView.setText(recognizedText);
+	        	// Process image in an AsyncTask
+	        	new OcrImageTask().execute(IMAGE_PATH);
 	        } else if (resultCode == RESULT_CANCELED) {
 	            // User cancelled the image capture
 	        	Toast.makeText(this, "Image capture cancelled.", Toast.LENGTH_LONG).show();
@@ -269,5 +232,79 @@ public class TastiActivity extends Activity {
 	        }
 	    }
 	}
+	
+	private class OcrImageTask extends AsyncTask<String, Void, String> {
+	    private ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_ocr);
+	    
+	    protected void onPreExecute () {
+	        progressBar.setVisibility(View.VISIBLE);
+	    }
+	    
+	    protected String doInBackground(final String... PATH) {
+		    // Image captured and saved to fileUri specified in the Intent
+		    //Toast.makeText(context, "Image saved to:\n" + PATH[0], Toast.LENGTH_LONG).show();
+            
+            //Bundle extras = data.getExtras();
+            //Bitmap imageBitmap = (Bitmap) extras.get("data");
+            Bitmap imageBitmap = BitmapFactory.decodeFile(PATH[0]);
+            
+            // Scale image to reduce memory usage
+            imageBitmap = Bitmap.createScaledBitmap(imageBitmap, imageBitmap.getWidth() / 2, imageBitmap.getHeight() / 2, false);
+            imageBitmap = fixImageOrientation(imageBitmap, PATH[0]);
+            
+            // Convert to ARGB_8888, required by tess
+            imageBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+            
+            TessBaseAPI baseApi = new TessBaseAPI();
+			
+			// To be safe, you should check that the SDCard is mounted
+		    // using Environment.getExternalStorageState() before doing this.
+
+		    File dataStorageDir = new File(Environment.getExternalStorageDirectory(), "SpoilFoil");
+		    // This location works best if you want the created images to be shared
+		    // between applications and persist after your app has been uninstalled.
+
+		    // Create the storage directory if it does not exist
+		    if (!dataStorageDir.exists()){
+		        if (!dataStorageDir.mkdirs()){
+		            //Toast.makeText(context, "Failed to create directory.", Toast.LENGTH_LONG).show();
+		        }
+		    }
+		    
+		    String DATA_PATH = dataStorageDir.getPath();
+			baseApi.init(DATA_PATH, LANG);
+			baseApi.setImage(imageBitmap);
+			String recognizedText = baseApi.getUTF8Text();
+			baseApi.end();
+			
+			// Display image in ImageView
+			final Bitmap imageBitmapFinal = imageBitmap;
+			imageBitmap = null;
+			
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ImageView imageView = (ImageView) findViewById(R.id.image_thumbnail);
+                    imageView.setImageBitmap(imageBitmapFinal);
+               }
+            });
+			
+            // Optimize text
+			return recognizedText.replaceAll("[^a-zA-Z0-9]+", " ").trim();
+	     }
+
+	    protected void onPostExecute(final String recognizedText) {
+	        // Display text in TextView
+			runOnUiThread(new Runnable() {
+			     @Override
+			     public void run() {
+			         TextView textView = (TextView) findViewById(R.id.recognized_text);
+			         textView.setText(recognizedText);
+			    }
+			});
+			
+			progressBar.setVisibility(View.GONE);
+	     }
+	 }
 
 }
