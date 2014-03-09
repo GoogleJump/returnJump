@@ -279,7 +279,7 @@ public class TastiActivity extends Activity {
 			
 			// Display image in ImageView
 			final Bitmap imageBitmapFinal = imageBitmap;
-			imageBitmap = null;
+			//imageBitmap.recycle();
 			
             runOnUiThread(new Runnable() {
                 @Override
@@ -290,7 +290,7 @@ public class TastiActivity extends Activity {
             });
 			
             // Optimize text
-			return recognizedText.replaceAll("[^a-zA-Z0-9]+", " ").trim();
+			return recognizedText.replaceAll("[^a-zA-Z0-9\n]+", " ").trim();
 	     }
 
 	    protected void onPostExecute(final String recognizedText) {
