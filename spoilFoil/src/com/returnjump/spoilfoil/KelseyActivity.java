@@ -1,12 +1,18 @@
 package com.returnjump.spoilfoil;
 
-import android.os.Bundle;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v4.app.NavUtils;
-import android.annotation.TargetApi;
-import android.os.Build;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ListView;
 
 public class KelseyActivity extends Activity {
 
@@ -16,7 +22,41 @@ public class KelseyActivity extends Activity {
 		setContentView(R.layout.activity_kelsey);
 		// Show the Up button in the action bar.
 		setupActionBar();
-	}
+		
+		ArrayList<foodItem> foodItems = new ArrayList<foodItem>();  //manually added for testing purposes
+		foodItem milk = new foodItem("Milk", 10);
+		foodItem bread = new foodItem("Bread", 30);
+		foodItem eggs = new foodItem("Eggs", 12);
+		foodItems.add(milk);
+		foodItems.add(bread);
+		foodItems.add(eggs);
+		
+	  final ArrayAdapter adapter = new ArrayAdapter (this, R.layout.food_item_textview, foodItems);
+	  
+	  ListView listView = (ListView) findViewById(R.id.foodItemListView);
+	  listView.setAdapter(adapter);
+		
+	  EditText textField = (EditText) findViewById(R.id.newItemEditText);
+	 String entry  = textField.getText().toString();
+	 Scanner scan = new Scanner(entry);
+	 try{
+	  if(entry.indexOf(" ")==-1){
+		  throw new IllegalArgumentException("Please enter an item and number of days it is good");
+	  }
+	  String foodName = scan.next();
+	  int daysGood = Integer.parseInt(scan.next());
+	  foodItem newFoodItem = new foodItem(foodName, daysGood);
+	  foodItems.add(newFoodItem);
+	 }
+	  catch (NumberFormatException n){
+		  
+	  }catch (IllegalArgumentException i){
+		  
+	  }	  
+	  }
+	  
+	  
+	 
 
 	/**
 	 * Set up the {@link android.app.ActionBar}, if the API is available.
