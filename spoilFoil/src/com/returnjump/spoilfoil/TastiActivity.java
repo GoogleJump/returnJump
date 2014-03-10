@@ -52,49 +52,8 @@ public class TastiActivity extends Activity {
 		setupActionBar();
 		
 		context = this;
-		
-		// To be safe, you should check that the SDCard is mounted
-	    // using Environment.getExternalStorageState() before doing this.
 
-	    File tessStorageDir = new File(Environment.getExternalStorageDirectory() + "/SpoilFoil/tessdata");
-	    // This location works best if you want the created images to be shared
-	    // between applications and persist after your app has been uninstalled.
-
-	    // Create the storage directory if it does not exist
-	    if (!tessStorageDir.exists()){
-	        if (!tessStorageDir.mkdirs()){
-	            Toast.makeText(context, "Failed to create directory:\n" + tessStorageDir.getPath(), Toast.LENGTH_LONG).show();
-	        }
-	    }
-
-		// LANG.traineddata file with the app (in assets folder)
-		// You can get them at:
-		// http://code.google.com/p/tesseract-ocr/downloads/list
-		// This area needs work and optimization
-		if (!(new File(tessStorageDir + "/" + LANG + ".traineddata")).exists()) {
-			try {
-
-				AssetManager assetManager = getAssets();
-				InputStream in = assetManager.open("tessdata/" + LANG + ".traineddata");
-				//GZIPInputStream gin = new GZIPInputStream(in);
-				OutputStream out = new FileOutputStream(tessStorageDir + "/" + LANG + ".traineddata");
-
-				// Transfer bytes from in to out
-				byte[] buf = new byte[1024];
-				int len;
-				//while ((lenf = gin.read(buff)) > 0) {
-				while ((len = in.read(buf)) > 0) {
-					out.write(buf, 0, len);
-				}
-				in.close();
-				//gin.close();
-				out.close();
-				
-				Toast.makeText(context, "Copied " + LANG + " traineddata", Toast.LENGTH_LONG).show();
-			} catch (IOException e) {
-				Toast.makeText(context, "Was unable to copy " + LANG + " traineddata ", Toast.LENGTH_LONG).show();
-			}
-		}
+		copyTessDataToStorage();
 		
 		// Open existing camera app, calls onActivityResult() when intent is finished
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -137,6 +96,51 @@ public class TastiActivity extends Activity {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	// LANG.traineddata file with the app (in assets folder)
+    // You can get them at:
+    // http://code.google.com/p/tesseract-ocr/downloads/list
+    // This area needs work and optimization
+	private static void copyTessDataToStorage() {
+	    // To be safe, you should check that the SDCard is mounted
+        // using Environment.getExternalStorageState() before doing this.
+
+        File tessStorageDir = new File(Environment.getExternalStorageDirectory() + "/SpoilFoil/tessdata");
+        // This location works best if you want the created images to be shared
+        // between applications and persist after your app has been uninstalled.
+
+        // Create the storage directory if it does not exist
+        if (!tessStorageDir.exists()){
+            if (!tessStorageDir.mkdirs()){
+                Toast.makeText(context, "Failed to create directory:\n" + tessStorageDir.getPath(), Toast.LENGTH_LONG).show();
+            }
+        }
+	    
+	    if (!(new File(tessStorageDir + "/" + LANG + ".traineddata")).exists()) {
+            try {
+                AssetManager assetManager = context.getAssets();
+                InputStream in = assetManager.open("tessdata/" + LANG + ".traineddata");
+                //GZIPInputStream gin = new GZIPInputStream(in);
+                OutputStream out = new FileOutputStream(tessStorageDir + "/" + LANG + ".traineddata");
+
+                // Transfer bytes from in to out
+                byte[] buf = new byte[1024];
+                int len;
+                //while ((lenf = gin.read(buff)) > 0) {
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                in.close();
+                //gin.close();
+                out.close();
+                
+                Toast.makeText(context, "Copied " + LANG + " traineddata", Toast.LENGTH_LONG).show();
+            } catch (IOException e) {
+                Toast.makeText(context, "Was unable to copy " + LANG + " traineddata ", Toast.LENGTH_LONG).show();
+            }
+        }
+	    
 	}
 	
 	private static Uri getOutputMediaFileUri(int type){
@@ -290,7 +294,9 @@ public class TastiActivity extends Activity {
             });
 			
             // Optimize text
-			return recognizedText.replaceAll("[^a-zA-Z0-9\n]+", " ").trim();
+            //return recognizedText.replaceAll("[^a-zA-Z0-9\n]+", " ").trim();
+            
+            return recognizedText.trim();
 	     }
 
 	    protected void onPostExecute(final String recognizedText) {
