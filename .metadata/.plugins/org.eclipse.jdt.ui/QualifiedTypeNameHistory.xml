@@ -27,4 +27,8 @@
 <fullyQualifiedTypeName name="com.returnjump.spoilfoil.R.id"/>
 <fullyQualifiedTypeName name="android.widget.ProgressBar"/>
 <fullyQualifiedTypeName name="android.view.View"/>
+<fullyQualifiedTypeName name="com.googlecode.leptonica.android.Pix"/>
+<fullyQualifiedTypeName name="com.googlecode.leptonica.android.ReadFile"/>
+<fullyQualifiedTypeName name="com.googlecode.leptonica.android.Binarize"/>
+<fullyQualifiedTypeName name="com.googlecode.leptonica.android.WriteFile"/>
 </qualifiedTypeNameHistroy>

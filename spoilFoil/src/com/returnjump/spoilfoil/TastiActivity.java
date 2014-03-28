@@ -8,6 +8,10 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.googlecode.leptonica.android.Binarize;
+import com.googlecode.leptonica.android.Pix;
+import com.googlecode.leptonica.android.ReadFile;
+import com.googlecode.leptonica.android.WriteFile;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import android.media.ExifInterface;
@@ -248,13 +252,21 @@ public class TastiActivity extends Activity {
 		    // Image captured and saved to fileUri specified in the Intent
 		    //Toast.makeText(context, "Image saved to:\n" + PATH[0], Toast.LENGTH_LONG).show();
             
+	        // Scale image to reduce memory consumption
+	        BitmapFactory.Options options = new BitmapFactory.Options();
+	        options.inSampleSize = 2;
+	        
             //Bundle extras = data.getExtras();
             //Bitmap imageBitmap = (Bitmap) extras.get("data");
-            Bitmap imageBitmap = BitmapFactory.decodeFile(PATH[0]);
+            Bitmap imageBitmap = BitmapFactory.decodeFile(PATH[0], options);
             
-            // Scale image to reduce memory usage
-            imageBitmap = Bitmap.createScaledBitmap(imageBitmap, imageBitmap.getWidth() / 2, imageBitmap.getHeight() / 2, false);
             imageBitmap = fixImageOrientation(imageBitmap, PATH[0]);
+            
+            // Leptonica binarization
+            Pix pix = ReadFile.readBitmap(imageBitmap);
+            pix = Binarize.otsuAdaptiveThreshold(pix, 32, 32, 2, 2, 0.9F);
+            //pix = Binarize.otsuAdaptiveThreshold(pix);
+            imageBitmap = WriteFile.writeBitmap(pix);
             
             // Convert to ARGB_8888, required by tess
             imageBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
@@ -293,7 +305,7 @@ public class TastiActivity extends Activity {
                }
             });
 			
-            // Optimize text
+            // Clean text
             //return recognizedText.replaceAll("[^a-zA-Z0-9\n]+", " ").trim();
             
             return recognizedText.trim();
