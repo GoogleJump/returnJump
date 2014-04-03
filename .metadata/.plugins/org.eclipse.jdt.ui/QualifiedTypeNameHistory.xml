@@ -31,4 +31,10 @@
 <fullyQualifiedTypeName name="com.googlecode.leptonica.android.ReadFile"/>
 <fullyQualifiedTypeName name="com.googlecode.leptonica.android.Binarize"/>
 <fullyQualifiedTypeName name="com.googlecode.leptonica.android.WriteFile"/>
+<fullyQualifiedTypeName name="org.xeustechnologies.googleapi.spelling.SpellChecker"/>
+<fullyQualifiedTypeName name="org.xeustechnologies.googleapi.spelling.SpellResponse"/>
+<fullyQualifiedTypeName name="org.xeustechnologies.googleapi.spelling.SpellCorrection"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="android.graphics.Color"/>
 </qualifiedTypeNameHistroy>

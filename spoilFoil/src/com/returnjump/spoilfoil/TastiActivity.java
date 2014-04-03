@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.googlecode.leptonica.android.Binarize;
 import com.googlecode.leptonica.android.Pix;
@@ -35,6 +37,7 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -56,7 +59,7 @@ public class TastiActivity extends Activity {
 		setupActionBar();
 		
 		context = this;
-
+		
 		copyTessDataToStorage();
 		
 		// Open existing camera app, calls onActivityResult() when intent is finished
@@ -64,7 +67,7 @@ public class TastiActivity extends Activity {
 		
 		fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
 		intent.putExtra(MediaStore.EXTRA_OUTPUT,  fileUri);
-		
+	Toast.makeText(this, IMAGE_PATH + " == " + fileUri.getPath(), Toast.LENGTH_LONG).show();
 		startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
 	}
 
@@ -131,7 +134,7 @@ public class TastiActivity extends Activity {
                 // Transfer bytes from in to out
                 byte[] buf = new byte[1024];
                 int len;
-                //while ((lenf = gin.read(buff)) > 0) {
+                
                 while ((len = in.read(buf)) > 0) {
                     out.write(buf, 0, len);
                 }
@@ -230,7 +233,8 @@ public class TastiActivity extends Activity {
 		if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
 	        if (resultCode == RESULT_OK) {
 	        	// Process image in an AsyncTask
-	        	new OcrImageTask().execute(IMAGE_PATH);
+	            
+	        	new BinarizeImageTask().execute(IMAGE_PATH);
 	        } else if (resultCode == RESULT_CANCELED) {
 	            // User cancelled the image capture
 	        	Toast.makeText(this, "Image capture cancelled.", Toast.LENGTH_LONG).show();
@@ -241,88 +245,141 @@ public class TastiActivity extends Activity {
 	    }
 	}
 	
-	private class OcrImageTask extends AsyncTask<String, Void, String> {
+	private class BinarizeImageTask extends AsyncTask<String, Void, Bitmap> {
+	    private TextView textView = (TextView) findViewById(R.id.recognized_text);
 	    private ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_ocr);
-	    
-	    protected void onPreExecute () {
-	        progressBar.setVisibility(View.VISIBLE);
-	    }
-	    
-	    protected String doInBackground(final String... PATH) {
-		    // Image captured and saved to fileUri specified in the Intent
-		    //Toast.makeText(context, "Image saved to:\n" + PATH[0], Toast.LENGTH_LONG).show();
+        
+        protected void onPreExecute () {
+            textView.setText("Binarizing image...");
+            progressBar.setVisibility(View.VISIBLE);
+        }
+        
+        protected Bitmap doInBackground(String... PATH) {
+            // Scale image to reduce memory consumption
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 2;
             
-	        // Scale image to reduce memory consumption
-	        BitmapFactory.Options options = new BitmapFactory.Options();
-	        options.inSampleSize = 2;
-	        
-            //Bundle extras = data.getExtras();
-            //Bitmap imageBitmap = (Bitmap) extras.get("data");
-            Bitmap imageBitmap = BitmapFactory.decodeFile(PATH[0], options);
+            Bitmap bitmap = BitmapFactory.decodeFile(PATH[0], options);
             
-            imageBitmap = fixImageOrientation(imageBitmap, PATH[0]);
+            bitmap = fixImageOrientation(bitmap, PATH[0]);
             
             // Leptonica binarization
-            Pix pix = ReadFile.readBitmap(imageBitmap);
+            Pix pix = ReadFile.readBitmap(bitmap);
             pix = Binarize.otsuAdaptiveThreshold(pix, 32, 32, 2, 2, 0.9F);
             //pix = Binarize.otsuAdaptiveThreshold(pix);
-            imageBitmap = WriteFile.writeBitmap(pix);
+            bitmap = WriteFile.writeBitmap(pix);
+            
+            return bitmap;
+        }
+        
+        protected void onPostExecute(Bitmap bitmap) {
+            new OcrImageTask().execute(bitmap);
+        }
+    }
+	
+	private class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
+	    private TextView textView = (TextView) findViewById(R.id.recognized_text);
+	    private ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_ocr);
+	    private ImageView imageView = (ImageView) findViewById(R.id.image_thumbnail);
+	    
+	    protected void onPreExecute () {
+	        textView.setText("OCR'ing image...");
+	    }
+	    
+	    private Bitmap[] splitBitmap(Bitmap bitmap) {
+	        int width = bitmap.getWidth();
+	        int height = bitmap.getHeight();
+	        int pixel;
+	        boolean isBlankRow = true;
+	        
+	        // Default if height below threshold (100) or no blank row found
+	        Bitmap first = Bitmap.createBitmap(bitmap, 0, 0, width, height);
+            Bitmap rest = null;
+	        
+	        if (height > 100) {
+	            
+	            for (int y = 0; y < height; ++y) {
+	                isBlankRow = true;
+	                
+	                for (int x = 0; x < width; ++x) {
+	                    pixel = bitmap.getPixel(x, y);
+	                    
+	                    if (pixel == Color.BLACK) {
+	                        isBlankRow = false;
+	                        break;
+	                    }
+	                }
+	                
+	                if (isBlankRow) {
+	                    first = Bitmap.createBitmap(bitmap, 0, 0, width, y+1);
+	                    rest = Bitmap.createBitmap(bitmap, 0, y+1, width, height - y-1);
+	                    
+	                    break;
+	                }
+	            }
+	            
+	        }
+
+	        Bitmap[] splittedBitmap = {first, rest};
+	        
+	        return splittedBitmap;
+	    }
+	    
+	    protected Bitmap doInBackground(Bitmap... bitmaps) {
+            Bitmap[] splittedBitmap = splitBitmap(bitmaps[0]);
+            Bitmap bitmap = splittedBitmap[0];
+            Bitmap restBitmap = splittedBitmap[1];
             
             // Convert to ARGB_8888, required by tess
-            imageBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+            bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
             
             TessBaseAPI baseApi = new TessBaseAPI();
-			
-			// To be safe, you should check that the SDCard is mounted
-		    // using Environment.getExternalStorageState() before doing this.
+            
+            // To be safe, you should check that the SDCard is mounted
+            // using Environment.getExternalStorageState() before doing this.
 
-		    File dataStorageDir = new File(Environment.getExternalStorageDirectory(), "SpoilFoil");
-		    // This location works best if you want the created images to be shared
-		    // between applications and persist after your app has been uninstalled.
+            File dataStorageDir = new File(Environment.getExternalStorageDirectory(), "SpoilFoil");
+            // This location works best if you want the created images to be shared
+            // between applications and persist after your app has been uninstalled.
 
-		    // Create the storage directory if it does not exist
-		    if (!dataStorageDir.exists()){
-		        if (!dataStorageDir.mkdirs()){
-		            //Toast.makeText(context, "Failed to create directory.", Toast.LENGTH_LONG).show();
-		        }
-		    }
-		    
-		    String DATA_PATH = dataStorageDir.getPath();
-			baseApi.init(DATA_PATH, LANG);
-			baseApi.setImage(imageBitmap);
-			String recognizedText = baseApi.getUTF8Text();
-			baseApi.end();
-			
-			// Display image in ImageView
-			final Bitmap imageBitmapFinal = imageBitmap;
-			//imageBitmap.recycle();
-			
+            // Create the storage directory if it does not exist
+            if (!dataStorageDir.exists()){
+                if (!dataStorageDir.mkdirs()){
+                    //Toast.makeText(context, "Failed to create directory.", Toast.LENGTH_LONG).show();
+                }
+            }
+            
+            String DATA_PATH = dataStorageDir.getPath();
+            baseApi.init(DATA_PATH, LANG);
+            baseApi.setImage(bitmap);
+            String recognizedText = baseApi.getUTF8Text();
+            baseApi.end();
+            
+            // Display image and text
+            final Bitmap finalBitmap = bitmap;
+            final String finalText = recognizedText;
+            
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    ImageView imageView = (ImageView) findViewById(R.id.image_thumbnail);
-                    imageView.setImageBitmap(imageBitmapFinal);
-               }
+                    imageView.setImageBitmap(finalBitmap);
+                    textView.setText(textView.getText() + "\n\n" + finalText);
+                }
             });
-			
+            
             // Clean text
             //return recognizedText.replaceAll("[^a-zA-Z0-9\n]+", " ").trim();
             
-            return recognizedText.trim();
-	     }
-
-	    protected void onPostExecute(final String recognizedText) {
-	        // Display text in TextView
-			runOnUiThread(new Runnable() {
-			     @Override
-			     public void run() {
-			         TextView textView = (TextView) findViewById(R.id.recognized_text);
-			         textView.setText(recognizedText);
-			    }
-			});
-			
-			progressBar.setVisibility(View.GONE);
-	     }
-	 }
+            return restBitmap;
+        }
+	    
+	    protected void onPostExecute(Bitmap bitmap) {
+	        if (bitmap != null) {
+	            new OcrImageTask().execute(bitmap);
+	        } else {
+	            progressBar.setVisibility(View.GONE);
+	        }
+	    }
+	}
 
 }
