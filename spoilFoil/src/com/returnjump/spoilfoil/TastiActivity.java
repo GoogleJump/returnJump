@@ -248,6 +248,7 @@ public class TastiActivity extends Activity {
 	private class BinarizeImageTask extends AsyncTask<String, Void, Bitmap> {
 	    private TextView textView = (TextView) findViewById(R.id.recognized_text);
 	    private ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_ocr);
+	    private ImageView imageView = (ImageView) findViewById(R.id.image_thumbnail);
         
         protected void onPreExecute () {
             textView.setText("Binarizing image...");
@@ -268,6 +269,16 @@ public class TastiActivity extends Activity {
             pix = Binarize.otsuAdaptiveThreshold(pix, 32, 32, 2, 2, 0.9F);
             //pix = Binarize.otsuAdaptiveThreshold(pix);
             bitmap = WriteFile.writeBitmap(pix);
+            
+            
+            final Bitmap finalBitmap = bitmap;
+            
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    imageView.setImageBitmap(finalBitmap);
+                }
+            });
             
             return bitmap;
         }
@@ -375,7 +386,6 @@ public class TastiActivity extends Activity {
                 public void run() {
                     imageView.setImageBitmap(finalBitmap);
                     textView.append("\n\n" + finalText);
-                    Log.wtf("ITEM", finalText);
                 }
             });
             
