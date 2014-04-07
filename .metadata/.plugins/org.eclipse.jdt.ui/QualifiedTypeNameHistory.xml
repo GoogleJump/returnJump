@@ -3,7 +3,6 @@
 <fullyQualifiedTypeName name="android.app.Application"/>
 <fullyQualifiedTypeName name="android.view.View.OnClickListener"/>
 <fullyQualifiedTypeName name="android.content.Intent"/>
-<fullyQualifiedTypeName name="com.returnjump.spoilfoil.R.string"/>
 <fullyQualifiedTypeName name="com.parse.Parse"/>
 <fullyQualifiedTypeName name="android.provider.MediaStore"/>
 <fullyQualifiedTypeName name="android.widget.Toast"/>
@@ -37,4 +36,5 @@
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="android.graphics.Color"/>
+<fullyQualifiedTypeName name="com.returnjump.spoilfoil.R.string"/>
 </qualifiedTypeNameHistroy>

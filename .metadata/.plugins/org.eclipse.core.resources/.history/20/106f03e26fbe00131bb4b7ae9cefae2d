@@ -34,10 +34,12 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+
+
 public class ArturoActivity extends Activity {
 	List<String> fridge = new ArrayList<String>();
-	
 	@Override
+	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_arturo);
@@ -65,7 +67,7 @@ public class ArturoActivity extends Activity {
                 // TODO Auto-generated method stub
 
                 try {   
-                    GmailSender sender = new GmailSender("returnjump@gmail.com", getString(R.string.email_password));
+                    GmailSender sender = new GmailSender("returnjump@gmail.com", "returnpassword");
                     sender.sendMail("This is Subject",   
                             "This is Body",   
                             "arturo.1035@gmail.com",   
