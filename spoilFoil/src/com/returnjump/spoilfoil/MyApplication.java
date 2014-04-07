@@ -10,8 +10,8 @@ public class MyApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 		
-		// Place Parse initialization below
-		//Parse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_key));
+		// Parse App ID and Client Key can be found in /res/values/secret.xml
+		Parse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_key));
 	}
 
 }

@@ -288,7 +288,7 @@ The ParseQuery class defines a query that is used to fetch ParseObjects. The mos
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;<A HREF="../../com/parse/ParseQuery.html" title="type parameter in ParseQuery">T</A></CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../com/parse/ParseQuery.html#get(java.lang.String)">get</A></B>(<A target="_top" HREF="http://developer.android.com/reference/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</A>&nbsp;theObjectId)</CODE>
+<TD><CODE><B><A HREF="../../com/parse/ParseQuery.html#get(java.lang.String)">get</A></B>(<A target="_top" HREF="http://developer.android.com/reference/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</A>&nbsp;objectId)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Constructs a ParseObject whose id is already known by fetching data from the server.</TD>
@@ -1030,14 +1030,14 @@ public void <B>countInBackground</B>(<A HREF="../../com/parse/CountCallback.html
 <A NAME="get(java.lang.String)"><!-- --></A><H3>
 get</H3>
 <PRE>
-public <A HREF="../../com/parse/ParseQuery.html" title="type parameter in ParseQuery">T</A> <B>get</B>(<A target="_top" HREF="http://developer.android.com/reference/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</A>&nbsp;theObjectId)
+public <A HREF="../../com/parse/ParseQuery.html" title="type parameter in ParseQuery">T</A> <B>get</B>(<A target="_top" HREF="http://developer.android.com/reference/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</A>&nbsp;objectId)
                           throws <A HREF="../../com/parse/ParseException.html" title="class in com.parse">ParseException</A></PRE>
 <DL>
 <DD>Constructs a ParseObject whose id is already known by fetching data from the server. This
  mutates the ParseQuery.
 <P>
 <DD><DL>
-<DT><B>Parameters:</B><DD><CODE>theObjectId</CODE> - Object id of the ParseObject to fetch.
+<DT><B>Parameters:</B><DD><CODE>objectId</CODE> - Object id of the ParseObject to fetch.
 <DT><B>Throws:</B>
 <DD><CODE><A HREF="../../com/parse/ParseException.html" title="class in com.parse">ParseException</A></CODE> - Throws an exception when there is no such object or when the network connection
            fails.</DL>

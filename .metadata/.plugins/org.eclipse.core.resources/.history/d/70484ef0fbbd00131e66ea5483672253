@@ -1,0 +1,18 @@
+package com.returnjump.spoilfoil;
+
+import com.parse.Parse;
+
+import android.app.Application;
+
+public class MyApplication extends Application {
+
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		
+		// Place Parse initialization below
+		//Parse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_key));
+		Parse.initialize(this, "JKRh9IfZZmFXZBRgThPmEugFC3mqcR0mCCAdf82B", "RnWyjzdBDpzlJW59PNH1zfGDN41i6cTRUjGsmir1");
+	}
+
+}
