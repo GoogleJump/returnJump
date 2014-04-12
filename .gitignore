@@ -12,9 +12,7 @@
 
 # Generated files
 spoilFoil/bin/
-spoilFoil/gen/
 tess-two/bin/
-tess-two/gen/
 
 # Gradle files
 .gradle/
