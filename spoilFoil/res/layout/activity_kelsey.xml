@@ -38,12 +38,18 @@
             android:layout_height="match_parent"
             android:orientation="horizontal" >
             
+            <ImageButton
+                android:id="@+id/calendarButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_action_calendar"
+                android:contentDescription="@string/calendar" />
+            
             <EditText
                 android:id="@+id/daysGoodEditText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_margin="5dp"
                 android:hint="@string/edit_text_DaysGood"
                 android:inputType="date"
                 android:singleLine="true"
@@ -54,7 +60,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_margin="5dp"
                 android:text="@string/add_new_item_button" />
             
         </LinearLayout>

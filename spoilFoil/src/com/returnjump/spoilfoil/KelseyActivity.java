@@ -1,17 +1,22 @@
 package com.returnjump.spoilfoil;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +25,7 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -51,10 +57,10 @@ public class KelseyActivity extends Activity {
 		// testing
 		// purposes
 
-		FoodItem milk = new FoodItem("Milk", 10, 0);
-		FoodItem bread = new FoodItem("Bread", 12, 2);
+		FoodItem milk = new FoodItem("Milk", 1, 0);
+		FoodItem bread = new FoodItem("Bread", 6, 2);
 		FoodItem eggs = new FoodItem("Eggs", 7, 12);
-		FoodItem apple = new FoodItem("Apple", 14, 5);
+		FoodItem apple = new FoodItem("Apple", 15, 5);
 		FoodItem cookies = new FoodItem("Cookies", 30, 24);
 		FoodItem orangeJuice = new FoodItem("Orange Juice", 21, 1);
 		FoodItem cereal = new FoodItem("Honey Nut Cheerios", 180, 1);
@@ -70,6 +76,7 @@ public class KelseyActivity extends Activity {
 		populateListView(foodItems);
 
 		findViewById(R.id.submitNewItemButton).setOnClickListener(addNewItemToListView);
+		findViewById(R.id.calendarButton).setOnClickListener(openCalendarDialog);
 	}
 
 	/**
@@ -108,6 +115,13 @@ public class KelseyActivity extends Activity {
 	    }
 	}
 	
+	private void populateListView(ArrayList<FoodItem> list) {
+        adapter = new MyFoodAdapter(this, R.layout.list_fooditems, list);
+
+        ListView listView = (ListView) findViewById(R.id.foodItemListView);
+        listView.setAdapter(adapter);
+    }
+	
 	private OnClickListener addNewItemToListView = new OnClickListener() {
 
         @Override
@@ -122,18 +136,48 @@ public class KelseyActivity extends Activity {
                 FoodItem newFoodItem = new FoodItem(foodName, Integer.parseInt(daysGood), 0);
                 foodItems.add(newFoodItem);
                 adapter.notifyDataSetChanged();
-                newItemField.setText(null);
-                daysGoodField.setText(null);
+                newItemField.setText("");
+                daysGoodField.setText("");
             }
         }
         
     };
+    
+    private OnClickListener openCalendarDialog = new OnClickListener() {
 
-    private void populateListView(ArrayList<FoodItem> list) {
-        adapter = new MyFoodAdapter(this, R.layout.list_fooditems, list);
+        @Override
+        public void onClick(View v) {
+            DialogFragment newFragment = new DatePickerFragment();
+            newFragment.show(getFragmentManager(), "datePicker");
+        }
+        
+    };
+    
+    public static class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
-        ListView listView = (ListView) findViewById(R.id.foodItemListView);
-        listView.setAdapter(adapter);
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the current date as the default date in the picker
+            final Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            
+            DatePickerDialog datePicker = new DatePickerDialog(getActivity(), this, year, month, day);
+            datePicker.setTitle("Enter expiry date"); // Isn't setting the title
+            
+            return datePicker;
+        }
+        
+        public void onDateSet(DatePicker view, int year, int month, int day) {
+            // Do something with the date chosen by the user
+            EditText daysGood = (EditText) getActivity().findViewById(R.id.daysGoodEditText);
+
+            long oldDate = GregorianCalendar.getInstance().getTimeInMillis() - (GregorianCalendar.getInstance().getTimeInMillis() % 86400000); // Remove hrs, mins, secs, millis from today's date
+            long newDate = new GregorianCalendar(year, month, day).getTimeInMillis();
+            int diffInDays = (int) (newDate - oldDate + 72000000) / 86400000; // Always off by 72000000 for some reason
+            daysGood.setText(Integer.toString(diffInDays));
+        }
     }
 	
 	private static class MyFoodAdapter extends ArrayAdapter<FoodItem> {
