@@ -1,4 +1,4 @@
-package com.returnjump.spoilfoil;
+/*package com.returnjump.spoilfoil;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -103,3 +103,4 @@ public class GmailSender extends javax.mail.Authenticator {
         }   
     }   
 }  
+*/

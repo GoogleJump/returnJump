@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <!--android:background="@drawable/background_gradient"-->
+    
+    <ListView
+        android:id="@+id/foodItemListView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:layout_margin="10dp"
+        android:layout_marginBottom="5dp"
+        android:background="#FFFFFF" />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="10dp"
+        android:layout_marginBottom="5dp"
+        android:orientation="vertical"
+        android:background="#FFFFFF" >
+        
+        <EditText
+            android:id="@+id/newItemEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:hint="@string/edit_text_new_foodItem"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:imeOptions="actionNext" />
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" >
+            
+            <EditText
+                android:id="@+id/daysGoodEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:gravity="center"
+                android:inputType="date"
+                android:hint="@string/edit_text_DaysGood"
+                android:textSize="20sp"
+                android:textStyle="italic" />
+            
+            <EditText
+                android:id="@+id/daysGoodEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:hint="@string/edit_text_new_foodItem"
+                android:inputType="textCapWords"
+                android:singleLine="true"
+                android:imeOptions="actionDone" />
+    
+            <Button
+                android:id="@+id/submitNewItemButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_weight=".75"
+                android:text="@string/add_new_item_button" 
+                android:textSize="23sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

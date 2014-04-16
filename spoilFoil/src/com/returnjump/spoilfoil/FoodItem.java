@@ -1,9 +1,5 @@
 package com.returnjump.spoilfoil;
 
-import android.annotation.TargetApi;
-import android.location.GpsStatus.NmeaListener;
-import android.os.Build;
-
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -19,14 +15,12 @@ public class FoodItem implements FoodItemInterface {
 	private Date expireDateGood;
 	private int numberOfItems;
 
-	public FoodItem(String foodName, Date expireDateGood, int numberOfItems) {
+	public FoodItem(String foodName, int daysGoodFromToday, int numberOfItems) {
 		this.foodName = foodName;
-		this.expireDateGood = expireDateGood;
+		this.expireDateGood = setDaysGood(daysGoodFromToday);
         this.numberOfItems = numberOfItems;
 	}
 
-
-	@Override
 	public int getDaysGood() {
 		Date today = new Date();
 		long diffInMillies = this.getExpireDate().getTime() - today.getTime();
@@ -36,40 +30,37 @@ public class FoodItem implements FoodItemInterface {
 		return days;
 	}
 
-	
-	@Override
-	public void setDaysGood(int daysGoodFromToday) {
+	public Date setDaysGood(int daysGoodFromToday) {
 		Date newExpireDate = new Date();
 
-		long daysGoodFrom = TimeUnit.MILLISECONDS.convert(daysGoodFromToday,
-				TimeUnit.DAYS);
+		long daysGoodFrom = TimeUnit.MILLISECONDS.convert(daysGoodFromToday, TimeUnit.DAYS);
 
 		newExpireDate.setTime(newExpireDate.getTime() + daysGoodFrom);
 
 		this.expireDateGood = newExpireDate;
-
+		
+		return newExpireDate;
 	}
 
-	@Override
 	public String getFoodItemName() {
 		return this.foodName;
 	}
 
-	@Override
 	public Date getExpireDate() {
 		return this.expireDateGood;
 	}
-
-	@Override  //called by the adapter
+	
+	//called by the adapter
 	public String toString(){
 		String s;
+		
 		if(this.numberOfItems==0 ){
-	   s = this.getFoodItemName()+"    "+ this.getDaysGood();
+		    s = this.getFoodItemName()+"    "+ this.getDaysGood();
 		}else{
-		s = this.getFoodItemName()+" ("+this.numberOfItems+")     "+ this.getDaysGood();
-			
+		    s = this.getFoodItemName()+" ("+this.numberOfItems+")     "+ this.getDaysGood();
 		}
-	  return s;
+	  
+		return s;
 	}
 
 
@@ -78,11 +69,52 @@ public class FoodItem implements FoodItemInterface {
 		return numberOfItems;
 	}
 
-
 	@Override
 	public void setNumberOfThisFoodItem(int numberOfThisItem) {
 		this.numberOfItems = numberOfThisItem;
-		
+	}
+	
+	public int getExpirationNumber() {
+	    int daysGood = getDaysGood();
+	    
+	    if (daysGood >= 28) {
+	        daysGood = daysGood / 28;
+	    } else if (daysGood >= 7) {
+	        daysGood = daysGood / 7;
+	    }
+	    
+	    return daysGood;
+	}
+	
+	public String getExpirationUnit() {
+	    int daysGood = getDaysGood();
+	    String unit;
+	    
+	    if (daysGood >= 28) {
+            daysGood = daysGood / 28;
+            
+            if (daysGood == 1) {
+                unit = "month";
+            } else {
+                unit = "months";
+            }
+        } else if (daysGood >= 7) {
+            daysGood = daysGood / 7;
+            
+            if (daysGood == 1) {
+                unit = "week";
+            } else {
+                unit = "weeks";
+            }
+        } else {
+            if (daysGood == 1) {
+                unit = "day";
+            } else {
+                unit = "days";
+            }
+        }
+	    
+	    return unit;
 	}
 
 }

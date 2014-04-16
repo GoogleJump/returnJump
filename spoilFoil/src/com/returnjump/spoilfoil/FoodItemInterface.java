@@ -6,7 +6,7 @@ public interface FoodItemInterface {
 	
 	public int getDaysGood();
 	
-	public void setDaysGood(int daysGoodFromToday);
+	public Date setDaysGood(int daysGoodFromToday);
 	
 	public String getFoodItemName();
 	

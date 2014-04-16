@@ -65,11 +65,11 @@ public class ArturoActivity extends Activity {
                 // TODO Auto-generated method stub
 
                 try {   
-                    GmailSender sender = new GmailSender("returnjump@gmail.com", getString(R.string.email_password));
+                    /*GmailSender sender = new GmailSender("returnjump@gmail.com", getString(R.string.email_password));
                     sender.sendMail("This is Subject",   
                             "This is Body",   
                             "arturo.1035@gmail.com",   
-                            "arturo.1035@gmail.com");   
+                            "arturo.1035@gmail.com");   */
                 } catch (Exception e) {   
                     Log.e("SendMail", e.getMessage(), e);   
                 } 

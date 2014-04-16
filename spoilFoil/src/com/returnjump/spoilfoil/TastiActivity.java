@@ -238,9 +238,11 @@ public class TastiActivity extends Activity {
 	        } else if (resultCode == RESULT_CANCELED) {
 	            // User cancelled the image capture
 	        	Toast.makeText(this, "Image capture cancelled.", Toast.LENGTH_LONG).show();
+	        	finish();
 	        } else {
 	            // Image capture failed, advise user
 	        	Toast.makeText(this, "Image capture failed.", Toast.LENGTH_LONG).show();
+	        	finish();
 	        }
 	    }
 	}

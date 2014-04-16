@@ -2,71 +2,63 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@drawable/background_gradient" >
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginBottom="25dp"
-        android:layout_marginTop="50dp"
-        android:gravity="center"
-        android:text="@string/your_food_items"
-        android:textSize="40sp" />
-
+    android:orientation="vertical" >
+    <!--android:background="@drawable/background_gradient"-->
+    
     <ListView
         android:id="@+id/foodItemListView"
-        android:layout_width="wrap_content"
-        android:layout_height="300dp"
-        android:layout_marginLeft="40dp"
-        android:layout_marginRight="40dp"
-        android:gravity="center" >
-    </ListView>
-
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:layout_margin="10dp"
+        android:background="@drawable/bg_card" />
+    
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:weightSum="4" >
-
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_card" >
+        
         <EditText
             android:id="@+id/newItemEditText"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:layout_marginLeft="40dp"
-            android:ems="10"
-            android:gravity="center"
-            android:inputType="textPersonName"
+            android:layout_margin="5dp"
             android:hint="@string/edit_text_new_foodItem"
-            android:textSize="20sp"
-           android:textStyle="italic"
-             >
-        </EditText>
-
-        <EditText
-            android:id="@+id/daysGoodEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ems="10"
-            android:gravity="center"
-            android:inputType="number"
-            android:hint="@string/edit_text_DaysGood"
-            android:textSize="20sp"
-           android:textStyle="italic"
-            />
-
-        <Button
-            android:id="@+id/submitNewItemButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_weight=".75"
-            android:text="@string/add_new_item_button" 
-            android:textSize="23sp"
-            />
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:imeOptions="actionNext" />
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" >
+            
+            <EditText
+                android:id="@+id/daysGoodEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="5dp"
+                android:hint="@string/edit_text_DaysGood"
+                android:inputType="date"
+                android:singleLine="true"
+                android:imeOptions="actionDone" />
+            
+            <Button
+                android:id="@+id/submitNewItemButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:text="@string/add_new_item_button" />
+            
+        </LinearLayout>
+        
     </LinearLayout>
 
 </LinearLayout>
