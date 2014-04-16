@@ -1,5 +1,6 @@
 package com.returnjump.spoilfoil;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -13,16 +14,20 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -76,7 +81,8 @@ public class KelseyActivity extends Activity {
 		populateListView(foodItems);
 
 		findViewById(R.id.submitNewItemButton).setOnClickListener(addNewItemToListView);
-		findViewById(R.id.calendarButton).setOnClickListener(openCalendarDialog);
+		findViewById(R.id.daysGoodTextView).setOnClickListener(openCalendarDialogClick);
+		findViewById(R.id.daysGoodTextView).setOnFocusChangeListener(openCalendarDialogFocus);
 	}
 
 	/**
@@ -115,6 +121,7 @@ public class KelseyActivity extends Activity {
 	    }
 	}
 	
+	// We should sort our list by ascending expiry date
 	private void populateListView(ArrayList<FoodItem> list) {
         adapter = new MyFoodAdapter(this, R.layout.list_fooditems, list);
 
@@ -127,30 +134,54 @@ public class KelseyActivity extends Activity {
         @Override
         public void onClick(View v) {
             EditText newItemField = (EditText) findViewById(R.id.newItemEditText);
-            EditText daysGoodField = (EditText) findViewById(R.id.daysGoodEditText);
+            TextView daysGoodField = (TextView) findViewById(R.id.daysGoodTextView);
             
             String foodName = newItemField.getText().toString();
             String daysGood = daysGoodField.getText().toString();
             
             if (!foodName.equals("") && !daysGood.equals("")) { 
-                FoodItem newFoodItem = new FoodItem(foodName, Integer.parseInt(daysGood), 0);
+                int year = (Integer) daysGoodField.getTag(R.id.year_id);
+                int month = (Integer) daysGoodField.getTag(R.id.month_id);
+                int day = (Integer) daysGoodField.getTag(R.id.day_id);
+                
+                long oldDate = GregorianCalendar.getInstance().getTimeInMillis() / 86400000L * 86400000L; // Remove hrs, mins, secs, millis from today's date
+                long newDate = new GregorianCalendar(year, month, day).getTimeInMillis();
+                int diffInDays = (int) ((newDate - oldDate) / 86400000L);
+                
+                Toast.makeText(v.getContext(), Integer.toString(diffInDays),Toast.LENGTH_LONG).show();
+                
+                FoodItem newFoodItem = new FoodItem(foodName, diffInDays, 0);
                 foodItems.add(newFoodItem);
                 adapter.notifyDataSetChanged();
                 newItemField.setText("");
                 daysGoodField.setText("");
+                daysGoodField.setTag(R.id.year_id, 0);
+                daysGoodField.setTag(R.id.month_id, 0);
+                daysGoodField.setTag(R.id.day_id, 0);
             }
         }
         
     };
     
-    private OnClickListener openCalendarDialog = new OnClickListener() {
+    private OnClickListener openCalendarDialogClick = new OnClickListener() {
 
         @Override
-        public void onClick(View v) {
+        public void onClick(View v) {            
             DialogFragment newFragment = new DatePickerFragment();
             newFragment.show(getFragmentManager(), "datePicker");
         }
         
+    };
+    
+    private OnFocusChangeListener openCalendarDialogFocus = new OnFocusChangeListener() {
+        
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (hasFocus) {
+                DialogFragment newFragment = new DatePickerFragment();
+                newFragment.show(getFragmentManager(), "datePicker");
+            }
+        }
     };
     
     public static class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
@@ -163,20 +194,38 @@ public class KelseyActivity extends Activity {
             int month = c.get(Calendar.MONTH);
             int day = c.get(Calendar.DAY_OF_MONTH);
             
-            DatePickerDialog datePicker = new DatePickerDialog(getActivity(), this, year, month, day);
-            datePicker.setTitle("Enter expiry date"); // Isn't setting the title
+            DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), this, year, month, day);
+            datePickerDialog.setTitle("Enter expiry date"); // Isn't setting the title
+            datePickerDialog.getDatePicker().setMinDate(Calendar.getInstance().getTimeInMillis() / 86400000L * 86400000L);
             
-            return datePicker;
+            return datePickerDialog;
         }
         
         public void onDateSet(DatePicker view, int year, int month, int day) {
             // Do something with the date chosen by the user
-            EditText daysGood = (EditText) getActivity().findViewById(R.id.daysGoodEditText);
-
-            long oldDate = GregorianCalendar.getInstance().getTimeInMillis() - (GregorianCalendar.getInstance().getTimeInMillis() % 86400000); // Remove hrs, mins, secs, millis from today's date
-            long newDate = new GregorianCalendar(year, month, day).getTimeInMillis();
-            int diffInDays = (int) (newDate - oldDate + 72000000) / 86400000; // Always off by 72000000 for some reason
-            daysGood.setText(Integer.toString(diffInDays));
+            TextView daysGood = (TextView) getActivity().findViewById(R.id.daysGoodTextView);
+            
+            // Display selected date in the TextView
+            Calendar expiryDate = new GregorianCalendar(year, month, day);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
+            daysGood.setText(dateFormat.format(expiryDate.getTime()));
+            
+            // Set hidden data in view for calculations when Add button is pressed
+            daysGood.setTag(R.id.year_id, year);
+            daysGood.setTag(R.id.month_id, month);
+            daysGood.setTag(R.id.day_id, day);
+        }
+        
+        public void onClick(DialogInterface dialog, int which) {
+            if (which == DialogInterface.BUTTON_NEGATIVE) {
+                Toast.makeText(getActivity(), "CANCELLED",Toast.LENGTH_LONG).show();
+            }
+        }
+        
+        @Override
+        public void onCancel(DialogInterface dialog) {
+            getActivity().findViewById(R.id.daysGoodTextView).clearFocus();
+            
         }
     }
 	

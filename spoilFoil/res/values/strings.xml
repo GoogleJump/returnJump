@@ -14,7 +14,7 @@
     <string name="captured_image">Captured Image</string>
     <string name="calendar">Calendar</string>
     <string name="edit_text_new_foodItem">Enter a food item</string>
-    <string name="edit_text_DaysGood">Days good</string>
+    <string name="edit_text_DaysGood">Expiry date</string>
     <string name="add_new_item_button">Add</string>
     <string name="set_expiry">Set Expiry</string>
     <string name="number">5</string>
