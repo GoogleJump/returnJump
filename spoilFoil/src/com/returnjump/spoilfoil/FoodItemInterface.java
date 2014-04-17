@@ -1,16 +1,16 @@
 package com.returnjump.spoilfoil;
 
-import java.util.Date;
+import java.util.Calendar;
 
 public interface FoodItemInterface {
 	
 	public int getDaysGood();
 	
-	public Date setDaysGood(int daysGoodFromToday);
+	public void setExpiryDate(Calendar newExpiryDate);
 	
 	public String getFoodItemName();
 	
-	public Date getExpireDate();
+	public Calendar getExpiryDate();
 	
 	public int getNumberOfThisFoodItem();
 	

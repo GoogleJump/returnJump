@@ -16,6 +16,7 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -27,6 +28,7 @@ import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -61,19 +63,22 @@ public class KelseyActivity extends Activity {
 		// added for
 		// testing
 		// purposes
-
-		FoodItem milk = new FoodItem("Milk", 1, 0);
-		FoodItem bread = new FoodItem("Bread", 6, 2);
-		FoodItem eggs = new FoodItem("Eggs", 7, 12);
-		FoodItem apple = new FoodItem("Apple", 15, 5);
-		FoodItem cookies = new FoodItem("Cookies", 30, 24);
-		FoodItem orangeJuice = new FoodItem("Orange Juice", 21, 1);
-		FoodItem cereal = new FoodItem("Honey Nut Cheerios", 180, 1);
+		
+		
+		FoodItem milk = new FoodItem("Milk", getCalendar(1), 0);
+		FoodItem bread = new FoodItem("Bread", getCalendar(6), 2);
+		FoodItem eggs = new FoodItem("Eggs", getCalendar(7), 12);
+		FoodItem apple = new FoodItem("Apple", getCalendar(15), 5);
+		FoodItem sugar = new FoodItem("Sugar", getCalendar(500), 1);
+		FoodItem cookies = new FoodItem("Cookies", getCalendar(30), 24);
+		FoodItem orangeJuice = new FoodItem("Orange Juice", getCalendar(21), 1);
+		FoodItem cereal = new FoodItem("Honey Nut Cheerios", getCalendar(180), 1);
 		
 		foodItems.add(milk);
 		foodItems.add(bread);
 		foodItems.add(eggs);
 		foodItems.add(apple);
+		foodItems.add(sugar);
 		foodItems.add(cookies);
 		foodItems.add(orangeJuice);
 		foodItems.add(cereal);
@@ -83,6 +88,13 @@ public class KelseyActivity extends Activity {
 		findViewById(R.id.submitNewItemButton).setOnClickListener(addNewItemToListView);
 		findViewById(R.id.daysGoodTextView).setOnClickListener(openCalendarDialogClick);
 		findViewById(R.id.daysGoodTextView).setOnFocusChangeListener(openCalendarDialogFocus);
+	}
+	
+	private Calendar getCalendar(int daysFromToday) {
+	    Calendar c = GregorianCalendar.getInstance();
+	    c.add(Calendar.DATE, daysFromToday);
+	    
+	    return c;
 	}
 
 	/**
@@ -135,29 +147,44 @@ public class KelseyActivity extends Activity {
         public void onClick(View v) {
             EditText newItemField = (EditText) findViewById(R.id.newItemEditText);
             TextView daysGoodField = (TextView) findViewById(R.id.daysGoodTextView);
+            ListView foodList = (ListView) findViewById(R.id.foodItemListView);
             
             String foodName = newItemField.getText().toString();
             String daysGood = daysGoodField.getText().toString();
+            
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
             
             if (!foodName.equals("") && !daysGood.equals("")) { 
                 int year = (Integer) daysGoodField.getTag(R.id.year_id);
                 int month = (Integer) daysGoodField.getTag(R.id.month_id);
                 int day = (Integer) daysGoodField.getTag(R.id.day_id);
                 
-                long oldDate = GregorianCalendar.getInstance().getTimeInMillis() / 86400000L * 86400000L; // Remove hrs, mins, secs, millis from today's date
-                long newDate = new GregorianCalendar(year, month, day).getTimeInMillis();
-                int diffInDays = (int) ((newDate - oldDate) / 86400000L);
+                Calendar expiryDate = new GregorianCalendar(year, month, day);
                 
-                Toast.makeText(v.getContext(), Integer.toString(diffInDays),Toast.LENGTH_LONG).show();
+                // Hide the keyboard if showing
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 
-                FoodItem newFoodItem = new FoodItem(foodName, diffInDays, 0);
+                FoodItem newFoodItem = new FoodItem(foodName, expiryDate, 0);
                 foodItems.add(newFoodItem);
                 adapter.notifyDataSetChanged();
+                
+                // UI clean up
                 newItemField.setText("");
                 daysGoodField.setText("");
+                newItemField.clearFocus();
+                daysGoodField.clearFocus();
                 daysGoodField.setTag(R.id.year_id, 0);
                 daysGoodField.setTag(R.id.month_id, 0);
                 daysGoodField.setTag(R.id.day_id, 0);
+                foodList.setSelection(adapter.getCount() - 1); // Should change if list is sorted
+                
+            } else if (foodName.equals("")) {
+                // Set focus and show keyboard
+                if (newItemField.requestFocus()) {
+                    imm.showSoftInput(newItemField, InputMethodManager.SHOW_IMPLICIT);
+                }
+            } else if (daysGood.equals("")) {
+                daysGoodField.requestFocus();
             }
         }
         
@@ -195,8 +222,10 @@ public class KelseyActivity extends Activity {
             int day = c.get(Calendar.DAY_OF_MONTH);
             
             DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), this, year, month, day);
-            datePickerDialog.setTitle("Enter expiry date"); // Isn't setting the title
+            datePickerDialog.setTitle("Enter expiry date"); // (Only shows on tablets)
             datePickerDialog.getDatePicker().setMinDate(Calendar.getInstance().getTimeInMillis() / 86400000L * 86400000L);
+            // Probably should set a maximum date too
+            // Calendar shown on tablets needs to be set to current date
             
             return datePickerDialog;
         }

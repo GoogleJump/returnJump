@@ -13,16 +13,16 @@
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="getString" key="selection"/>
+		<item value="Focus" key="selection"/>
 		<list key="findhistory">
+			<item value="focus"/>
+			<item value="toast"/>
+			<item value="EditText"/>
+			<item value="edittext"/>
+			<item value="daysgood"/>
 			<item value="get"/>
 			<item value="getstring"/>
 			<item value="startActivityForResult"/>
-			<item value="res"/>
-			<item value="re"/>
-			<item value="file.sep"/>
-			<item value="&quot;eng&quot;"/>
-			<item value="short"/>
 		</list>
 		<list key="replacehistory">
 		</list>

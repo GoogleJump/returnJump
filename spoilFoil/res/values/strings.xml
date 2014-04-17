@@ -18,11 +18,13 @@
     <string name="add_new_item_button">Add</string>
     <string name="set_expiry">Set Expiry</string>
     <string name="number">5</string>
-    <string name="day">Day</string>
-    <string name="days">Days</string>
-    <string name="week">Week</string>
-    <string name="weeks">Weeks</string>
-    <string name="month">Month</string>
-    <string name="months">Months</string>
+    <string name="day">day</string>
+    <string name="days">days</string>
+    <string name="week">week</string>
+    <string name="weeks">weeks</string>
+    <string name="month">month</string>
+    <string name="months">months</string>
+    <string name="year">year</string>
+    <string name="years">years</string>
     
 </resources>

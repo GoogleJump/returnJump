@@ -1,6 +1,8 @@
 package com.returnjump.spoilfoil;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -12,42 +14,37 @@ import java.util.concurrent.TimeUnit;
 public class FoodItem implements FoodItemInterface { 
 
 	private String foodName;
-	private Date expireDateGood;
+	private Calendar expiryDate;
 	private int numberOfItems;
 
-	public FoodItem(String foodName, int daysGoodFromToday, int numberOfItems) {
+	public FoodItem(String foodName, Calendar expiryDate, int numberOfItems) {
 		this.foodName = foodName;
-		this.expireDateGood = setDaysGood(daysGoodFromToday);
+		this.expiryDate = expiryDate;
         this.numberOfItems = numberOfItems;
+	}
+	
+	public void setFoodName(String foodName) {
+	    this.foodName = foodName;
 	}
 
 	public int getDaysGood() {
-		Date today = new Date();
-		long diffInMillies = this.getExpireDate().getTime() - today.getTime();
-		long converted = TimeUnit.DAYS.toDays(diffInMillies);
-		int days = (int) (converted / 86400000);
-		today = null;
-		return days + 1;
+	    long today = GregorianCalendar.getInstance().getTimeInMillis() / 86400000L * 86400000L;
+	    long expiryDay = this.expiryDate.getTimeInMillis();
+		int diffInDays = (int) ((expiryDay - today) / 86400000L);
+		
+	    return diffInDays;
 	}
 
-	public Date setDaysGood(int daysGoodFromToday) {
-		Date newExpireDate = new Date();
-
-		long daysGoodFrom = TimeUnit.MILLISECONDS.convert(daysGoodFromToday, TimeUnit.DAYS);
-
-		newExpireDate.setTime(newExpireDate.getTime() + daysGoodFrom);
-
-		this.expireDateGood = newExpireDate;
-		
-		return newExpireDate;
+	public void setExpiryDate(Calendar newExpiryDate) {
+		this.expiryDate = newExpiryDate;
 	}
 
 	public String getFoodItemName() {
 		return this.foodName;
 	}
 
-	public Date getExpireDate() {
-		return this.expireDateGood;
+	public Calendar getExpiryDate() {
+		return this.expiryDate;
 	}
 	
 	//called by the adapter
@@ -63,10 +60,9 @@ public class FoodItem implements FoodItemInterface {
 		return s;
 	}
 
-
 	@Override
 	public int getNumberOfThisFoodItem() {
-		return numberOfItems;
+		return this.numberOfItems;
 	}
 
 	@Override
@@ -75,39 +71,49 @@ public class FoodItem implements FoodItemInterface {
 	}
 	
 	public int getExpirationNumber() {
-	    int daysGood = getDaysGood();
+	    int timeGood = getDaysGood();
 	    
-	    if (daysGood >= 28) {
-	        daysGood = daysGood / 28;
-	    } else if (daysGood >= 7) {
-	        daysGood = daysGood / 7;
+	    if (timeGood >= 365) {
+	        timeGood = timeGood / 365;
+	    } else if (timeGood >= 28) {
+	        timeGood = timeGood / 28;
+	    } else if (timeGood >= 7) {
+	        timeGood = timeGood / 7;
 	    }
 	    
-	    return daysGood;
+	    return timeGood;
 	}
 	
 	public String getExpirationUnit() {
-	    int daysGood = getDaysGood();
+	    int timeGood = getDaysGood();
 	    String unit;
 	    
-	    if (daysGood >= 28) {
-            daysGood = daysGood / 28;
+	    if (timeGood >= 365) {
+	        timeGood = timeGood / 365;
             
-            if (daysGood == 1) {
+            if (timeGood == 1) {
+                unit = "year";
+            } else {
+                unit = "years";
+            }
+	    } else if (timeGood >= 28) {
+	        timeGood = timeGood / 28;
+            
+            if (timeGood == 1) {
                 unit = "month";
             } else {
                 unit = "months";
             }
-        } else if (daysGood >= 7) {
-            daysGood = daysGood / 7;
+        } else if (timeGood >= 7) {
+            timeGood = timeGood / 7;
             
-            if (daysGood == 1) {
+            if (timeGood == 1) {
                 unit = "week";
             } else {
                 unit = "weeks";
             }
         } else {
-            if (daysGood == 1) {
+            if (timeGood == 1) {
                 unit = "day";
             } else {
                 unit = "days";
