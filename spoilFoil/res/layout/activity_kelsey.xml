@@ -46,11 +46,14 @@
                 android:drawableLeft="@drawable/ic_action_calendar"
                 android:singleLine="true" />
             
-            <Button
+            <ImageButton
                 android:id="@+id/submitNewItemButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/add_new_item_button" />
+                android:layout_gravity="center"
+                android:src="@drawable/ic_action_new"
+                android:contentDescription="@string/add"
+                android:background="@drawable/button" />
             
         </LinearLayout>
         

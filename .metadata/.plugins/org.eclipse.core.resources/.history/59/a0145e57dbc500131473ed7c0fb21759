@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <!--android:background="@drawable/background_gradient"-->
+    
+    <ListView
+        android:id="@+id/foodItemListView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="10dp"
+        android:background="@drawable/bg_card" />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_card" >
+        
+        <EditText
+            android:id="@+id/newItemEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/edit_text_new_foodItem"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:imeOptions="actionNext" />
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" >
+            
+            <TextView
+                android:id="@+id/daysGoodTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                style="@android:style/Widget.EditText"
+                android:hint="@string/edit_text_DaysGood"
+                android:drawableLeft="@drawable/ic_action_calendar"
+                android:singleLine="true" />
+            
+            <Button
+                android:id="@+id/submitNewItemButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_new_item_button"
+                android:background="@color/theme"
+                android:textColor="@color/white" />
+            
+            <ImageButton
+                android:id="@+id/submitNewItemButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_new_item_button"
+                android:background="@color/theme"
+                android:textColor="@color/white" />
+            
+        </LinearLayout>
+        
+    </LinearLayout>
+
+</LinearLayout>
