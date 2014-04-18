@@ -93,7 +93,7 @@ public class ArturoActivity extends Activity {
 			// Creates the Notification mBuilder
 				NotificationCompat.Builder mBuilder =
 					    new NotificationCompat.Builder(view.getContext())
-					    .setSmallIcon(R.drawable.ic_launcher)
+					    .setSmallIcon(R.drawable.ic_launcher_white)
 					    .setContentTitle("Testing notifications")
 					    .setContentText(item_popped);
 				//sets the type of alert
