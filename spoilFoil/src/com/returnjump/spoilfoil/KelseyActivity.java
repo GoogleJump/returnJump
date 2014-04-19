@@ -63,8 +63,6 @@ public class KelseyActivity extends Activity {
 		// added for
 		// testing
 		// purposes
-		
-		
 		FoodItem milk = new FoodItem("Milk", getCalendar(1), 0);
 		FoodItem bread = new FoodItem("Bread", getCalendar(6), 2);
 		FoodItem eggs = new FoodItem("Eggs", getCalendar(7), 12);
@@ -73,7 +71,7 @@ public class KelseyActivity extends Activity {
 		FoodItem cookies = new FoodItem("Cookies", getCalendar(30), 24);
 		FoodItem orangeJuice = new FoodItem("Orange Juice", getCalendar(21), 1);
 		FoodItem cereal = new FoodItem("Honey Nut Cheerios", getCalendar(180), 1);
-		
+		/*
 		foodItems.add(milk);
 		foodItems.add(bread);
 		foodItems.add(eggs);
@@ -82,7 +80,7 @@ public class KelseyActivity extends Activity {
 		foodItems.add(cookies);
 		foodItems.add(orangeJuice);
 		foodItems.add(cereal);
-
+		*/
 		populateListView(foodItems);
 
 		findViewById(R.id.submitNewItemButton).setOnClickListener(addNewItemToListView);
@@ -137,8 +135,29 @@ public class KelseyActivity extends Activity {
 	private void populateListView(ArrayList<FoodItem> list) {
         adapter = new MyFoodAdapter(this, R.layout.list_fooditems, list);
 
+        TextView emptyFridge = (TextView) findViewById(R.id.empty_fridge);
         ListView listView = (ListView) findViewById(R.id.foodItemListView);
         listView.setAdapter(adapter);
+        
+        if (list.size() == 0) {
+            listView.setVisibility(View.GONE);
+            emptyFridge.setVisibility(View.VISIBLE);
+        }
+    }
+	
+	private void updateListView(ArrayList<FoodItem> list) {
+	    TextView emptyFridge = (TextView) findViewById(R.id.empty_fridge);
+        ListView listView = (ListView) findViewById(R.id.foodItemListView);
+	    
+	    adapter.notifyDataSetChanged();
+	    
+	    if (list.size() == 0) {
+            listView.setVisibility(View.GONE);
+            emptyFridge.setVisibility(View.VISIBLE);
+        } else {
+            emptyFridge.setVisibility(View.GONE);
+            listView.setVisibility(View.VISIBLE);
+        }
     }
 	
 	private OnClickListener addNewItemToListView = new OnClickListener() {
@@ -166,7 +185,7 @@ public class KelseyActivity extends Activity {
                 
                 FoodItem newFoodItem = new FoodItem(foodName, expiryDate, 0);
                 foodItems.add(newFoodItem);
-                adapter.notifyDataSetChanged();
+                updateListView(foodItems);
                 
                 // UI clean up
                 newItemField.setText("");
@@ -196,6 +215,8 @@ public class KelseyActivity extends Activity {
         public void onClick(View v) {            
             DialogFragment newFragment = new DatePickerFragment();
             newFragment.show(getFragmentManager(), "datePicker");
+            
+            findViewById(R.id.daysGoodTextView).clearFocus();
         }
         
     };
@@ -207,6 +228,8 @@ public class KelseyActivity extends Activity {
             if (hasFocus) {
                 DialogFragment newFragment = new DatePickerFragment();
                 newFragment.show(getFragmentManager(), "datePicker");
+                
+                findViewById(R.id.daysGoodTextView).clearFocus();
             }
         }
     };
@@ -245,52 +268,6 @@ public class KelseyActivity extends Activity {
             daysGood.setTag(R.id.day_id, day);
         }
         
-        public void onClick(DialogInterface dialog, int which) {
-            if (which == DialogInterface.BUTTON_NEGATIVE) {
-                Toast.makeText(getActivity(), "CANCELLED",Toast.LENGTH_LONG).show();
-            }
-        }
-        
-        @Override
-        public void onCancel(DialogInterface dialog) {
-            getActivity().findViewById(R.id.daysGoodTextView).clearFocus();
-            
-        }
     }
-	
-	private static class MyFoodAdapter extends ArrayAdapter<FoodItem> {
-	      private Context context;
-	      private int layout;
-	      private List<FoodItem> foods;
-	      
-	      public MyFoodAdapter(Context context, int layout, List<FoodItem> foods) {
-	          super(context, layout, foods);
-	          this.context = context;
-	          this.layout = layout;
-	          this.foods = foods;
-	      }
-
-	      @Override
-	      public View getView(int position, View convertView, ViewGroup parent) {
-	          // Make sure we have a view to work with (may have been given null)
-	          View itemView = convertView;
-	          if (itemView == null) {
-	              itemView = LayoutInflater.from(context).inflate(layout, parent, false);
-	          }
-	          
-	          FoodItem currentFood = foods.get(position);
-	          
-	          TextView foodItemName = (TextView) itemView.findViewById(R.id.food_item_name);
-	          foodItemName.setText(currentFood.getFoodItemName());
-	          
-	          TextView expirationNumber = (TextView) itemView.findViewById(R.id.expiration_number);
-	          expirationNumber.setText(Integer.toString(currentFood.getExpirationNumber()));
-	          
-	          TextView expirationUnit = (TextView) itemView.findViewById(R.id.expiration_unit);
-	          expirationUnit.setText(currentFood.getExpirationUnit());
-
-	          return itemView;
-	      }               
-	  }
 
 }

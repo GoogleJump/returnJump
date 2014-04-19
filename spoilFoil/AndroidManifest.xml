@@ -61,6 +61,7 @@
         <activity
             android:name="com.returnjump.spoilfoil.KelseyActivity"
             android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="adjustResize"
             android:label="@string/title_activity_kelsey"
             android:parentActivityName="com.returnjump.spoilfoil.MainActivity" >
             <meta-data
