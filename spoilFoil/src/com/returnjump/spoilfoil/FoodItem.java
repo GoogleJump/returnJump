@@ -13,14 +13,24 @@ import java.util.concurrent.TimeUnit;
 
 public class FoodItem implements FoodItemInterface { 
 
+    private long id;
 	private String foodName;
 	private Calendar expiryDate;
 	private int numberOfItems;
 
-	public FoodItem(String foodName, Calendar expiryDate, int numberOfItems) {
-		this.foodName = foodName;
+	public FoodItem(long id, String foodName, Calendar expiryDate, int numberOfItems) {
+		this.id = id;
+	    this.foodName = foodName;
 		this.expiryDate = expiryDate;
         this.numberOfItems = numberOfItems;
+	}
+	
+	public long getId() {
+	    return this.id;
+	}
+	
+	public void setId(long newId) {
+	    this.id = newId;
 	}
 	
 	public void setFoodName(String foodName) {

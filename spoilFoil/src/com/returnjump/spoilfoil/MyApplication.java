@@ -3,6 +3,8 @@ package com.returnjump.spoilfoil;
 import com.parse.Parse;
 
 import android.app.Application;
+import android.content.Context;
+import android.os.UserManager;
 
 public class MyApplication extends Application {
 
@@ -11,7 +13,7 @@ public class MyApplication extends Application {
 		super.onCreate();
 		
 		// Parse App ID and Client Key can be found in /res/values/secret.xml
-		Parse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_key));
+	    Parse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_key));
 	}
 
 }

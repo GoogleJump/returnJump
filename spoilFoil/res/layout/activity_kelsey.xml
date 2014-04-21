@@ -20,7 +20,9 @@
         android:layout_weight="1"
         android:gravity="center"
         android:text="@string/empty_fridge"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:focusable="true" 
+        android:focusableInTouchMode="true" />
     
     <LinearLayout
         android:layout_width="match_parent"

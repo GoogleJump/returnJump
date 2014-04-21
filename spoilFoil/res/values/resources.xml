@@ -4,4 +4,6 @@
     <item type="id" name="year_id"/>
     <item type="id" name="month_id"/>
     <item type="id" name="day_id"/>
+    
+    <item type="id" name="food_item_id"/>
 </resources>

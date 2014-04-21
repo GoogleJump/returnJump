@@ -7,25 +7,33 @@ import java.util.Calendar;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class FridgeDbHelper extends SQLiteOpenHelper {
+    
     public FridgeDbHelper(Context context) {
-        super(context, FridgeContract.DATABASE_NAME, null, FridgeContract.DATABASE_VERSION);
+        super(context, DatabaseContract.DATABASE_NAME, null, DatabaseContract.DATABASE_VERSION);
     }
     
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(FridgeContract.FridgeTable.SQL_CREATE_TABLE);
+        db.execSQL(DatabaseContract.FridgeTable.SQL_CREATE_TABLE);
     }
     
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(FridgeContract.FridgeTable.SQL_DELETE_TABLE);
+        db.execSQL(DatabaseContract.FridgeTable.SQL_DELETE_TABLE);
         onCreate(db);
     }
     
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
+    }
+    
+    public long size() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        
+        return DatabaseUtils.queryNumEntries(db, DatabaseContract.FridgeTable.TABLE_NAME);
     }
     
     public static String calendarToString(Calendar cal) {
@@ -34,19 +42,23 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return dateFormat.format(cal.getTime());
     }
     
-    public void put(SQLiteDatabase db, long id, String foodItem, Calendar expiryDate) {
+    public long put(String foodItem, Calendar expiryDate) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(FridgeContract.FridgeTable.COLUMN_NAME_ITEM_ID, id);
-        values.put(FridgeContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);
-        values.put(FridgeContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE, DatabaseContract.BOOL_TRUE);
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId;
         newRowId = db.insert(
-                FridgeContract.FridgeTable.TABLE_NAME,
+                DatabaseContract.FridgeTable.TABLE_NAME,
                 null,
                 values);
+        
+        return newRowId;
     }
     
     public static Calendar stringToCalendar(String date) {
@@ -61,22 +73,24 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return cal;
     }
     
-    public Cursor read(SQLiteDatabase db) {
+    public Cursor read() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
-                FridgeContract.FridgeTable._ID,
-                FridgeContract.FridgeTable.COLUMN_NAME_ITEM_ID,
-                FridgeContract.FridgeTable.COLUMN_NAME_FOOD_ITEM,
-                FridgeContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE,
+                DatabaseContract.FridgeTable._ID,
+                DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM,
+                DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE,
+                DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE,
                 };
 
         // How you want the results sorted in the resulting Cursor
         String sortOrder =
-                FridgeContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE + " ASC";
+                DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE + " ASC";
 
         Cursor c = db.query(
-                FridgeContract.FridgeTable.TABLE_NAME,    // The table to query
+                DatabaseContract.FridgeTable.TABLE_NAME,    // The table to query
                 projection,                               // The columns to return
                 null,                                     // The columns for the WHERE clause
                 null,                                     // The values for the WHERE clause
@@ -88,28 +102,35 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return c;
     }
     
-    public void delete(SQLiteDatabase db, long rowId) {
+    // Instead of deleting, this implementation should just set the visible column to false
+    public void delete(long rowId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        
         // Define 'where' part of query.
-        String selection = FridgeContract.FridgeTable.COLUMN_NAME_ITEM_ID + " LIKE ?";
+        String selection = DatabaseContract.FridgeTable._ID + " LIKE ?";
         
         // Specify arguments in placeholder order.
         String[] selectionArgs = { String.valueOf(rowId) };
         
         // Issue SQL statement.
-        db.delete(FridgeContract.FridgeTable.TABLE_NAME, selection, selectionArgs);
+        db.delete(DatabaseContract.FridgeTable.TABLE_NAME, selection, selectionArgs);
     }
     
-    public void update(SQLiteDatabase db, long rowId, String foodItem, Calendar expiryDate) {
+    public void update(long rowId, String foodItem, Calendar expiryDate, int visible) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        
         // New value for one column
         ContentValues values = new ContentValues();
-        values.put(FridgeContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE, visible);
 
         // Which row to update, based on the ID
-        String selection = FridgeContract.FridgeTable.COLUMN_NAME_ITEM_ID + " LIKE ?";
+        String selection = DatabaseContract.FridgeTable._ID + " LIKE ?";
         String[] selectionArgs = { String.valueOf(rowId) };
 
         int count = db.update(
-            FridgeContract.FridgeTable.TABLE_NAME,
+            DatabaseContract.FridgeTable.TABLE_NAME,
             values,
             selection,
             selectionArgs);

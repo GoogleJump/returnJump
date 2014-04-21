@@ -16,11 +16,13 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,6 +48,7 @@ public class KelseyActivity extends Activity {
 
 	private ArrayAdapter<FoodItem> adapter;
 	private ArrayList<FoodItem> foodItems = new ArrayList<FoodItem>();
+	private FridgeDbHelper dbHelper;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,30 +62,43 @@ public class KelseyActivity extends Activity {
 		 */
 		PushService.setDefaultPushCallback(this, KelseyActivity.class);
 		ParseInstallation.getCurrentInstallation().saveInBackground();
-
+		
+		dbHelper = new FridgeDbHelper(this);
+		
 		// added for
 		// testing
-		// purposes
-		FoodItem milk = new FoodItem("Milk", getCalendar(1), 0);
-		FoodItem bread = new FoodItem("Bread", getCalendar(6), 2);
-		FoodItem eggs = new FoodItem("Eggs", getCalendar(7), 12);
-		FoodItem apple = new FoodItem("Apple", getCalendar(15), 5);
-		FoodItem sugar = new FoodItem("Sugar", getCalendar(500), 1);
-		FoodItem cookies = new FoodItem("Cookies", getCalendar(30), 24);
-		FoodItem orangeJuice = new FoodItem("Orange Juice", getCalendar(21), 1);
-		FoodItem cereal = new FoodItem("Honey Nut Cheerios", getCalendar(180), 1);
-		
-		foodItems.add(milk);
-		foodItems.add(bread);
-		foodItems.add(eggs);
-		foodItems.add(apple);
-		foodItems.add(sugar);
-		foodItems.add(cookies);
-		foodItems.add(orangeJuice);
-		foodItems.add(cereal);
+		// purposes		
+		// Populate the database if it hasn't already been populated (temporary, for testing)
+        if (dbHelper.size() < 8) {
+    		FoodItem milk = new FoodItem(0, "Milk", getCalendar(1), 0);
+    		FoodItem bread = new FoodItem(0, "Bread", getCalendar(6), 2);
+    		FoodItem eggs = new FoodItem(0, "Eggs", getCalendar(7), 12);
+    		FoodItem apple = new FoodItem(0, "Apple", getCalendar(15), 5);
+    		FoodItem sugar = new FoodItem(0, "Sugar", getCalendar(500), 1);
+    		FoodItem cookies = new FoodItem(0, "Cookies", getCalendar(30), 24);
+    		FoodItem orangeJuice = new FoodItem(0, "Orange Juice", getCalendar(21), 1);
+    		FoodItem cereal = new FoodItem(0, "Honey Nut Cheerios", getCalendar(180), 1);
+    		
+    		foodItems.add(milk);
+    		foodItems.add(bread);
+    		foodItems.add(eggs);
+    		foodItems.add(apple);
+    		foodItems.add(sugar);
+    		foodItems.add(cookies);
+    		foodItems.add(orangeJuice);
+    		foodItems.add(cereal);
+    		
+    		int n = foodItems.size();
+    		
+		    for (int i = 0; i < n; ++i) {
+		        dbHelper.put(foodItems.get(i).getFoodItemName(), foodItems.get(i).getExpiryDate());
+		    }
+		} else {
+		    copyDatabaseToList();
+		}
 		
 		populateListView(foodItems);
-
+		
 		findViewById(R.id.submitNewItemButton).setOnClickListener(addNewItemToListView);
 		findViewById(R.id.daysGoodTextView).setOnClickListener(openCalendarDialogClick);
 		findViewById(R.id.daysGoodTextView).setOnFocusChangeListener(openCalendarDialogFocus);
@@ -128,6 +144,34 @@ public class KelseyActivity extends Activity {
 	        return true;
 	    } else {
 	        return super.onOptionsItemSelected(item);
+	    }
+	}
+	
+	private void copyDatabaseToList() {
+	    Cursor c = dbHelper.read();
+	    c.moveToFirst();
+	    
+	    while (!c.isAfterLast()) {
+	        long id = c.getLong(
+	                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable._ID)
+	                );
+	        String foodName = c.getString(
+	                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM)
+	                );
+	        Calendar expiryDate = FridgeDbHelper.stringToCalendar(c.getString(
+	                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE))
+	                );
+	        boolean visible = 0 != c.getInt(
+	                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE)
+	                );
+	        
+	        Log.wtf("TEST: ", foodName);
+	        
+	        if (visible) {
+	            foodItems.add(new FoodItem(id, foodName, expiryDate, 0));
+	        }
+	        
+	        c.moveToNext();
 	    }
 	}
 	
@@ -183,7 +227,16 @@ public class KelseyActivity extends Activity {
                 // Hide the keyboard if showing
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 
-                FoodItem newFoodItem = new FoodItem(foodName, expiryDate, 0);
+                dbHelper.put(foodName, expiryDate);
+                
+                Cursor c = dbHelper.read();
+                c.moveToLast();
+                
+                long id = c.getLong(
+                        c.getColumnIndexOrThrow(DatabaseContract.FridgeTable._ID)
+                        );
+                
+                FoodItem newFoodItem = new FoodItem(id, foodName, expiryDate, 0);
                 foodItems.add(newFoodItem);
                 updateListView(foodItems);
                 

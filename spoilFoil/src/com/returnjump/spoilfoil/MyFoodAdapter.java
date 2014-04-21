@@ -38,6 +38,9 @@ public class MyFoodAdapter extends ArrayAdapter<FoodItem> {
           
           TextView expirationUnit = (TextView) itemView.findViewById(R.id.expiration_unit);
           expirationUnit.setText(currentFood.getExpirationUnit());
+          
+          // Set the tags for hidden data
+          itemView.setTag(R.id.food_item_id, currentFood.getId());
 
           return itemView;
      }               
