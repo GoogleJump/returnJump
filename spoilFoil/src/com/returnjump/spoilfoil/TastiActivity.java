@@ -105,20 +105,35 @@ public class TastiActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 	
+	/* Checks if external storage is available for read and write */
+	public static boolean isExternalStorageWritable() {
+	    String state = Environment.getExternalStorageState();
+	    if (Environment.MEDIA_MOUNTED.equals(state)) {
+	        return true;
+	    }
+	    return false;
+	}
+
+	/* Checks if external storage is available to at least read */
+	public static boolean isExternalStorageReadable() {
+	    String state = Environment.getExternalStorageState();
+	    if (Environment.MEDIA_MOUNTED.equals(state) ||
+	        Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+	        return true;
+	    }
+	    return false;
+	}
+	
 	// LANG.traineddata file with the app (in assets folder)
     // You can get them at:
     // http://code.google.com/p/tesseract-ocr/downloads/list
     // This area needs work and optimization
+	// Should use getFreeSpace() to verify the data will fit in storage
 	private static void copyTessDataToStorage() {
-	    // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
-
         File tessStorageDir = new File(Environment.getExternalStorageDirectory() + "/SpoilFoil/tessdata");
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
 
-        // Create the storage directory if it does not exist
-        if (!tessStorageDir.exists()){
+        // Create the storage directory if writable and it does not exist
+        if (isExternalStorageWritable() && !tessStorageDir.exists()){
             if (!tessStorageDir.mkdirs()){
                 Toast.makeText(context, "Failed to create directory:\n" + tessStorageDir.getPath(), Toast.LENGTH_LONG).show();
             }
@@ -155,15 +170,10 @@ public class TastiActivity extends Activity {
 	}
 	
 	private static File getOutputMediaFile(int type){
-	    // To be safe, you should check that the SDCard is mounted
-	    // using Environment.getExternalStorageState() before doing this.
-
 	    File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "SpoilFoil");
-	    // This location works best if you want the created images to be shared
-	    // between applications and persist after your app has been uninstalled.
 
 	    // Create the storage directory if it does not exist
-	    if (!mediaStorageDir.exists()){
+	    if (isExternalStorageWritable() && !mediaStorageDir.exists()){
 	        if (!mediaStorageDir.mkdirs()){
 	            Toast.makeText(context, "Failed to create directory.", Toast.LENGTH_LONG).show();
 	            return null;
@@ -235,6 +245,9 @@ public class TastiActivity extends Activity {
 	        	// Process image in an AsyncTask
 	            
 	        	new BinarizeImageTask().execute(IMAGE_PATH);
+	        	
+	        	// Delete the file after processed using file.delete()
+	        	// or we can save them to the cloud for later use
 	        } else if (resultCode == RESULT_CANCELED) {
 	            // User cancelled the image capture
 	        	Toast.makeText(this, "Image capture cancelled.", Toast.LENGTH_LONG).show();
@@ -260,7 +273,7 @@ public class TastiActivity extends Activity {
         protected Bitmap doInBackground(String... PATH) {
             // Scale image to reduce memory consumption
             BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 2;
+            options.inSampleSize = 2; // Binarizing should be done seperately to each image chuck for full image resolution
             
             Bitmap bitmap = BitmapFactory.decodeFile(PATH[0], options);
             
@@ -359,15 +372,10 @@ public class TastiActivity extends Activity {
             
             TessBaseAPI baseApi = new TessBaseAPI();
             
-            // To be safe, you should check that the SDCard is mounted
-            // using Environment.getExternalStorageState() before doing this.
-
             File dataStorageDir = new File(Environment.getExternalStorageDirectory(), "SpoilFoil");
-            // This location works best if you want the created images to be shared
-            // between applications and persist after your app has been uninstalled.
 
-            // Create the storage directory if it does not exist
-            if (!dataStorageDir.exists()){
+            // Create the storage directory if writable and it does not exist
+            if (isExternalStorageWritable() && !dataStorageDir.exists()){
                 if (!dataStorageDir.mkdirs()){
                     //Toast.makeText(context, "Failed to create directory.", Toast.LENGTH_LONG).show();
                 }
@@ -390,10 +398,7 @@ public class TastiActivity extends Activity {
                     textView.append("\n\n" + finalText);
                 }
             });
-            
-            // Clean text
-            //return recognizedText.replaceAll("[^a-zA-Z0-9\n]+", " ").trim();
-            
+
             return restBitmap;
         }
 	    

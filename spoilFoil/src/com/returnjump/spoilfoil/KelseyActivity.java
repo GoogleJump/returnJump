@@ -71,7 +71,7 @@ public class KelseyActivity extends Activity {
 		FoodItem cookies = new FoodItem("Cookies", getCalendar(30), 24);
 		FoodItem orangeJuice = new FoodItem("Orange Juice", getCalendar(21), 1);
 		FoodItem cereal = new FoodItem("Honey Nut Cheerios", getCalendar(180), 1);
-		/*
+		
 		foodItems.add(milk);
 		foodItems.add(bread);
 		foodItems.add(eggs);
@@ -80,7 +80,7 @@ public class KelseyActivity extends Activity {
 		foodItems.add(cookies);
 		foodItems.add(orangeJuice);
 		foodItems.add(cereal);
-		*/
+		
 		populateListView(foodItems);
 
 		findViewById(R.id.submitNewItemButton).setOnClickListener(addNewItemToListView);
@@ -131,7 +131,7 @@ public class KelseyActivity extends Activity {
 	    }
 	}
 	
-	// We should sort our list by ascending expiry date
+	// We should sort our list by descending expiry date
 	private void populateListView(ArrayList<FoodItem> list) {
         adapter = new MyFoodAdapter(this, R.layout.list_fooditems, list);
 
