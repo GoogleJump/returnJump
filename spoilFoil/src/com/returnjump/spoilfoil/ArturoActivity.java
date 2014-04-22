@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.View;
@@ -31,6 +34,7 @@ import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
@@ -61,22 +65,73 @@ public class ArturoActivity extends Activity {
 	
 	public OnClickListener sendemail = new OnClickListener(){
 		public void onClick(View View){
-			{
-                // TODO Auto-generated method stub
-
-                try {   
-                    /*GmailSender sender = new GmailSender("returnjump@gmail.com", getString(R.string.email_password));
-                    sender.sendMail("This is Subject",   
-                            "This is Body",   
-                            "arturo.1035@gmail.com",   
-                            "arturo.1035@gmail.com");   */
-                } catch (Exception e) {   
-                    Log.e("SendMail", e.getMessage(), e);   
-                } 
-
+			   EditText email_address = (EditText) findViewById(R.id.email_address);
+			   String ultimate_email = email_address.getText().toString();
+			   if (isValidEmailAddress(ultimate_email)){
+			       new SendEmailTask().execute(ultimate_email);
             }
+			   else{
+			         Toast.makeText(getApplicationContext(), "invalid email", Toast.LENGTH_LONG).show();
+			   }
 		}
 	};
+	
+	
+	public static boolean isValidEmailAddress(String email) {
+	    boolean result = true;
+	    try {
+	       InternetAddress emailAddr = new InternetAddress(email);
+	       emailAddr.validate();
+	    } catch (AddressException ex) {
+	       result = false;
+	    }
+	    return result;
+	 }
+	
+	private class SendEmailTask extends AsyncTask <String, Void, Void>{
+	   public void sendemail(String email) {
+	       
+	        final String username = "returnjump@gmail.com";
+	        final String password = getString(R.string.email_password);
+	 
+	        Properties props = new Properties();
+	        props.put("mail.smtp.auth", "true");
+	        props.put("mail.smtp.starttls.enable", "true");
+	        props.put("mail.smtp.host", "smtp.gmail.com");
+	        props.put("mail.smtp.port", "587");
+	 
+	        Session session = Session.getInstance(props,
+	          new javax.mail.Authenticator() {
+	            protected PasswordAuthentication getPasswordAuthentication() {
+	                return new PasswordAuthentication(username, password);
+	            }
+	          });
+	 
+	        try {
+	 
+	            Message message = new MimeMessage(session);
+	            message.setFrom(new InternetAddress("returnjump@gmail.com"));
+	            message.setRecipients(Message.RecipientType.TO,
+	                InternetAddress.parse(email));
+	            message.setSubject("Testing Subject");
+	            message.setText("Dear Mail Crawler,"
+	                + "\n\n No spam to my email, please!");
+	 
+	            Transport.send(message);	 
+	        } catch (MessagingException e) {
+	            Log.wtf("EMAIL ERROR:", "Send failed: " + e.getMessage());
+	        }
+	        
+	    }
+	   protected Void doInBackground(String... params) {
+	       sendemail(params[0]);
+	       return null;
+	   }
+	   protected void onPostExecute(Void v){
+	       Toast.makeText(getApplicationContext(), "emailsent", Toast.LENGTH_LONG).show();
+	   }
+	}
+	
 			
 	public OnClickListener set_number = new OnClickListener(){
 		public void onClick(View view){
