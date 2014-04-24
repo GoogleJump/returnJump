@@ -7,7 +7,6 @@
     <string name="title_activity_tasti">TastiActivity</string>
     <string name="title_activity_arturo">ArturoActivity</string>
     <string name="title_activity_kelsey">KelseyActivity</string>
-    <string name="title_activity_jeffrey">JeffreyActivity</string>
     
     <string name="hello_world">Hello world!</string>
     <string name="processing_image">Your image is being processed&#8230;</string>
@@ -16,6 +15,7 @@
     <string name="edit_text_new_foodItem">Enter a food item</string>
     <string name="edit_text_DaysGood">Expiry date</string>
     <string name="add">Add</string>
+    <string name="checkout">Checkout</string>
     <string name="set_expiry">Set Expiry</string>
     <string name="empty_fridge">Your fridge is empty. :(</string>
     <string name="number">5</string>
@@ -27,6 +27,6 @@
     <string name="months">months</string>
     <string name="year">year</string>
     <string name="years">years</string>
-    <string name= "enter_email">enter email address</string>
+    <string name="enter_email">enter email address</string>
     
 </resources>

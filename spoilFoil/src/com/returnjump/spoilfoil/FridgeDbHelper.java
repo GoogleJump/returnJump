@@ -3,6 +3,7 @@ package com.returnjump.spoilfoil;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -10,6 +11,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
 
 public class FridgeDbHelper extends SQLiteOpenHelper {
     
@@ -36,19 +38,24 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return DatabaseUtils.queryNumEntries(db, DatabaseContract.FridgeTable.TABLE_NAME);
     }
     
-    public static String calendarToString(Calendar cal) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    public static String calendarToString(Calendar cal, String format) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format);
         
         return dateFormat.format(cal.getTime());
     }
     
-    public long put(String foodItem, Calendar expiryDate) {
+    public long put(String foodItem, Calendar expiryDate, String rawFoodItem, Bitmap image) {
         SQLiteDatabase db = this.getWritableDatabase();
         
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM, rawFoodItem);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_ADDED_DATE, calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_LAST_UPDATE_DATE, calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME));
+        //values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE, image);
+        values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE, DatabaseContract.BOOL_TRUE);
 
         // Insert the new row, returning the primary key value of the new row
@@ -61,9 +68,9 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return newRowId;
     }
     
-    public static Calendar stringToCalendar(String date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar cal = Calendar.getInstance();
+    public static Calendar stringToCalendar(String date, String format) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format);
+        Calendar cal = GregorianCalendar.getInstance();
         try {
             cal.setTime(dateFormat.parse(date));
         } catch (ParseException e) {
@@ -82,6 +89,10 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
                 DatabaseContract.FridgeTable._ID,
                 DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM,
                 DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE,
+                DatabaseContract.FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM,
+                DatabaseContract.FridgeTable.COLUMN_NAME_ADDED_DATE,
+                DatabaseContract.FridgeTable.COLUMN_NAME_LAST_UPDATE_DATE,
+                DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE,
                 DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE,
                 };
 
@@ -102,7 +113,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return c;
     }
     
-    // Instead of deleting, this implementation should just set the visible column to false
+    // Instead of deleting, this implementation should just set the visible column to false using update()
     public void delete(long rowId) {
         SQLiteDatabase db = this.getWritableDatabase();
         
@@ -122,7 +133,8 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         // New value for one column
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_LAST_UPDATE_DATE, calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME));
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE, visible);
 
         // Which row to update, based on the ID

@@ -54,8 +54,6 @@ public class KelseyActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_kelsey);
-		// Show the Up button in the action bar.
-		setupActionBar();
 
 		/*
 		 * Change KelseyActivity to whatever activity will be handling push notifications
@@ -64,39 +62,6 @@ public class KelseyActivity extends Activity {
 		ParseInstallation.getCurrentInstallation().saveInBackground();
 		
 		dbHelper = new FridgeDbHelper(this);
-		
-		// added for
-		// testing
-		// purposes		
-		// Populate the database if it hasn't already been populated (temporary, for testing)
-        if (dbHelper.size() < 8) {
-    		FoodItem milk = new FoodItem(0, "Milk", getCalendar(1), 0);
-    		FoodItem bread = new FoodItem(0, "Bread", getCalendar(6), 2);
-    		FoodItem eggs = new FoodItem(0, "Eggs", getCalendar(7), 12);
-    		FoodItem apple = new FoodItem(0, "Apple", getCalendar(15), 5);
-    		FoodItem sugar = new FoodItem(0, "Sugar", getCalendar(500), 1);
-    		FoodItem cookies = new FoodItem(0, "Cookies", getCalendar(30), 24);
-    		FoodItem orangeJuice = new FoodItem(0, "Orange Juice", getCalendar(21), 1);
-    		FoodItem cereal = new FoodItem(0, "Honey Nut Cheerios", getCalendar(180), 1);
-    		
-    		foodItems.add(milk);
-    		foodItems.add(bread);
-    		foodItems.add(eggs);
-    		foodItems.add(apple);
-    		foodItems.add(sugar);
-    		foodItems.add(cookies);
-    		foodItems.add(orangeJuice);
-    		foodItems.add(cereal);
-    		
-    		int n = foodItems.size();
-    		
-		    for (int i = 0; i < n; ++i) {
-		        dbHelper.put(foodItems.get(i).getFoodItemName(), foodItems.get(i).getExpiryDate());
-		    }
-		} else {
-		    copyDatabaseToList();
-		}
-		
 		populateListView(foodItems);
 		
 		findViewById(R.id.submitNewItemButton).setOnClickListener(addNewItemToListView);
@@ -104,21 +69,18 @@ public class KelseyActivity extends Activity {
 		findViewById(R.id.daysGoodTextView).setOnFocusChangeListener(openCalendarDialogFocus);
 	}
 	
+	@Override
+	protected void onRestart() {
+	    super.onRestart();
+	    
+	    populateListView(foodItems);
+	}
+	
 	private Calendar getCalendar(int daysFromToday) {
 	    Calendar c = GregorianCalendar.getInstance();
 	    c.add(Calendar.DATE, daysFromToday);
 	    
 	    return c;
-	}
-
-	/**
-	 * Set up the {@link android.app.ActionBar}, if the API is available.
-	 */
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	private void setupActionBar() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			getActionBar().setDisplayHomeAsUpEnabled(true);
-		}
 	}
 
 	@Override
@@ -132,11 +94,13 @@ public class KelseyActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    int itemId = item.getItemId();
 	    
-	    if (itemId == android.R.id.home) {
-	        NavUtils.navigateUpFromSameTask(this);
-            return true;
-	    } else if (itemId == R.id.action_settings) {
+	    if (itemId == R.id.action_settings) {
 	        return true;
+	    } else if (itemId == R.id.action_arturo) {
+	        Intent intent = new Intent(this, ArturoActivity.class);
+            startActivity(intent);
+            
+            return true;
 	    } else if (itemId == R.id.action_camera) {
 	        Intent intent = new Intent(this, TastiActivity.class);
 	        startActivity(intent);
@@ -150,6 +114,7 @@ public class KelseyActivity extends Activity {
 	private void copyDatabaseToList() {
 	    Cursor c = dbHelper.read();
 	    c.moveToFirst();
+	    foodItems.clear();
 	    
 	    while (!c.isAfterLast()) {
 	        long id = c.getLong(
@@ -159,13 +124,11 @@ public class KelseyActivity extends Activity {
 	                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM)
 	                );
 	        Calendar expiryDate = FridgeDbHelper.stringToCalendar(c.getString(
-	                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE))
+	                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)), DatabaseContract.FORMAT_DATE
 	                );
 	        boolean visible = 0 != c.getInt(
 	                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE)
 	                );
-	        
-	        Log.wtf("TEST: ", foodName);
 	        
 	        if (visible) {
 	            foodItems.add(new FoodItem(id, foodName, expiryDate, 0));
@@ -177,6 +140,8 @@ public class KelseyActivity extends Activity {
 	
 	// We should sort our list by descending expiry date
 	private void populateListView(ArrayList<FoodItem> list) {
+	    copyDatabaseToList();
+	    
         adapter = new MyFoodAdapter(this, R.layout.list_fooditems, list);
 
         TextView emptyFridge = (TextView) findViewById(R.id.empty_fridge);
@@ -186,6 +151,9 @@ public class KelseyActivity extends Activity {
         if (list.size() == 0) {
             listView.setVisibility(View.GONE);
             emptyFridge.setVisibility(View.VISIBLE);
+        } else {
+            emptyFridge.setVisibility(View.GONE);
+            listView.setVisibility(View.VISIBLE);
         }
     }
 	
@@ -227,15 +195,7 @@ public class KelseyActivity extends Activity {
                 // Hide the keyboard if showing
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 
-                dbHelper.put(foodName, expiryDate);
-                
-                Cursor c = dbHelper.read();
-                c.moveToLast();
-                
-                long id = c.getLong(
-                        c.getColumnIndexOrThrow(DatabaseContract.FridgeTable._ID)
-                        );
-                
+                long id = dbHelper.put(foodName, expiryDate, foodName, null);
                 FoodItem newFoodItem = new FoodItem(id, foodName, expiryDate, 0);
                 foodItems.add(newFoodItem);
                 updateListView(foodItems);

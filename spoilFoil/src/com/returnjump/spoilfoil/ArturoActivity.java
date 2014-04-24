@@ -88,8 +88,9 @@ public class ArturoActivity extends Activity {
 	    return result;
 	 }
 	
-	private class SendEmailTask extends AsyncTask <String, Void, Void>{
-	   public void sendemail(String email) {
+	private class SendEmailTask extends AsyncTask <String, Void, Boolean>{
+	   
+	    public boolean sendemail(String email) {
 	       
 	        final String username = "returnjump@gmail.com";
 	        final String password = getString(R.string.email_password);
@@ -117,19 +118,29 @@ public class ArturoActivity extends Activity {
 	            message.setText("Dear Mail Crawler,"
 	                + "\n\n No spam to my email, please!");
 	 
-	            Transport.send(message);	 
+	            Transport.send(message);
+	            
+	            return true;
 	        } catch (MessagingException e) {
 	            Log.wtf("EMAIL ERROR:", "Send failed: " + e.getMessage());
+	            
+	            return false;
 	        }
 	        
 	    }
-	   protected Void doInBackground(String... params) {
-	       sendemail(params[0]);
-	       return null;
+	    
+	   protected Boolean doInBackground(String... params) {
+	       return sendemail(params[0]);
 	   }
-	   protected void onPostExecute(Void v){
-	       Toast.makeText(getApplicationContext(), "emailsent", Toast.LENGTH_LONG).show();
+	   
+	   protected void onPostExecute(Boolean sent){
+	       if (sent) {
+	           Toast.makeText(getApplicationContext(), "Email sent.", Toast.LENGTH_LONG).show();
+	       } else {
+	           Toast.makeText(getApplicationContext(), "Sending failed.", Toast.LENGTH_LONG).show();
+	       }
 	   }
+	   
 	}
 	
 			

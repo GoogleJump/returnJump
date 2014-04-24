@@ -7,7 +7,9 @@ import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import com.googlecode.leptonica.android.Binarize;
@@ -26,7 +28,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,6 +57,10 @@ public class TastiActivity extends Activity {
 	private static final String LANG = "eng";
 	private Uri fileUri;
 	
+	private ArrayAdapter<FoodItem> adapter;
+    private ArrayList<FoodItem> shoppingCart = new ArrayList<FoodItem>();
+    private FridgeDbHelper dbHelper;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -62,12 +72,20 @@ public class TastiActivity extends Activity {
 		
 		copyTessDataToStorage();
 		
+		// Setup database and list
+		dbHelper = new FridgeDbHelper(this);
+		adapter = new MyFoodAdapter(this, R.layout.list_fooditems, shoppingCart);
+        ListView listView = (ListView) findViewById(R.id.shoppingCart);
+        listView.setAdapter(adapter);
+        
+        findViewById(R.id.checkoutButton).setOnClickListener(addToFridge);
+		
 		// Open existing camera app, calls onActivityResult() when intent is finished
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		
 		fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
 		intent.putExtra(MediaStore.EXTRA_OUTPUT,  fileUri);
-	Toast.makeText(this, IMAGE_PATH + " == " + fileUri.getPath(), Toast.LENGTH_LONG).show();
+		
 		startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
 	}
 
@@ -143,7 +161,6 @@ public class TastiActivity extends Activity {
             try {
                 AssetManager assetManager = context.getAssets();
                 InputStream in = assetManager.open("tessdata/" + LANG + ".traineddata");
-                //GZIPInputStream gin = new GZIPInputStream(in);
                 OutputStream out = new FileOutputStream(tessStorageDir + "/" + LANG + ".traineddata");
 
                 // Transfer bytes from in to out
@@ -154,7 +171,6 @@ public class TastiActivity extends Activity {
                     out.write(buf, 0, len);
                 }
                 in.close();
-                //gin.close();
                 out.close();
                 
                 Toast.makeText(context, "Copied " + LANG + " traineddata", Toast.LENGTH_LONG).show();
@@ -260,14 +276,27 @@ public class TastiActivity extends Activity {
 	    }
 	}
 	
+	private OnClickListener addToFridge = new OnClickListener() {
+
+        @Override
+        public void onClick(View view) {
+            int n = shoppingCart.size();
+            
+            for (int i = 0; i < n; ++i) {
+                FoodItem item = shoppingCart.get(i);
+                
+                dbHelper.put(item.getFoodItemName(), item.getExpiryDate(), item.getFoodItemName(), null);
+            }
+            
+            finish();
+        }
+        
+    };
+	
 	private class BinarizeImageTask extends AsyncTask<String, Void, Bitmap> {
-	    private TextView textView = (TextView) findViewById(R.id.recognized_text);
-	    private ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_ocr);
-	    private ImageView imageView = (ImageView) findViewById(R.id.image_thumbnail);
         
         protected void onPreExecute () {
-            textView.setText("Binarizing image...");
-            progressBar.setVisibility(View.VISIBLE);
+            Toast.makeText(getApplicationContext(), "Binarizing image.", Toast.LENGTH_SHORT).show();
         }
         
         protected Bitmap doInBackground(String... PATH) {
@@ -285,7 +314,7 @@ public class TastiActivity extends Activity {
             //pix = Binarize.otsuAdaptiveThreshold(pix);
             bitmap = WriteFile.writeBitmap(pix);
             
-            
+            /*
             final Bitmap finalBitmap = bitmap;
             
             runOnUiThread(new Runnable() {
@@ -294,6 +323,7 @@ public class TastiActivity extends Activity {
                     imageView.setImageBitmap(finalBitmap);
                 }
             });
+            */
             
             return bitmap;
         }
@@ -304,9 +334,9 @@ public class TastiActivity extends Activity {
     }
 	
 	private class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
-	    private TextView textView = (TextView) findViewById(R.id.recognized_text);
 	    private ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_ocr);
-	    private ImageView imageView = (ImageView) findViewById(R.id.image_thumbnail);
+	    private Button checkoutButton = (Button) findViewById(R.id.checkoutButton);
+	    private ListView shoppingCartListView = (ListView) findViewById(R.id.shoppingCart);
 	    private boolean isFirstCall;
 	    
 	    // Override constructor to pass additional param
@@ -316,7 +346,7 @@ public class TastiActivity extends Activity {
 	    
 	    protected void onPreExecute () {
 	        if (isFirstCall) {
-	            textView.setText("OCR'ing image...");
+	            Toast.makeText(getApplicationContext(), "OCR'ing image.", Toast.LENGTH_SHORT).show();
 	        }
 	    }
 	    
@@ -387,15 +417,16 @@ public class TastiActivity extends Activity {
             String recognizedText = baseApi.getUTF8Text();
             baseApi.end();
             
-            // Display image and text
-            final Bitmap finalBitmap = bitmap;
-            final String finalText = recognizedText;
+            // Add item to  list
+            Calendar c = GregorianCalendar.getInstance();
+            c.add(Calendar.DATE, 7);
+            FoodItem newFoodItem = new FoodItem(0, recognizedText, c, 0);
+            shoppingCart.add(newFoodItem);
             
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    imageView.setImageBitmap(finalBitmap);
-                    textView.append("\n\n" + finalText);
+                    adapter.notifyDataSetChanged();
                 }
             });
 
@@ -407,6 +438,7 @@ public class TastiActivity extends Activity {
 	            new OcrImageTask(false).execute(bitmap);
 	        } else {
 	            progressBar.setVisibility(View.GONE);
+	            checkoutButton.setVisibility(View.VISIBLE);
 	        }
 	    }
 	}
