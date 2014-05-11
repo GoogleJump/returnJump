@@ -57,6 +57,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         //values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE, image);
         values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE, DatabaseContract.BOOL_TRUE);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED, DatabaseContract.BOOL_FALSE);
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId;
@@ -94,6 +95,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
                 DatabaseContract.FridgeTable.COLUMN_NAME_LAST_UPDATE_DATE,
                 DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE,
                 DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE,
+                DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED,
                 };
 
         // How you want the results sorted in the resulting Cursor
@@ -127,15 +129,25 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         db.delete(DatabaseContract.FridgeTable.TABLE_NAME, selection, selectionArgs);
     }
     
-    public void update(long rowId, String foodItem, Calendar expiryDate, int visible) {
+    public void update(long rowId, String foodItem, Calendar expiryDate, Integer visible, Integer notified) {
         SQLiteDatabase db = this.getReadableDatabase();
         
-        // New value for one column
         ContentValues values = new ContentValues();
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
+
+        // New value for one column (null means don't change the value)
+        if (foodItem != null) {
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);
+        }
+        if (expiryDate != null) {
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
+        }
+        if (visible != null) {
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE, visible);
+        }
+        if (notified != null) {
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED, notified);
+        }
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_LAST_UPDATE_DATE, calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME));
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE, visible);
 
         // Which row to update, based on the ID
         String selection = DatabaseContract.FridgeTable._ID + " LIKE ?";

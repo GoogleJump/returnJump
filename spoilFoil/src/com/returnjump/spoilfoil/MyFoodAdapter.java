@@ -6,7 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MyFoodAdapter extends ArrayAdapter<FoodItem> {
       private Context context;
@@ -41,6 +45,33 @@ public class MyFoodAdapter extends ArrayAdapter<FoodItem> {
           
           // Set the tags for hidden data
           itemView.setTag(R.id.food_item_id, currentFood.getId());
+
+          /*
+          final int pos = position;
+          EditText foodItemEdit = (EditText) itemView.findViewById(R.id.newItemEditTextSwipe);
+          foodItemEdit.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View view) {
+                  Toast.makeText(context, Integer.toString(pos), Toast.LENGTH_LONG).show();
+              }
+          });
+
+          TextView daysGoodEdit = (TextView) itemView.findViewById(R.id.daysGoodTextViewSwipe);
+          daysGoodEdit.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View view) {
+                  Toast.makeText(context, Integer.toString(pos), Toast.LENGTH_LONG).show();
+              }
+          });
+
+          ImageButton updateItem = (ImageButton) itemView.findViewById(R.id.submitNewItemButtonSwipe);
+          updateItem.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View view) {
+                  Toast.makeText(context, Integer.toString(pos), Toast.LENGTH_LONG).show();
+              }
+          });
+          */
 
           return itemView;
      }               

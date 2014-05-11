@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
 
 import com.googlecode.leptonica.android.Binarize;
 import com.googlecode.leptonica.android.Pix;
@@ -31,10 +30,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
@@ -60,6 +57,8 @@ public class TastiActivity extends Activity {
 	private ArrayAdapter<FoodItem> adapter;
     private ArrayList<FoodItem> shoppingCart = new ArrayList<FoodItem>();
     private FridgeDbHelper dbHelper;
+
+    ListView cartListView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -71,12 +70,32 @@ public class TastiActivity extends Activity {
 		context = this;
 		
 		copyTessDataToStorage();
-		
-		// Setup database and list
+
+        cartListView = (ListView) findViewById(R.id.shoppingCart);
+        SwipeDismissListViewTouchListener touchListener =
+                new SwipeDismissListViewTouchListener(cartListView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                    @Override
+                    public boolean canDismiss(int position) {
+                        return true;
+                    }
+
+                    @Override
+                    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                        // reverseSortedPositions always has a length = 1
+                        int position = reverseSortedPositions[0];
+
+                        adapter.remove(adapter.getItem(position));
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+        cartListView.setOnTouchListener(touchListener);
+        cartListView.setOnScrollListener(touchListener.makeScrollListener());
+
+
+        // Setup database and list
 		dbHelper = new FridgeDbHelper(this);
 		adapter = new MyFoodAdapter(this, R.layout.list_fooditems, shoppingCart);
-        ListView listView = (ListView) findViewById(R.id.shoppingCart);
-        listView.setAdapter(adapter);
+        cartListView.setAdapter(adapter);
         
         findViewById(R.id.checkoutButton).setOnClickListener(addToFridge);
 		
@@ -275,7 +294,7 @@ public class TastiActivity extends Activity {
 	        }
 	    }
 	}
-	
+
 	private OnClickListener addToFridge = new OnClickListener() {
 
         @Override
@@ -336,7 +355,6 @@ public class TastiActivity extends Activity {
 	private class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 	    private ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_ocr);
 	    private Button checkoutButton = (Button) findViewById(R.id.checkoutButton);
-	    private ListView shoppingCartListView = (ListView) findViewById(R.id.shoppingCart);
 	    private boolean isFirstCall;
 	    
 	    // Override constructor to pass additional param
@@ -414,21 +432,23 @@ public class TastiActivity extends Activity {
             String DATA_PATH = dataStorageDir.getPath();
             baseApi.init(DATA_PATH, LANG);
             baseApi.setImage(bitmap);
-            String recognizedText = baseApi.getUTF8Text();
+            String recognizedText = baseApi.getUTF8Text().trim();
             baseApi.end();
-            
-            // Add item to  list
-            Calendar c = GregorianCalendar.getInstance();
-            c.add(Calendar.DATE, 7);
-            FoodItem newFoodItem = new FoodItem(0, recognizedText, c, 0);
-            shoppingCart.add(newFoodItem);
-            
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    adapter.notifyDataSetChanged();
-                }
-            });
+
+            if (!recognizedText.equals("")) {
+                // Add item to  list
+                Calendar c = GregorianCalendar.getInstance();
+                c.add(Calendar.DATE, 7);
+                FoodItem newFoodItem = new FoodItem(0, recognizedText, c, 0);
+                shoppingCart.add(newFoodItem);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+            }
 
             return restBitmap;
         }

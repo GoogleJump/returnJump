@@ -11,7 +11,7 @@
         android:layout_weight="1"
         android:layout_margin="10dp"
         android:background="@drawable/bg_card" />
-    
+
     <TextView
         android:id="@+id/empty_fridge"
         android:layout_width="match_parent"

@@ -29,6 +29,7 @@ public final class DatabaseContract {
         public static final String COLUMN_NAME_LAST_UPDATE_DATE = "lastupdatedate";
         public static final String COLUMN_NAME_IMAGE = "image";
         public static final String COLUMN_NAME_VISIBLE = "visible";
+        public static final String COLUMN_NAME_NOTIFIED = "notified";
         
         public static final String SQL_CREATE_TABLE =
             "CREATE TABLE " + TABLE_NAME + " (" +
@@ -39,7 +40,8 @@ public final class DatabaseContract {
             FridgeTable.COLUMN_NAME_ADDED_DATE + TEXT_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_LAST_UPDATE_DATE + TEXT_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_IMAGE + BLOB_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_VISIBLE + INTEGER_TYPE +
+            FridgeTable.COLUMN_NAME_VISIBLE + INTEGER_TYPE + COMMA_SEP +
+            FridgeTable.COLUMN_NAME_NOTIFIED + INTEGER_TYPE +
             " )";
 
         public static final String SQL_DELETE_TABLE =
