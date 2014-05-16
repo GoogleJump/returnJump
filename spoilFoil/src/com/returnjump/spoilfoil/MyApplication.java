@@ -1,12 +1,10 @@
 package com.returnjump.spoilfoil;
 
-import com.parse.Parse;
-
 import android.app.Application;
-import android.content.Context;
-import android.os.UserManager;
 import android.view.View;
 import android.widget.ListView;
+
+import com.parse.Parse;
 
 public class MyApplication extends Application {
 

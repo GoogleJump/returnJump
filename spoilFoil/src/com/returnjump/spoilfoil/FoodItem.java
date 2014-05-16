@@ -1,9 +1,7 @@
 package com.returnjump.spoilfoil;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This class represents one food item

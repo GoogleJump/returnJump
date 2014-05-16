@@ -10,7 +10,8 @@
 
 package com.google.scrollview.ui;
 
-import org.piccolo2d.nodes.PImage;
+import org.piccolo2d.nodes
+        .PImage;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

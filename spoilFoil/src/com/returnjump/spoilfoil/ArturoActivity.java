@@ -1,34 +1,26 @@
 package com.returnjump.spoilfoil;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
-import android.os.Bundle;
-import android.app.Activity;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v4.app.NavUtils;
-import android.annotation.TargetApi;
-import android.os.Build;
-import android.view.View.OnClickListener;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.support.v4.app.NotificationCompat;
-import android.view.View.OnClickListener;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
