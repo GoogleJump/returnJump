@@ -1,5 +1,6 @@
 SpoilFoil/res/values/secret.xml
 out/
+jni/
 
 # Built application files
 *.apk
@@ -12,10 +13,8 @@ out/
 *.class
 
 # Generated files
-spoilFoil/bin/
-spoilFoil/gen/
-tess-two/bin/
-tess-two/gen/
+bin/
+gen/
 
 # Gradle files
 .gradle/

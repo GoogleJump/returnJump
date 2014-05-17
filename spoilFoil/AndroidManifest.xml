@@ -60,6 +60,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.returnjump.spoilfoil.KelseyActivity" />
         </activity>
+        <activity
+            android:name="com.returnjump.spoilfoil.SettingsActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="com.returnjump.spoilfoil.KelseyActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.returnjump.spoilfoil.KelseyActivity" />
+        </activity>
         
         <service android:name="com.parse.PushService" />
         <receiver android:name="com.parse.ParseBroadcastReceiver">

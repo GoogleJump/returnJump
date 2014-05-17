@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/header_notifications">
+
+        <CheckBoxPreference
+            android:key="checkbox_push"
+            android:title="@string/notification_push"
+            android:summary="@string/notification_push_summary"
+            android:defaultValue="true" />
+
+        <CheckBoxPreference
+            android:key="checkbox_email"
+            android:title="@string/notification_email"
+            android:summary="@string/notification_email_summary"
+            android:defaultValue="false" />
+
+        <EditTextPreference
+            android:key="email_address"
+            android:dependency="checkbox_email"
+            android:layout="?android:attr/preferenceLayoutChild"
+            android:title="@string/email_address"
+            android:dialogTitle="@string/email_address"
+            android:inputType="textEmailAddress"
+            android:defaultValue="" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

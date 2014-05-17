@@ -129,19 +129,30 @@ public class TastiActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                // This ID represents the Home or Up button. In the case of this
-                // activity, the Up button is shown. Use NavUtils to allow users
-                // to navigate up one level in the application structure. For
-                // more details, see the Navigation pattern on Android Design:
-                //
-                // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-                //
-                NavUtils.navigateUpFromSameTask(this);
-                return true;
+        int itemId = item.getItemId();
+
+        if (itemId == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
+
+            return true;
+        } else if (itemId == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+
+            return true;
+        } else if (itemId == R.id.action_arturo) {
+            Intent intent = new Intent(this, ArturoActivity.class);
+            startActivity(intent);
+
+            return true;
+        } else if (itemId == R.id.action_camera) {
+            Intent intent = new Intent(this, TastiActivity.class);
+            startActivity(intent);
+
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     /* Checks if external storage is available for read and write */
