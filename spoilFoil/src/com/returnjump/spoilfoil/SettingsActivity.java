@@ -26,7 +26,7 @@ public class SettingsActivity extends PreferenceActivity {
                 .commit();
     }
 
-    public static class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+    public static class SettingsFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -40,11 +40,14 @@ public class SettingsActivity extends PreferenceActivity {
             super.onActivityCreated(savedInstanceState);
 
             bindPreferenceToSummary();
+
+            // Set listener for validation checks
             findPreference("email_address").setOnPreferenceChangeListener(prefChangeListener);
         }
 
         private void bindPreferenceToSummary() {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
             setPrefSummary(sharedPref, "email_address", "");
         }
 
@@ -90,13 +93,6 @@ public class SettingsActivity extends PreferenceActivity {
 
         };
 
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            Preference pref = findPreference(key);
-
-            if (key.equals("email_address")) {
-                pref.setSummary(sharedPreferences.getString(key, ""));
-            }
-        }
     }
 
 }

@@ -35,7 +35,7 @@ public class MyFoodAdapter extends ArrayAdapter<FoodItem> {
           FoodItem currentFood = foods.get(position);
           
           TextView foodItemName = (TextView) itemView.findViewById(R.id.food_item_name);
-          foodItemName.setText(currentFood.getFoodItemName());
+          foodItemName.setText(currentFood.getFoodName());
           
           TextView expirationNumber = (TextView) itemView.findViewById(R.id.expiration_number);
           expirationNumber.setText(Integer.toString(currentFood.getExpirationNumber()));

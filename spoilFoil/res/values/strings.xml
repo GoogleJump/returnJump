@@ -10,11 +10,11 @@
     <string name="title_activity_settings">Settings</string>
 
     <string name="header_notifications">Notifications</string>
-    <string name="notification_push">Push Notification</string>
-    <string name="notification_push_summary">Receive notifications directly on your device</string>
-    <string name="notification_email">Email Notification</string>
+    <string name="notification_push">Push notification</string>
+    <string name="notification_push_summary">Receive notifications directly to your device</string>
+    <string name="notification_email">Email notification</string>
     <string name="notification_email_summary">Receive email notifications</string>
-    <string name="email_address">Email Address</string>
+    <string name="email_address">Email address</string>
     
     <string name="hello_world">Hello world!</string>
     <string name="processing_image">Your image is being processed&#8230;</string>

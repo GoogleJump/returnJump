@@ -317,7 +317,7 @@ public class TastiActivity extends Activity {
             for (int i = 0; i < n; ++i) {
                 FoodItem item = shoppingCart.get(i);
 
-                dbHelper.put(item.getFoodItemName(), item.getExpiryDate(), item.getFoodItemName(), null);
+                dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), null);
             }
 
             finish();
@@ -467,7 +467,7 @@ public class TastiActivity extends Activity {
             if (!recognizedText.equals("")) {
                 // Add item to  list
                 Calendar c = GregorianCalendar.getInstance();
-                c.add(Calendar.DATE, 7);
+                c.add(Calendar.DATE, 5);
                 FoodItem newFoodItem = new FoodItem(0, recognizedText, c, 0);
                 shoppingCart.add(newFoodItem);
 
