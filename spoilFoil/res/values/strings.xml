@@ -15,6 +15,9 @@
     <string name="notification_email">Email notification</string>
     <string name="notification_email_summary">Receive email notifications</string>
     <string name="email_address">Email address</string>
+    <string name="header_cloud">Cloud</string>
+    <string name="sync_to_cloud">Sync to cloud</string>
+    <string name="sync_to_cloud_summary">Sync your fridge data to the cloud for cross-device access</string>
     
     <string name="hello_world">Hello world!</string>
     <string name="processing_image">Your image is being processed&#8230;</string>

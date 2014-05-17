@@ -41,8 +41,9 @@ public class SettingsActivity extends PreferenceActivity {
 
             bindPreferenceToSummary();
 
-            // Set listener for validation checks
-            findPreference("email_address").setOnPreferenceChangeListener(prefChangeListener);
+            // Set preference listeners
+            findPreference("email_address").setOnPreferenceChangeListener(emailPrefChangeListener);
+            findPreference("preference_sync").setOnPreferenceClickListener(syncPrefClickListener);
         }
 
         private void bindPreferenceToSummary() {
@@ -65,7 +66,7 @@ public class SettingsActivity extends PreferenceActivity {
             return matcher.matches();
         }
 
-        public static Preference.OnPreferenceChangeListener prefChangeListener = new Preference.OnPreferenceChangeListener() {
+        public static Preference.OnPreferenceChangeListener emailPrefChangeListener = new Preference.OnPreferenceChangeListener() {
 
             @Override
             public boolean onPreferenceChange(Preference preference, Object value) {
@@ -91,6 +92,16 @@ public class SettingsActivity extends PreferenceActivity {
 
             }
 
+        };
+
+        public static Preference.OnPreferenceClickListener syncPrefClickListener = new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Context context = preference.getContext();
+
+                Toast.makeText(context, "Syncing...", Toast.LENGTH_LONG).show();
+                return true;
+            }
         };
 
     }

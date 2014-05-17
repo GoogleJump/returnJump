@@ -52,12 +52,17 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM, rawFoodItem);
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_ADDED_DATE, calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME));
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_LAST_UPDATE_DATE, calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_CREATED_DATE, calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE, calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY, "DEVICE");
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE, DatabaseContract.BOOL_FALSE);
         //values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE, image);
         values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE);
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE, DatabaseContract.BOOL_TRUE);
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED, DatabaseContract.BOOL_FALSE);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED, DatabaseContract.BOOL_FALSE);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_CART, DatabaseContract.BOOL_FALSE);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_FRIDGE, DatabaseContract.BOOL_FALSE);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_PUSH, DatabaseContract.BOOL_FALSE);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_EMAIL, DatabaseContract.BOOL_FALSE);
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId;
@@ -91,16 +96,22 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
                 DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM,
                 DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE,
                 DatabaseContract.FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM,
-                DatabaseContract.FridgeTable.COLUMN_NAME_ADDED_DATE,
-                DatabaseContract.FridgeTable.COLUMN_NAME_LAST_UPDATE_DATE,
+                DatabaseContract.FridgeTable.COLUMN_NAME_CREATED_DATE,
+                DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE,
+                DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY,
+                DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE,
                 DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE,
-                DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE,
-                DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED,
+                DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED,
+                DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_CART,
+                DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_FRIDGE,
+                DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_PUSH,
+                DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_EMAIL,
                 };
 
         // How you want the results sorted in the resulting Cursor
         String sortOrder =
-                DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE + " ASC";
+                DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE + DatabaseContract.COMMA_SEP +
+                DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM + " ASC";
 
         Cursor c = db.query(
                 DatabaseContract.FridgeTable.TABLE_NAME,    // The table to query
@@ -114,40 +125,39 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
      
         return c;
     }
-    
-    // Instead of deleting, this implementation should just set the visible column to false using update()
-    public void delete(long rowId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        
-        // Define 'where' part of query.
-        String selection = DatabaseContract.FridgeTable._ID + " LIKE ?";
-        
-        // Specify arguments in placeholder order.
-        String[] selectionArgs = { String.valueOf(rowId) };
-        
-        // Issue SQL statement.
-        db.delete(DatabaseContract.FridgeTable.TABLE_NAME, selection, selectionArgs);
-    }
-    
-    public void update(long rowId, String foodItem, Calendar expiryDate, Integer visible, Integer notified) {
+
+    public void update(long rowId, String foodItem, Calendar expiryDate, Integer fromImage, Integer expired, Integer deletedCart, Integer deletedFridge, Integer notifiedPush, Integer notifiedEmail) {
         SQLiteDatabase db = this.getReadableDatabase();
         
         ContentValues values = new ContentValues();
 
-        // New value for one column (null means don't change the value)
+        // Update value for each column (null means don't change the value)
         if (foodItem != null) {
             values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);
         }
         if (expiryDate != null) {
             values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
         }
-        if (visible != null) {
-            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_VISIBLE, visible);
+        if (fromImage != null) {
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE, fromImage);
         }
-        if (notified != null) {
-            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED, notified);
+        if (expired != null) {
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED, expired);
         }
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_LAST_UPDATE_DATE, calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME));
+        if (deletedCart != null) {
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_CART, deletedCart);
+        }
+        if (deletedFridge != null) {
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_FRIDGE, deletedFridge);
+        }
+        if (notifiedPush != null) {
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_PUSH, notifiedPush);
+        }
+        if (notifiedEmail != null) {
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_EMAIL, notifiedEmail);
+        }
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE, calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY, "DEVICE");
 
         // Which row to update, based on the ID
         String selection = DatabaseContract.FridgeTable._ID + " LIKE ?";

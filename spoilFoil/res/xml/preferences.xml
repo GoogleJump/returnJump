@@ -27,5 +27,15 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="@string/header_cloud">
+
+        <Preference
+            android:key="preference_sync"
+            android:title="@string/sync_to_cloud"
+            android:summary="@string/sync_to_cloud_summary" />
+
+    </PreferenceCategory>
+
 
 </PreferenceScreen>

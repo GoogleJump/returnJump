@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -58,6 +59,7 @@ public class TastiActivity extends Activity {
 
     private ArrayAdapter<FoodItem> adapter;
     private ArrayList<FoodItem> shoppingCart = new ArrayList<FoodItem>();
+    private ArrayList<FoodItem> deletedCart = new ArrayList<FoodItem>();
     private FridgeDbHelper dbHelper;
 
     ListView cartListView;
@@ -85,14 +87,15 @@ public class TastiActivity extends Activity {
                     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                         // reverseSortedPositions always has a length = 1
                         int position = reverseSortedPositions[0];
+                        FoodItem item = adapter.getItem(position);
 
-                        adapter.remove(adapter.getItem(position));
+                        deletedCart.add(item);
+                        adapter.remove(item);
                         adapter.notifyDataSetChanged();
                     }
                 });
         cartListView.setOnTouchListener(touchListener);
         cartListView.setOnScrollListener(touchListener.makeScrollListener());
-
 
         // Setup database and list
         dbHelper = new FridgeDbHelper(this);
@@ -313,12 +316,24 @@ public class TastiActivity extends Activity {
         @Override
         public void onClick(View view) {
             int n = shoppingCart.size();
+            int m = deletedCart.size();
 
+            // Add the shopping cart to the database
             for (int i = 0; i < n; ++i) {
                 FoodItem item = shoppingCart.get(i);
 
-                dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), null);
+                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), null);
+                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, null);
             }
+
+            // Add the deleted cart to the database, setting deleted_cart to True
+            for (int j = 0; j < m; ++j) {
+                FoodItem item = deletedCart.get(j);
+
+                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), null);
+                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, DatabaseContract.BOOL_TRUE, null, null, null);
+            }
+
 
             finish();
         }
@@ -345,17 +360,6 @@ public class TastiActivity extends Activity {
             pix = Binarize.otsuAdaptiveThreshold(pix, 32, 32, 2, 2, 0.9F);
             //pix = Binarize.otsuAdaptiveThreshold(pix);
             bitmap = WriteFile.writeBitmap(pix);
-            
-            /*
-            final Bitmap finalBitmap = bitmap;
-            
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    imageView.setImageBitmap(finalBitmap);
-                }
-            });
-            */
 
             return bitmap;
         }
@@ -467,8 +471,8 @@ public class TastiActivity extends Activity {
             if (!recognizedText.equals("")) {
                 // Add item to  list
                 Calendar c = GregorianCalendar.getInstance();
-                c.add(Calendar.DATE, 5);
-                FoodItem newFoodItem = new FoodItem(0, recognizedText, c, 0);
+                c.add(Calendar.DATE, 7); // DEFAULTED TO 1 WEEK!
+                FoodItem newFoodItem = new FoodItem(-1, recognizedText, c, 0);
                 shoppingCart.add(newFoodItem);
 
                 runOnUiThread(new Runnable() {

@@ -1,6 +1,9 @@
 package com.returnjump.spoilfoil;
 
 import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseInstallation;
+import com.parse.SaveCallback;
 
 import android.app.Application;
 import android.content.Context;
@@ -8,6 +11,7 @@ import android.os.UserManager;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class MyApplication extends Application {
 
@@ -15,11 +19,20 @@ public class MyApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 		
-		// Parse App ID and Client Key can be found in /res/values/secret.xml
+		// Parse App ID and Client Key can be found in spoilFoil/res/values/secret.xml
 	    Parse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_key));
+        ParseInstallation.getCurrentInstallation().saveEventually(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e != null) {
+                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Done.", Toast.LENGTH_LONG).show();
+                }
 
-        // Set default preference values if first time entering using the app
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+            }
+        });
+
 	}
 
     public static View getViewByPosition(int position, ListView listView) {
