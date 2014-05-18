@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -206,12 +207,49 @@ public class KelseyActivity extends Activity {
         return i;
     }
 
-    private void colorFlash(int index) throws InterruptedException {
-        View item = MyApplication.getViewByPosition(index, fridgeListView);
+    private class ColorFlashTask extends AsyncTask<Integer, Void, Void> {
 
-        item.setBackgroundColor(getResources().getColor(R.color.theme_dark));
-        Thread.sleep(500);
-        item.setBackgroundColor(getResources().getColor(R.color.white));
+        @Override
+        protected Void doInBackground(Integer... index) {
+            final View item = MyApplication.getViewByPosition(index[0], fridgeListView);
+
+            // Fade in
+            for (int x = 0; x < 64; x++) {
+                final int alpha = x;
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        item.setBackgroundColor(Color.argb(alpha, 134, 179, 0));
+                    }
+                });
+
+                try {
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                }
+            }
+
+            // Fade out
+            for (int y = 63; y >= 0; y--) {
+                final int alpha = y;
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        item.setBackgroundColor(Color.argb(alpha, 134, 179, 0));
+                    }
+                });
+
+                try {
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                }
+            }
+
+            return null;
+        }
+
     }
 	
 	private OnClickListener addNewItemToListView = new OnClickListener() {
@@ -250,10 +288,7 @@ public class KelseyActivity extends Activity {
                 daysGoodField.setTag(R.id.month_id, 0);
                 daysGoodField.setTag(R.id.day_id, 0);
                 fridgeListView.smoothScrollToPosition(index); //fridgeListView.setSelection(index);
-                /*try {
-                    colorFlash(index);
-                } catch (InterruptedException e) {
-                }*/
+                //new ColorFlashTask().execute(index);
                 
             } else if (foodName.equals("")) {
                 // Set focus and show keyboard

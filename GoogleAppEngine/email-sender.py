@@ -1,4 +1,5 @@
 import smtplib
+import json
 
 def createMessage(fromeName, fromEmail, toName, toEmail, subject, body):
     return """From: %s <%s>
@@ -22,7 +23,14 @@ message = createMessage(fromeName, fromEmail, toName, toEmail, subject, body)
 try:
     smtpObj = smtplib.SMTP('smtp.gmail.com', 587)
     smtpObj.starttls()
-    smtpObj.login('returnjump@gmail.com', 'returnpassword')
+
+    # Get password from file
+    jsonData = open('secret.json')
+    data = json.load(jsonData)
+    jsonData.close()
+    password = data['email_password']
+
+    smtpObj.login('returnjump@gmail.com', password)
     smtpObj.sendmail(sender, receivers, message)         
     print "Successfully sent email"
 except SMTPException:

@@ -2,6 +2,7 @@ package com.returnjump.spoilfoil;
 
 import java.util.List;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,33 +46,6 @@ public class MyFoodAdapter extends ArrayAdapter<FoodItem> {
           
           // Set the tags for hidden data
           itemView.setTag(R.id.food_item_id, currentFood.getId());
-
-          /*
-          final int pos = position;
-          EditText foodItemEdit = (EditText) itemView.findViewById(R.id.newItemEditTextSwipe);
-          foodItemEdit.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View view) {
-                  Toast.makeText(context, Integer.toString(pos), Toast.LENGTH_LONG).show();
-              }
-          });
-
-          TextView daysGoodEdit = (TextView) itemView.findViewById(R.id.daysGoodTextViewSwipe);
-          daysGoodEdit.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View view) {
-                  Toast.makeText(context, Integer.toString(pos), Toast.LENGTH_LONG).show();
-              }
-          });
-
-          ImageButton updateItem = (ImageButton) itemView.findViewById(R.id.submitNewItemButtonSwipe);
-          updateItem.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View view) {
-                  Toast.makeText(context, Integer.toString(pos), Toast.LENGTH_LONG).show();
-              }
-          });
-          */
 
           return itemView;
      }               

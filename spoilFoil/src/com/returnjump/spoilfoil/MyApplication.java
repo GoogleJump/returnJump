@@ -20,18 +20,8 @@ public class MyApplication extends Application {
 		super.onCreate();
 		
 		// Parse App ID and Client Key can be found in spoilFoil/res/values/secret.xml
-	    Parse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_key));
-        ParseInstallation.getCurrentInstallation().saveEventually(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e != null) {
-                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Done.", Toast.LENGTH_LONG).show();
-                }
-
-            }
-        });
+	    MyParse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_key));
+        MyParse.saveInstallationEventually(this);
 
 	}
 
