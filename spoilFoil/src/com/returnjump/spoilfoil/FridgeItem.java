@@ -13,6 +13,7 @@ public class FridgeItem {
     private boolean fromImage;
     private byte[] image;
     private byte[] imageBinarized;
+    private boolean dismissed;
     private boolean expired;
     private boolean editedCart;
     private boolean editedFridge;
@@ -24,7 +25,7 @@ public class FridgeItem {
     // General constructor (Parse)
     public FridgeItem(long rowId, String hash, String foodItem, String rawFoodItem, String expiryDate,
                       String createdDate, String updatedDate, String updatedBy, boolean fromImage,
-                      byte[] image, byte[] imageBinarized, boolean expired, boolean editedCart, boolean editedFridge,
+                      byte[] image, byte[] imageBinarized, boolean dismissed, boolean expired, boolean editedCart, boolean editedFridge,
                       boolean deletedCart, boolean deletedFridge, boolean notifiedPush, boolean notifiedEmail) {
 
         this.rowId = rowId;
@@ -38,6 +39,7 @@ public class FridgeItem {
         this.fromImage = fromImage;
         this.image = image;
         this.imageBinarized = imageBinarized;
+        this.dismissed = dismissed;
         this.expired = expired;
         this.editedCart = editedCart;
         this.editedFridge = editedFridge;
@@ -51,11 +53,11 @@ public class FridgeItem {
     // SQLite constructor
     public FridgeItem(long rowId, String hash, String foodItem, String rawFoodItem, String expiryDate,
                       String createdDate, String updatedDate, String updatedBy, int fromImage,
-                      byte[] image, byte[] imageBinarized, int expired, int editedCart, int editedFridge,
+                      byte[] image, byte[] imageBinarized, int dismissed, int expired, int editedCart, int editedFridge,
                       int deletedCart, int deletedFridge, int notifiedPush, int notifiedEmail) {
 
-        this(rowId, hash, foodItem, rawFoodItem, expiryDate, createdDate,
-             updatedDate, updatedBy, intToBoolean(fromImage), image, imageBinarized, intToBoolean(expired),
+        this(rowId, hash, foodItem, rawFoodItem, expiryDate, createdDate, updatedDate, updatedBy,
+             intToBoolean(fromImage), image, imageBinarized, intToBoolean(expired), intToBoolean(dismissed),
              intToBoolean(editedCart), intToBoolean(editedFridge), intToBoolean(deletedCart),
              intToBoolean(deletedFridge), intToBoolean(notifiedPush), intToBoolean(notifiedEmail));
 
@@ -123,6 +125,13 @@ public class FridgeItem {
 
     public byte[] getImageBinarized() {
         return this.imageBinarized;
+    }
+
+    public boolean isDismissed() {
+        return this.dismissed;
+    }
+    public void setDismissed(boolean dismissed) {
+        this.dismissed = dismissed;
     }
 
     public boolean isExpired() {

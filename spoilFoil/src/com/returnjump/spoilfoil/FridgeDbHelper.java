@@ -89,6 +89,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE);
         //values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED, imageBinarized);
         values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED, DatabaseContract.BOOL_FALSE);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED, DatabaseContract.BOOL_FALSE);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_CART, DatabaseContract.BOOL_FALSE);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_FRIDGE, DatabaseContract.BOOL_FALSE);
@@ -136,6 +137,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
                 DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE,
                 DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE,
                 DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED,
+                DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED,
                 DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED,
                 DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_CART,
                 DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_FRIDGE,
@@ -169,7 +171,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return c;
     }
 
-    public void update(long rowId, String foodItem, Calendar expiryDate, Integer fromImage, Integer expired, Integer editedCart, Integer editedFridge,
+    public void update(long rowId, String foodItem, Calendar expiryDate, Integer fromImage, Integer dismissed, Integer expired, Integer editedCart, Integer editedFridge,
                        Integer deletedCart, Integer deletedFridge, Integer notifiedPush, Integer notifiedEmail) {
         SQLiteDatabase db = this.getReadableDatabase();
         
@@ -184,6 +186,9 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         }
         if (fromImage != null) {
             values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE, fromImage);
+        }
+        if (dismissed != null) {
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED, dismissed);
         }
         if (expired != null) {
             values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED, expired);

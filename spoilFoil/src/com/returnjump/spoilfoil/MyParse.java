@@ -159,6 +159,7 @@ public class MyParse {
             int fromImage = parseCloudFridgeItem.getInt("fromImage");
             byte[] image = parseCloudFridgeItem.getBytes("image");
             byte[] imageBinarized = parseCloudFridgeItem.getBytes("imageBinarized");
+            int dismissed = parseCloudFridgeItem.getInt("dismissed");
             int expired = parseCloudFridgeItem.getInt("expired");
             int editedCart = parseCloudFridgeItem.getInt("editedCart");
             int editedFridge = parseCloudFridgeItem.getInt("editedFridge");
@@ -225,6 +226,9 @@ public class MyParse {
             byte[] imageBinarized = c.getBlob(
                     c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED)
             );
+            int dismissed = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED)
+            );
             int expired = c.getInt(
                     c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED)
             );
@@ -248,7 +252,7 @@ public class MyParse {
             );
 
             localFridge.add(new FridgeItem(rowId, hash, foodItem, rawFoodItem, expiryDate, createdDate, updatedDate, updatedBy,
-                    fromImage, image, imageBinarized, expired, editedCart, editedFridge, deletedCart,
+                    fromImage, image, imageBinarized, dismissed, expired, editedCart, editedFridge, deletedCart,
                     deletedFridge, notifiedPush, notifiedEmail));
 
             c.moveToNext();
@@ -314,6 +318,7 @@ public class MyParse {
                 newParseCloudItem.put("expiryDate", localFridgeItem.getExpiryDate());
                 newParseCloudItem.put("updatedDate", localFridgeItem.getUpdatedDate());
                 newParseCloudItem.put("updatedBy", localFridgeItem.getUpdatedBy());
+                newParseCloudItem.put("dismissed", localFridgeItem.isDismissed());
                 newParseCloudItem.put("expired", localFridgeItem.isExpired());
                 newParseCloudItem.put("editedCart", localFridgeItem.isEditedCart());
                 newParseCloudItem.put("editedFridge", localFridgeItem.isEditedFridge());
@@ -330,6 +335,7 @@ public class MyParse {
                 parseCloudItem.put("expiryDate", localFridgeItem.getExpiryDate());
                 parseCloudItem.put("updatedDate", localFridgeItem.getUpdatedDate());
                 parseCloudItem.put("updatedBy", localFridgeItem.getUpdatedBy());
+                parseCloudItem.put("dismissed", localFridgeItem.isDismissed());
                 parseCloudItem.put("expired", localFridgeItem.isExpired());
                 parseCloudItem.put("editedCart", localFridgeItem.isEditedCart());
                 parseCloudItem.put("editedFridge", localFridgeItem.isEditedFridge());

@@ -25,6 +25,7 @@
     <string name="calendar">Calendar</string>
     <string name="edit_text_new_foodItem">Enter a food item</string>
     <string name="edit_text_DaysGood">Expiry date</string>
+    <string name="expired">expired</string>
     <string name="add">Add</string>
     <string name="checkout">Checkout</string>
     <string name="set_expiry">Set Expiry</string>

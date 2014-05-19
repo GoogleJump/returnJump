@@ -32,6 +32,7 @@ public final class DatabaseContract {
         public static final String COLUMN_NAME_FROM_IMAGE = "from_image";
         public static final String COLUMN_NAME_IMAGE = "image";
         public static final String COLUMN_NAME_IMAGE_BINARIZED = "image_binarized";
+        public static final String COLUMN_NAME_DISMISSED = "dismissed";
         public static final String COLUMN_NAME_EXPIRED = "expired";
         public static final String COLUMN_NAME_EDITED_CART = "edited_cart";
         public static final String COLUMN_NAME_EDITED_FRIDGE = "edited_fridge";
@@ -53,6 +54,7 @@ public final class DatabaseContract {
             FridgeTable.COLUMN_NAME_FROM_IMAGE + INTEGER_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_IMAGE + BLOB_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_IMAGE_BINARIZED + BLOB_TYPE + COMMA_SEP +
+            FridgeTable.COLUMN_NAME_DISMISSED + INTEGER_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_EXPIRED + INTEGER_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_EDITED_CART + INTEGER_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_EDITED_FRIDGE + INTEGER_TYPE + COMMA_SEP +

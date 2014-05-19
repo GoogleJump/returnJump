@@ -63,12 +63,13 @@ public class KelseyActivity extends Activity {
                     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                         // reverseSortedPositions always has a length = 1
                         int position = reverseSortedPositions[0];
-                        View child = MyApplication.getViewByPosition(position, fridgeListView);
+                        //View child = MyApplication.getViewByPosition(position, fridgeListView);
+                        View child = adapter.getView(position, null, fridgeListView);
 
                         // Set visible to false in the database for the item that was swiped
                         if (child != null) {
                             long rowId = (Long) child.getTag(R.id.food_item_id);
-                            dbHelper.update(rowId, null, null, null, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
+                            dbHelper.update(rowId, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
                             adapter.remove(adapter.getItem(position));
                             updateListView(foodItems);
                         } else {
@@ -149,11 +150,9 @@ public class KelseyActivity extends Activity {
 	        Calendar expiryDate = FridgeDbHelper.stringToCalendar(c.getString(
 	                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)), DatabaseContract.FORMAT_DATE
 	                );
-	        boolean expired = c.getInt(c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED)) != 0;
-            boolean deletedCart = c.getInt(c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_CART)) != 0;
-            boolean deletedFridge = c.getInt(c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_FRIDGE)) != 0;
+	        boolean dismissed = c.getInt(c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED)) != 0;
 	        
-	        if (!(expired || deletedCart || deletedFridge)) {
+	        if (!dismissed) {
 	            foodItems.add(new FoodItem(id, foodName, expiryDate, 0));
 	        }
 	        
@@ -198,7 +197,9 @@ public class KelseyActivity extends Activity {
         int n = foodItems.size();
         int i = 0;
 
-        while ((i < n) && (item.getDaysGood() > foodItems.get(i).getDaysGood()))  {
+        while ((i < n) && ((item.getDaysGood() > foodItems.get(i).getDaysGood()) ||
+                          ((item.getDaysGood() == foodItems.get(i).getDaysGood()) &&
+                          (item.getFoodName().compareTo(foodItems.get(i).getFoodName())) > 0)))  {
             i++;
         }
 
@@ -211,7 +212,8 @@ public class KelseyActivity extends Activity {
 
         @Override
         protected Void doInBackground(Integer... index) {
-            final View item = MyApplication.getViewByPosition(index[0], fridgeListView);
+            //final View item = MyApplication.getViewByPosition(index[0], fridgeListView);
+            final View item = adapter.getView(index[0], null, fridgeListView);
 
             // Fade in
             for (int x = 0; x < 64; x++) {
