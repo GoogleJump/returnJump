@@ -1,6 +1,7 @@
 import smtplib
 import json
 
+# As tempting as it may be, DO NOT tab this function
 def createMessage(fromeName, fromEmail, toName, toEmail, subject, body):
     return """From: %s <%s>
 To: %s <%s>

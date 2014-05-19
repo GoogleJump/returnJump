@@ -322,16 +322,16 @@ public class TastiActivity extends Activity {
             for (int i = 0; i < n; ++i) {
                 FoodItem item = shoppingCart.get(i);
 
-                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), null);
-                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, null);
+                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), null, null);
+                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, null, null, null);
             }
 
             // Add the deleted cart to the database, setting deleted_cart to True
             for (int j = 0; j < m; ++j) {
                 FoodItem item = deletedCart.get(j);
 
-                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), null);
-                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, DatabaseContract.BOOL_TRUE, null, null, null);
+                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), null, null);
+                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
             }
 
 

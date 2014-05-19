@@ -22,15 +22,19 @@ public final class DatabaseContract {
     // Inner class that defines the table contents
     public static abstract class FridgeTable implements BaseColumns {
         public static final String TABLE_NAME = "fridge";
+        public static final String COLUMN_NAME_HASH = "hash";
         public static final String COLUMN_NAME_FOOD_ITEM = "food_item";
-        public static final String COLUMN_NAME_EXPIRY_DATE = "expiry_date";
         public static final String COLUMN_NAME_RAW_FOOD_ITEM = "raw_food_item";
+        public static final String COLUMN_NAME_EXPIRY_DATE = "expiry_date";
         public static final String COLUMN_NAME_CREATED_DATE = "created_date";
         public static final String COLUMN_NAME_UPDATED_DATE = "updated_date";
         public static final String COLUMN_NAME_UPDATED_BY = "update_by";
         public static final String COLUMN_NAME_FROM_IMAGE = "from_image";
         public static final String COLUMN_NAME_IMAGE = "image";
+        public static final String COLUMN_NAME_IMAGE_BINARIZED = "image_binarized";
         public static final String COLUMN_NAME_EXPIRED = "expired";
+        public static final String COLUMN_NAME_EDITED_CART = "edited_cart";
+        public static final String COLUMN_NAME_EDITED_FRIDGE = "edited_fridge";
         public static final String COLUMN_NAME_DELETED_CART = "deleted_cart";
         public static final String COLUMN_NAME_DELETED_FRIDGE = "deleted_fridge";
         public static final String COLUMN_NAME_NOTIFIED_PUSH = "notified_push";
@@ -38,16 +42,20 @@ public final class DatabaseContract {
         
         public static final String SQL_CREATE_TABLE =
             "CREATE TABLE " + TABLE_NAME + " (" +
-            FridgeTable._ID + " INTEGER PRIMARY KEY," +
+            FridgeTable._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
+            FridgeTable.COLUMN_NAME_HASH + TEXT_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_FOOD_ITEM + TEXT_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_EXPIRY_DATE + TEXT_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM + TEXT_TYPE + COMMA_SEP +
+            FridgeTable.COLUMN_NAME_EXPIRY_DATE + TEXT_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_CREATED_DATE + TEXT_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_UPDATED_DATE + TEXT_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_UPDATED_BY + TEXT_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_FROM_IMAGE + INTEGER_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_IMAGE + BLOB_TYPE + COMMA_SEP +
+            FridgeTable.COLUMN_NAME_IMAGE_BINARIZED + BLOB_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_EXPIRED + INTEGER_TYPE + COMMA_SEP +
+            FridgeTable.COLUMN_NAME_EDITED_CART + INTEGER_TYPE + COMMA_SEP +
+            FridgeTable.COLUMN_NAME_EDITED_FRIDGE + INTEGER_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_DELETED_CART + INTEGER_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_DELETED_FRIDGE + INTEGER_TYPE + COMMA_SEP +
             FridgeTable.COLUMN_NAME_NOTIFIED_PUSH + INTEGER_TYPE + COMMA_SEP +

@@ -68,7 +68,7 @@ public class KelseyActivity extends Activity {
                         // Set visible to false in the database for the item that was swiped
                         if (child != null) {
                             long rowId = (Long) child.getTag(R.id.food_item_id);
-                            dbHelper.update(rowId, null, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
+                            dbHelper.update(rowId, null, null, null, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
                             adapter.remove(adapter.getItem(position));
                             updateListView(foodItems);
                         } else {
@@ -135,7 +135,7 @@ public class KelseyActivity extends Activity {
 	}
 
 	private void copyDatabaseToList() {
-	    Cursor c = dbHelper.read();
+	    Cursor c = dbHelper.read(null);
 	    c.moveToFirst();
 	    foodItems.clear();
 	    
@@ -274,7 +274,7 @@ public class KelseyActivity extends Activity {
                 // Hide the keyboard if showing
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 
-                long id = dbHelper.put(foodName, expiryDate, foodName, null);
+                long id = dbHelper.put(foodName, expiryDate, foodName, null, null);
                 FoodItem newFoodItem = new FoodItem(id, foodName, expiryDate, 0);
                 int index = insertToSortedList(newFoodItem); //foodItems.add(newFoodItem);
                 updateListView(foodItems);

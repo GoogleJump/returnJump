@@ -46,14 +46,15 @@ public class SettingsActivity extends PreferenceActivity {
         public void onDestroy() {
             super.onDestroy();
 
-            notifyEmailInitValue();
+            initNotifyEmailValue();
+            MyParse.savePreferenceToCloud(getActivity());
         }
 
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
 
-            notifyEmailInitValue();
+            initNotifyEmailValue();
             bindPreferenceToSummary();
 
             // Set preference listeners
@@ -61,7 +62,7 @@ public class SettingsActivity extends PreferenceActivity {
             findPreference(PREF_SYNC).setOnPreferenceClickListener(syncPrefClickListener);
         }
 
-        private void notifyEmailInitValue() {
+        private void initNotifyEmailValue() {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String emailAddress = sharedPreferences.getString(PREF_EMAIL_ADDRESS, "").trim();
             Preference notifyEmail = findPreference(PREF_CHECKBOX_EMAIL);
@@ -127,9 +128,7 @@ public class SettingsActivity extends PreferenceActivity {
             public boolean onPreferenceClick(Preference preference) {
                 Context context = preference.getContext();
 
-                Toast.makeText(context, "Syncing...", Toast.LENGTH_LONG).show();
-
-                MyParse.savePreferenceEventually(context);
+                MyParse.saveFridgeToCloud(context);
 
                 return true;
             }
