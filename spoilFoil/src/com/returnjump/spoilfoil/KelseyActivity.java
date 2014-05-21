@@ -272,6 +272,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                     .newInstance(KelseyActivity.this, year, month, day);
             calendarDatePickerDialog.show(fm, "FRAG_TAG_DATE_PICKER");
 
+            calendarDatePickerDialog.setYearRange(year,calendarDatePickerDialog.getMaxYear());
 
             findViewById(R.id.daysGoodTextView).clearFocus();
 
@@ -297,6 +298,9 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
                 CalendarDatePickerDialog calendarDatePickerDialog = CalendarDatePickerDialog
                         .newInstance(KelseyActivity.this, year, month, day);
+
+                calendarDatePickerDialog.setYearRange(year,calendarDatePickerDialog.getMaxYear());
+
                 calendarDatePickerDialog.show(fm, "FRAG_TAG_DATE_PICKER");
 
 
