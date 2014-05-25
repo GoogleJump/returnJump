@@ -39,6 +39,7 @@ import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -114,10 +115,10 @@ public class CalendarDatePickerDialog extends DialogFragment implements
     public interface OnDateSetListener {
 
         /**
-         * @param dialog The view associated with this listener.
-         * @param year The year that was set.
+         * @param dialog      The view associated with this listener.
+         * @param year        The year that was set.
          * @param monthOfYear The month that was set (0-11) for compatibility with {@link java.util.Calendar}.
-         * @param dayOfMonth The day of the month that was set.
+         * @param dayOfMonth  The day of the month that was set.
          */
         void onDateSet(CalendarDatePickerDialog dialog, int year, int monthOfYear, int dayOfMonth);
     }
@@ -136,14 +137,14 @@ public class CalendarDatePickerDialog extends DialogFragment implements
     }
 
     /**
-     * @param callBack How the parent is notified that the date is set.
-     * @param year The initial year of the dialog.
+     * @param callBack    How the parent is notified that the date is set.
+     * @param year        The initial year of the dialog.
      * @param monthOfYear The initial month of the dialog.
-     * @param dayOfMonth The initial day of the dialog.
+     * @param dayOfMonth  The initial day of the dialog.
      */
     public static CalendarDatePickerDialog newInstance(OnDateSetListener callBack, int year,
-            int monthOfYear,
-            int dayOfMonth) {
+                                                       int monthOfYear,
+                                                       int dayOfMonth) {
         CalendarDatePickerDialog ret = new CalendarDatePickerDialog();
         ret.initialize(callBack, year, monthOfYear, dayOfMonth);
         return ret;
@@ -191,7 +192,7 @@ public class CalendarDatePickerDialog extends DialogFragment implements
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: ");
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
@@ -246,11 +247,33 @@ public class CalendarDatePickerDialog extends DialogFragment implements
             @Override
             public void onClick(View v) {
                 tryVibrate();
-                if (mCallBack != null) {
-                    mCallBack.onDateSet(CalendarDatePickerDialog.this, mCalendar.get(Calendar.YEAR),
-                            mCalendar.get(Calendar.MONTH), mCalendar.get(Calendar.DAY_OF_MONTH));
+
+                Calendar today = Calendar.getInstance();
+
+
+
+                if ( mCalendar.compareTo(today)<0) {  //returns -1 when mCalendar is today... not sure why
+
+                    CharSequence text = "Please select a valid expiry date.";
+
+                    Toast toast = Toast.makeText(v.getContext(), text, Toast.LENGTH_SHORT);
+                    toast.show();
+
+                } else {
+
+                    if (mCallBack != null) {
+
+
+                        mCallBack.onDateSet(CalendarDatePickerDialog.this, mCalendar.get(Calendar.YEAR),
+
+
+                                mCalendar.get(Calendar.MONTH), mCalendar.get(Calendar.DAY_OF_MONTH));
+
+                    }
+
+
+                    dismiss();
                 }
-                dismiss();
             }
         });
 

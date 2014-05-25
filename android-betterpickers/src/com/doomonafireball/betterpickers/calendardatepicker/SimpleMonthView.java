@@ -39,7 +39,9 @@ public class SimpleMonthView extends MonthView {
 
         if (mHasToday && mToday == day) {
             mMonthNumPaint.setColor(mTodayNumberColor);
-        } else {
+        } else if( day < mToday){
+            mMonthNumPaint.setColor(mMonthTitleColor);  // days before today are white, not selectable
+        }else {
             mMonthNumPaint.setColor(mDayTextColor);
         }
         canvas.drawText(String.format("%d", day), x, y, mMonthNumPaint);

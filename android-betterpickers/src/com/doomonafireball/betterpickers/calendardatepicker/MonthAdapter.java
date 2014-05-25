@@ -21,10 +21,12 @@ import com.doomonafireball.betterpickers.calendardatepicker.MonthView.OnDayClick
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView.LayoutParams;
 import android.widget.BaseAdapter;
+import android.widget.Toast;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -102,6 +104,15 @@ public abstract class MonthAdapter extends BaseAdapter implements OnDayClickList
             year = calendar.get(Calendar.YEAR);
             day = calendar.get(Calendar.DAY_OF_MONTH);
         }
+
+        /*
+
+         */
+        public Calendar getCalendar(){
+            Calendar c = Calendar.getInstance();
+            c.set(year, month, day);
+            return c;
+        }
     }
 
     public MonthAdapter(Context context, CalendarDatePickerController controller) {
@@ -117,8 +128,21 @@ public abstract class MonthAdapter extends BaseAdapter implements OnDayClickList
      * @param day The day to highlight
      */
     public void setSelectedDay(CalendarDay day) {
-        mSelectedDay = day;
-        notifyDataSetChanged();
+        Calendar today = Calendar.getInstance();
+
+
+
+        if(day.getCalendar().compareTo(today)<0){
+            //do nothing, maybe add a toast here
+
+
+
+        }else {
+
+
+            mSelectedDay = day;
+            notifyDataSetChanged();
+        }
     }
 
     public CalendarDay getSelectedDay() {

@@ -305,9 +305,6 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
 
                 findViewById(R.id.daysGoodTextView).clearFocus();
-
-
-                findViewById(R.id.daysGoodTextView).clearFocus();
             }
         }
     };

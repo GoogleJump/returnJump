@@ -174,6 +174,8 @@ public abstract class MonthView extends View {
 
     // Optional listener for handling day click actions
     private OnDayClickListener mOnDayClickListener;
+
+
     // Whether to prevent setting the accessibility delegate
     private boolean mLockAccessibilityDelegate;
 
@@ -194,7 +196,7 @@ public abstract class MonthView extends View {
         mMonthTitleTypeface = res.getString(R.string.sans_serif);
 
         mDayTextColor = res.getColor(R.color.date_picker_text_normal);
-        mTodayNumberColor = res.getColor(R.color.blue);
+        mTodayNumberColor =res.getColor(R.color.spoilfoil_theme) ;
         mMonthTitleColor = res.getColor(R.color.white);
         mMonthTitleBGColor = res.getColor(R.color.circle_background);
 
