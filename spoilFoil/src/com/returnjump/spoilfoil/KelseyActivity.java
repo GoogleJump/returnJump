@@ -45,12 +45,6 @@ public class KelseyActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_kelsey);
 
-		/*
-		 * Change KelseyActivity to whatever activity will be handling push notifications
-		 */
-		PushService.setDefaultPushCallback(this, KelseyActivity.class);
-		ParseInstallation.getCurrentInstallation().saveInBackground();
-
         fridgeListView = (ListView) findViewById(R.id.foodItemListView);
         SwipeDismissListViewTouchListener touchListener =
                 new SwipeDismissListViewTouchListener(fridgeListView, new SwipeDismissListViewTouchListener.DismissCallbacks() {

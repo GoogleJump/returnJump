@@ -255,6 +255,9 @@ public class MyParse {
                     fromImage, image, imageBinarized, dismissed, expired, editedCart, editedFridge, deletedCart,
                     deletedFridge, notifiedPush, notifiedEmail));
 
+            if (imageBinarized != null) {
+                Log.wtf("TESTINGGGGGG:", Integer.toString(imageBinarized.length));
+            }
             c.moveToNext();
         }
 
@@ -277,17 +280,6 @@ public class MyParse {
 
     private static void updateCloud(final Context context, List<FridgeItem> localFridge, HashMap<String, ParseObject> parseCloudFridgeHash) {
         int n = localFridge.size();
-
-        SaveCallback saveCallback = new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e == null) {
-                    Toast.makeText(context, "Syncing complete.", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        };
 
         for (int i = 0; i < n; i++) {
             FridgeItem localFridgeItem = localFridge.get(i);

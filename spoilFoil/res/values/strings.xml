@@ -18,6 +18,9 @@
     <string name="header_cloud">Cloud</string>
     <string name="sync_to_cloud">Sync to cloud</string>
     <string name="sync_to_cloud_summary">Sync your fridge data to the cloud for cross-device access</string>
+    <string name="notification_time">Expiry reminder time</string>
+    <string name="auto_sync">Sync automatically</string>
+    <string name="auto_sync_summary">Any changes to your fridge will automatically be saved</string>
     
     <string name="hello_world">Hello world!</string>
     <string name="processing_image">Your image is being processed&#8230;</string>

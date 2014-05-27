@@ -70,7 +70,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return hash;
     }
     
-    public long put(String foodItem, Calendar expiryDate, String rawFoodItem, Bitmap image, Bitmap imageBinarized) {
+    public long put(String foodItem, Calendar expiryDate, String rawFoodItem, byte[] image, byte[] imageBinarized) {
         SQLiteDatabase db = this.getWritableDatabase();
         
         // Create a new map of values, where column names are the keys
@@ -85,10 +85,10 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE, calNow);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY, "DEVICE");
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE, DatabaseContract.BOOL_FALSE);
-        //values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE, image);
-        values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE);
-        //values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED, imageBinarized);
-        values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE, image);
+        //values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED, imageBinarized);
+        //values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED, DatabaseContract.BOOL_FALSE);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED, DatabaseContract.BOOL_FALSE);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_CART, DatabaseContract.BOOL_FALSE);

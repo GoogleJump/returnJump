@@ -4,6 +4,11 @@
     <PreferenceCategory
         android:title="@string/header_notifications">
 
+        <Preference
+            android:key="preference_time"
+            android:title="@string/notification_time"
+            android:defaultValue="08:00" />
+
         <CheckBoxPreference
             android:key="checkbox_push"
             android:title="@string/notification_push"
@@ -29,6 +34,12 @@
 
     <PreferenceCategory
         android:title="@string/header_cloud">
+
+        <CheckBoxPreference
+            android:key="checkbox_auto"
+            android:title="@string/auto_sync"
+            android:summary="@string/auto_sync_summary"
+            android:defaultValue="true" />
 
         <Preference
             android:key="preference_sync"
