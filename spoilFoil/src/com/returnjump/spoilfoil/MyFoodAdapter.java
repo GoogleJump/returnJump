@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
+
 import android.widget.TextView;
 
 import java.util.List;
@@ -32,43 +34,35 @@ public class MyFoodAdapter extends ArrayAdapter<FoodItem> {
           FoodItem currentFood = foods.get(position);
           
           TextView foodItemName = (TextView) itemView.findViewById(R.id.food_item_name);
-          foodItemName.setText(currentFood.getFoodItemName());
-          
-          TextView expirationNumber = (TextView) itemView.findViewById(R.id.expiration_number);
-          expirationNumber.setText(Integer.toString(currentFood.getExpirationNumber()));
-          
-          TextView expirationUnit = (TextView) itemView.findViewById(R.id.expiration_unit);
-          expirationUnit.setText(currentFood.getExpirationUnit());
+          foodItemName.setText(currentFood.getFoodName());
+
+          // Set up which linear layout will show since only one of the two should be
+          // visible at any given time
+          int expirationNum = currentFood.getExpirationNumber();
+          LinearLayout expirationMessage = (LinearLayout) itemView.findViewById(R.id.expiration_message);
+          LinearLayout expirationTime = (LinearLayout) itemView.findViewById(R.id.expiration_time);
+
+          LinearLayout.LayoutParams paramShow = new LinearLayout.LayoutParams(
+                  0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+          LinearLayout.LayoutParams paramHide = new LinearLayout.LayoutParams(
+                  0, ViewGroup.LayoutParams.WRAP_CONTENT, 0.0f);
+
+          if (expirationNum > 0) {
+              expirationMessage.setLayoutParams(paramHide);
+              expirationTime.setLayoutParams(paramShow);
+
+              TextView expirationNumber = (TextView) itemView.findViewById(R.id.expiration_number);
+              expirationNumber.setText(Integer.toString(expirationNum));
+
+              TextView expirationUnit = (TextView) itemView.findViewById(R.id.expiration_unit);
+              expirationUnit.setText(currentFood.getExpirationUnit());
+          } else {
+              expirationMessage.setLayoutParams(paramShow);
+              expirationTime.setLayoutParams(paramHide);
+          }
           
           // Set the tags for hidden data
           itemView.setTag(R.id.food_item_id, currentFood.getId());
-
-          /*
-          final int pos = position;
-          EditText foodItemEdit = (EditText) itemView.findViewById(R.id.newItemEditTextSwipe);
-          foodItemEdit.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View view) {
-                  Toast.makeText(context, Integer.toString(pos), Toast.LENGTH_LONG).show();
-              }
-          });
-
-          TextView daysGoodEdit = (TextView) itemView.findViewById(R.id.daysGoodTextViewSwipe);
-          daysGoodEdit.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View view) {
-                  Toast.makeText(context, Integer.toString(pos), Toast.LENGTH_LONG).show();
-              }
-          });
-
-          ImageButton updateItem = (ImageButton) itemView.findViewById(R.id.submitNewItemButtonSwipe);
-          updateItem.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View view) {
-                  Toast.makeText(context, Integer.toString(pos), Toast.LENGTH_LONG).show();
-              }
-          });
-          */
 
           return itemView;
      }               

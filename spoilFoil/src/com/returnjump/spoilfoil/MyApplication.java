@@ -4,16 +4,16 @@ import android.app.Application;
 import android.view.View;
 import android.widget.ListView;
 
-import com.parse.Parse;
-
 public class MyApplication extends Application {
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		
-		// Parse App ID and Client Key can be found in /res/values/secret.xml
-	    Parse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_key));
+		// Parse App ID and Client Key can be found in spoilFoil/res/values/secret.xml
+	    MyParse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_key));
+        MyParse.saveInstallationEventually(this);
+
 	}
 
     public static View getViewByPosition(int position, ListView listView) {

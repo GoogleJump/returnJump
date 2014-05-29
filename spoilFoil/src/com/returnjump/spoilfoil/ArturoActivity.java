@@ -2,7 +2,10 @@ package com.returnjump.spoilfoil;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+
 import android.app.NotificationManager;
+import android.graphics.Color;
+import android.media.RingtoneManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -153,7 +156,10 @@ public class ArturoActivity extends Activity {
 					    new NotificationCompat.Builder(view.getContext())
 					    .setSmallIcon(R.drawable.ic_notification)
 					    .setContentTitle("Testing notifications")
-					    .setContentText(item_popped);
+					    .setContentText(item_popped)
+                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                        .setVibrate(new long[]{ 0, 1000 })
+                        .setLights(Color.GREEN, 500, 1000);
 				//sets the type of alert
 				int mNotificationId = 001;
 				// Gets an instance of the NotificationManager service

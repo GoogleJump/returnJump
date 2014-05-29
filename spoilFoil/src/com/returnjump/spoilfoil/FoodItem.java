@@ -9,7 +9,7 @@ import java.util.GregorianCalendar;
  *
  */
 
-public class FoodItem implements FoodItemInterface { 
+public class FoodItem {
 
     private long id;
 	private String foodName;
@@ -35,6 +35,10 @@ public class FoodItem implements FoodItemInterface {
 	    this.foodName = foodName;
 	}
 
+    public String getFoodName() {
+        return this.foodName;
+    }
+
 	public int getDaysGood() {
 	    long today = GregorianCalendar.getInstance().getTimeInMillis() / 86400000L * 86400000L;
 	    long expiryDay = this.expiryDate.getTimeInMillis();
@@ -47,33 +51,14 @@ public class FoodItem implements FoodItemInterface {
 		this.expiryDate = newExpiryDate;
 	}
 
-	public String getFoodItemName() {
-		return this.foodName;
-	}
-
 	public Calendar getExpiryDate() {
 		return this.expiryDate;
 	}
-	
-	//called by the adapter
-	public String toString(){
-		String s;
-		
-		if(this.numberOfItems==0 ){
-		    s = this.getFoodItemName()+"    "+ this.getDaysGood();
-		}else{
-		    s = this.getFoodItemName()+" ("+this.numberOfItems+")     "+ this.getDaysGood();
-		}
-	  
-		return s;
-	}
 
-	@Override
 	public int getNumberOfThisFoodItem() {
 		return this.numberOfItems;
 	}
 
-	@Override
 	public void setNumberOfThisFoodItem(int numberOfThisItem) {
 		this.numberOfItems = numberOfThisItem;
 	}
