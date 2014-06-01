@@ -155,6 +155,23 @@ public class CalendarDatePickerDialog extends DialogFragment implements
         mCalendar.set(Calendar.YEAR, year);
         mCalendar.set(Calendar.MONTH, monthOfYear);
         mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+
+    }
+
+    public boolean selectedDateBeforeToday() {
+        Calendar c = Calendar.getInstance();
+
+        if (mCalendar.get(Calendar.MONTH) < c.get(Calendar.MONTH) && c.get(Calendar.MONTH) != 12) {
+            return true;
+        }
+        if (mCalendar.get(Calendar.DAY_OF_MONTH) < c.get(Calendar.DAY_OF_MONTH)) {
+            return true;
+        }
+
+        return false;
+
+
     }
 
     @Override
@@ -168,6 +185,7 @@ public class CalendarDatePickerDialog extends DialogFragment implements
             mCalendar.set(Calendar.MONTH, savedInstanceState.getInt(KEY_SELECTED_MONTH));
             mCalendar.set(Calendar.DAY_OF_MONTH, savedInstanceState.getInt(KEY_SELECTED_DAY));
         }
+
     }
 
     @Override
@@ -248,11 +266,7 @@ public class CalendarDatePickerDialog extends DialogFragment implements
             public void onClick(View v) {
                 tryVibrate();
 
-                Calendar today = Calendar.getInstance();
-
-
-
-                if ( mCalendar.compareTo(today)<0) {  //returns -1 when mCalendar is today... not sure why
+                if (selectedDateBeforeToday()) {
 
                     CharSequence text = "Please select a valid expiry date.";
 
@@ -263,11 +277,8 @@ public class CalendarDatePickerDialog extends DialogFragment implements
 
                     if (mCallBack != null) {
 
-
                         mCallBack.onDateSet(CalendarDatePickerDialog.this, mCalendar.get(Calendar.YEAR),
-
-
-                                mCalendar.get(Calendar.MONTH), mCalendar.get(Calendar.DAY_OF_MONTH));
+                        mCalendar.get(Calendar.MONTH), mCalendar.get(Calendar.DAY_OF_MONTH));
 
                     }
 

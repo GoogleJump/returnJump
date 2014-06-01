@@ -19,7 +19,6 @@ package com.doomonafireball.betterpickers.calendardatepicker;
 import com.doomonafireball.betterpickers.R;
 import com.doomonafireball.betterpickers.Utils;
 import com.doomonafireball.betterpickers.calendardatepicker.MonthAdapter.CalendarDay;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -187,6 +186,7 @@ public abstract class MonthView extends View {
     public MonthView(Context context) {
         super(context);
 
+
         Resources res = context.getResources();
 
         mDayLabelCalendar = Calendar.getInstance();
@@ -196,7 +196,8 @@ public abstract class MonthView extends View {
         mMonthTitleTypeface = res.getString(R.string.sans_serif);
 
         mDayTextColor = res.getColor(R.color.date_picker_text_normal);
-        //mTodayNumberColor =res.getColor(R.color.spoilfoil_theme);
+        // how can I reference this color from the spoilFoil package in
+       // mTodayNumberColor =res.getColor();
         mMonthTitleColor = res.getColor(R.color.white);
         mMonthTitleBGColor = res.getColor(R.color.circle_background);
 

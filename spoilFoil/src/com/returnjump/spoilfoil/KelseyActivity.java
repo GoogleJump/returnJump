@@ -1,5 +1,6 @@
 package com.returnjump.spoilfoil;
 
+import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -12,12 +13,14 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -73,6 +76,48 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                 });
         fridgeListView.setOnTouchListener(touchListener);
         fridgeListView.setOnScrollListener(touchListener.makeScrollListener());
+
+        fridgeListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+
+                long rowId = (Long) view.getTag(R.id.food_item_id);
+
+
+//                FridgeItem fridgeItem = dbHelper.get(rowId);
+//
+//                String name = fridgeItem.getFoodItem();
+//                String date = fridgeItem.getExpiryDate(); // Then extract the day,month,year from this
+
+
+                FoodItem testItem = foodItems.get(0);
+                String name = testItem.getFoodName();
+                int date = testItem.getDaysGood();
+
+                Toast.makeText(getApplicationContext(), name + "  " + date, Toast.LENGTH_LONG).show();
+
+                Log.d("      $$$$$$$ onLongPress", name + "  " + date + "     yeahhh ");
+
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                if(fragmentManager.findFragmentByTag("EDIT_ACTIVITY_TAG")==null){
+                    EditNameFragment editNameFragmentActivity = new EditNameFragment();
+                    fragmentTransaction.add(editNameFragmentActivity, "EDIT_ACTIVITY_TAG");
+                }
+
+                fragmentTransaction.commit();
+
+
+
+
+
+                return true;
+            }
+        });
+
 
         populateListView(foodItems);
 		

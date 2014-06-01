@@ -4,7 +4,9 @@
     android:layout_height="wrap_content"
     android:gravity="center"
     android:orientation="horizontal"
-    android:padding="5dp" >
+    android:padding="5dp"
+    android:descendantFocusability="blocksDescendants"
+    >
     
     <TextView
             android:id="@+id/food_item_name"
