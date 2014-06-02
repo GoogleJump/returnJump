@@ -1,7 +1,29 @@
 package com.returnjump.spoilfoil;
 
+
 import android.annotation.TargetApi;
 import android.app.Activity;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
+import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+
+import com.googlecode.leptonica.android.Binarize;
+import com.googlecode.leptonica.android.Pix;
+import com.googlecode.leptonica.android.ReadFile;
+import com.googlecode.leptonica.android.WriteFile;
+import com.googlecode.tesseract.android.TessBaseAPI;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -31,23 +53,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.googlecode.leptonica.android.Binarize;
-import com.googlecode.leptonica.android.Pix;
-import com.googlecode.leptonica.android.ReadFile;
-import com.googlecode.leptonica.android.WriteFile;
-import com.googlecode.tesseract.android.TessBaseAPI;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-
 public class TastiActivity extends Activity {
 
     private static Context context;
@@ -57,8 +62,11 @@ public class TastiActivity extends Activity {
     private static final String LANG = "eng";
 
     private ArrayAdapter<FoodItem> adapter;
-    private ArrayList<FoodItem> shoppingCart = new ArrayList<FoodItem>();
     private FridgeDbHelper dbHelper;
+    private List<FoodItem> shoppingCart = new ArrayList<FoodItem>();
+    private List<FoodItem> deletedCart = new ArrayList<FoodItem>();
+    private List<byte[]> shoppingCartImages = new ArrayList<byte[]>();
+    private List<byte[]> deletedCartImages = new ArrayList<byte[]>();
 
     ListView cartListView;
 
@@ -85,14 +93,19 @@ public class TastiActivity extends Activity {
                     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                         // reverseSortedPositions always has a length = 1
                         int position = reverseSortedPositions[0];
+                        FoodItem item = adapter.getItem(position);
 
-                        adapter.remove(adapter.getItem(position));
+                        // Take the item+image and put it in the deleted cart, then remove it
+                        deletedCart.add(item);
+                        deletedCartImages.add(shoppingCartImages.get(position));
+
+                        adapter.remove(item);
+                        shoppingCartImages.remove(position);
                         adapter.notifyDataSetChanged();
                     }
                 });
         cartListView.setOnTouchListener(touchListener);
         cartListView.setOnScrollListener(touchListener.makeScrollListener());
-
 
         // Setup database and list
         dbHelper = new FridgeDbHelper(this);
@@ -129,19 +142,30 @@ public class TastiActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                // This ID represents the Home or Up button. In the case of this
-                // activity, the Up button is shown. Use NavUtils to allow users
-                // to navigate up one level in the application structure. For
-                // more details, see the Navigation pattern on Android Design:
-                //
-                // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-                //
-                NavUtils.navigateUpFromSameTask(this);
-                return true;
+        int itemId = item.getItemId();
+
+        if (itemId == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
+
+            return true;
+        } else if (itemId == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+
+            return true;
+        } else if (itemId == R.id.action_arturo) {
+            Intent intent = new Intent(this, ArturoActivity.class);
+            startActivity(intent);
+
+            return true;
+        } else if (itemId == R.id.action_camera) {
+            Intent intent = new Intent(this, TastiActivity.class);
+            startActivity(intent);
+
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     /* Checks if external storage is available for read and write */
@@ -302,12 +326,24 @@ public class TastiActivity extends Activity {
         @Override
         public void onClick(View view) {
             int n = shoppingCart.size();
+            int m = deletedCart.size();
 
+            // Add the shopping cart to the database
             for (int i = 0; i < n; ++i) {
                 FoodItem item = shoppingCart.get(i);
 
-                dbHelper.put(item.getFoodItemName(), item.getExpiryDate(), item.getFoodItemName(), null);
+                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), null, shoppingCartImages.get(i));
+                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, null, null, null, null);
             }
+
+            // Add the deleted cart to the database, setting deleted_cart to True
+            for (int j = 0; j < m; ++j) {
+                FoodItem item = deletedCart.get(j);
+
+                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), null, deletedCartImages.get(j));
+                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
+            }
+
 
             finish();
         }
@@ -334,17 +370,6 @@ public class TastiActivity extends Activity {
             pix = Binarize.otsuAdaptiveThreshold(pix, 32, 32, 2, 2, 0.9F);
             //pix = Binarize.otsuAdaptiveThreshold(pix);
             bitmap = WriteFile.writeBitmap(pix);
-            
-            /*
-            final Bitmap finalBitmap = bitmap;
-            
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    imageView.setImageBitmap(finalBitmap);
-                }
-            });
-            */
 
             return bitmap;
         }
@@ -428,6 +453,13 @@ public class TastiActivity extends Activity {
             return splittedBitmap;
         }
 
+        private byte[] bitmapToByteArray(Bitmap bitmap) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+            return stream.toByteArray();
+        }
+
         protected Bitmap doInBackground(Bitmap... bitmaps) {
             Bitmap[] splittedBitmap = splitBitmap(bitmaps[0]);
             Bitmap bitmap = splittedBitmap[0];
@@ -453,12 +485,16 @@ public class TastiActivity extends Activity {
             String recognizedText = baseApi.getUTF8Text().trim();
             baseApi.end();
 
+            // This is where the algorithm should take recognizedText and extract the right word(s)
+            // and expiry date out of it
+
             if (!recognizedText.equals("")) {
                 // Add item to  list
                 Calendar c = GregorianCalendar.getInstance();
-                c.add(Calendar.DATE, 7);
-                FoodItem newFoodItem = new FoodItem(0, recognizedText, c, 0);
+                c.add(Calendar.DATE, 7); // DEFAULTED TO 1 WEEK!
+                FoodItem newFoodItem = new FoodItem(-1, recognizedText, c, 0);
                 shoppingCart.add(newFoodItem);
+                shoppingCartImages.add(bitmapToByteArray(bitmap));
 
                 runOnUiThread(new Runnable() {
                     @Override
