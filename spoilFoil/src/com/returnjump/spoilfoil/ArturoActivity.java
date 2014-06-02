@@ -8,7 +8,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,30 +18,37 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
+import com.parse.FunctionCallback;
+import com.parse.Parse;
+import com.parse.ParseCloud;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+
+import java.util.HashMap;
 
 public class ArturoActivity extends Activity {
 	List<String> fridge = new ArrayList<String>();
-	
-	@Override
+	List<FoodItem> ItemsToNotify = new ArrayList<FoodItem>();
+
+    @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_arturo);
+        setupActionBar();
+        findViewById(R.id.pushing_my_buttons).setOnClickListener(set_number);
+        findViewById(R.id.popping_my_buttons).setOnClickListener(notify_me);
+        findViewById(R.id.send_emails).setOnClickListener(sendemail);
 		// Show the Up button in the action bar.
-		setupActionBar();
-		findViewById(R.id.pushing_my_buttons).setOnClickListener(set_number);
-		findViewById(R.id.popping_my_buttons).setOnClickListener(notify_me);
-		findViewById(R.id.send_emails).setOnClickListener(sendemail);
+        Parse.initialize(this, "Gi733s6fybmROYVSXCrSoOCejvcYVM2zLr9n6LRO", "S4JauKQ70Rrtz8MYp6Sw6sCLt75RD8eAzY26rici");
+
 	}
+
 	public void refresh_view(){
 		TextView updated_list_view = (TextView) findViewById(R.id.fridge_list);
 		String fridge_string = "";
@@ -53,8 +59,7 @@ public class ArturoActivity extends Activity {
 		
 		updated_list_view.setText(fridge_string);
 	}
-		
-	
+
 	public OnClickListener sendemail = new OnClickListener(){
 		public void onClick(View View){
 			   EditText email_address = (EditText) findViewById(R.id.email_address);
@@ -67,8 +72,7 @@ public class ArturoActivity extends Activity {
 			   }
 		}
 	};
-	
-	
+
 	public static boolean isValidEmailAddress(String email) {
 	    boolean result = true;
 	    try {
@@ -79,64 +83,53 @@ public class ArturoActivity extends Activity {
 	    }
 	    return result;
 	 }
-	
-	private class SendEmailTask extends AsyncTask <String, Void, Boolean>{
-	   
-	    public boolean sendemail(String email) {
-	       
-	        final String username = "returnjump@gmail.com";
-	        final String password = getString(R.string.email_password);
-	 
-	        Properties props = new Properties();
-	        props.put("mail.smtp.auth", "true");
-	        props.put("mail.smtp.starttls.enable", "true");
-	        props.put("mail.smtp.host", "smtp.gmail.com");
-	        props.put("mail.smtp.port", "587");
-	 
-	        Session session = Session.getInstance(props,
-	          new javax.mail.Authenticator() {
-	            protected PasswordAuthentication getPasswordAuthentication() {
-	                return new PasswordAuthentication(username, password);
-	            }
-	          });
-	 
-	        try {
-	 
-	            Message message = new MimeMessage(session);
-	            message.setFrom(new InternetAddress("returnjump@gmail.com"));
-	            message.setRecipients(Message.RecipientType.TO,
-	                InternetAddress.parse(email));
-	            message.setSubject("Testing Subject");
-	            message.setText("Dear Mail Crawler,"
-	                + "\n\n No spam to my email, please!");
-	 
-	            Transport.send(message);
-	            
-	            return true;
-	        } catch (MessagingException e) {
-	            Log.wtf("EMAIL ERROR:", "Send failed: " + e.getMessage());
-	            
-	            return false;
-	        }
-	        
-	    }
-	    
-	   protected Boolean doInBackground(String... params) {
-	       return sendemail(params[0]);
+
+    private boolean haveNetworkConnection() {
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
+    }
+
+
+	private class SendEmailTask extends AsyncTask<String, Void, Void> {
+
+        public void cloudEmailSender(String email){
+           // SharedPreferences email_address =  getSharedPreferences("email");
+            HashMap<String, Object> params = new HashMap<String, Object>();
+            params.put("address", email);
+            params.put("Expiring", "Random food item");
+            ParseCloud.callFunctionInBackground("emailsender", params, new FunctionCallback<String>() {
+                @Override
+                public void done (String message, com.parse.ParseException e) {
+                    if (e == null){
+                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                    }
+                    else{
+                        Toast.makeText(getApplicationContext(), "There seems to be an error", Toast.LENGTH_LONG).show();
+                }
+            }
+            });
+        }
+
+       @Override
+	   protected Void doInBackground(String... params) {
+           cloudEmailSender(params[0]);
+           return null;
 	   }
-	   
-	   protected void onPostExecute(Boolean sent){
-	       if (sent) {
-	           Toast.makeText(getApplicationContext(), "Email sent.", Toast.LENGTH_LONG).show();
-	       } else {
-	           Toast.makeText(getApplicationContext(), "Sending failed.", Toast.LENGTH_LONG).show();
-	       }
-	   }
-	   
-	}
-	
-			
-	public OnClickListener set_number = new OnClickListener(){
+    }
+
+    public OnClickListener set_number = new OnClickListener(){
 		public void onClick(View view){
 			fridge.add("Banananananannanana");
 			refresh_view();
@@ -197,6 +190,5 @@ public class ArturoActivity extends Activity {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
-	} 
+	}
 }
-
