@@ -1,18 +1,14 @@
 package com.returnjump.spoilfoil;
 
-import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import android.graphics.Color;
-import android.os.AsyncTask;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +24,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 public class KelseyActivity extends FragmentActivity implements CalendarDatePickerDialog.OnDateSetListener {
 //public class KelseyActivity extends Activity {
@@ -104,8 +105,8 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
                 if(fragmentManager.findFragmentByTag("EDIT_ACTIVITY_TAG")==null){
-                    EditNameFragment editNameFragmentActivity = new EditNameFragment();
-                    fragmentTransaction.add(editNameFragmentActivity, "EDIT_ACTIVITY_TAG");
+                 //   EditNameFragment editNameFragmentActivity = new EditNameFragment();
+                  //  fragmentTransaction.add(editNameFragmentActivity, "EDIT_ACTIVITY_TAG");
                 }
 
                 fragmentTransaction.commit();
