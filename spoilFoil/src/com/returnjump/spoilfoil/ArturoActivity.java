@@ -59,7 +59,7 @@ public class ArturoActivity extends Activity {
 
     public OnClickListener sendemail = new OnClickListener(){
         public void onClick(View View){
-                cloudEmailSender(ultimate_email);
+                cloudEmailSender("random fooditem");
         }
     };
 
