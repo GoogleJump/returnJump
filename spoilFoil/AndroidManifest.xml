@@ -62,6 +62,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.returnjump.spoilfoil.KelseyActivity" />
         </activity>
+        <receiver android:name="ConnectionChangeReceiver">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"></action>
+            </intent-filter>
+        </receiver>
+
 
 </application>
 

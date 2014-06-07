@@ -42,9 +42,9 @@ public class ArturoActivity extends Activity {
         findViewById(R.id.popping_my_buttons).setOnClickListener(notify_me);
         findViewById(R.id.send_emails).setOnClickListener(sendemail);
         // Show the Up button in the action bar.
-        Parse.initialize(this, "Gi733s6fybmROYVSXCrSoOCejvcYVM2zLr9n6LRO", "S4JauKQ70Rrtz8MYp6Sw6sCLt75RD8eAzY26rici");
-
+        Parse.initialize(this, getResources().getString(R.string.parse_app_id), "S4JauKQ70Rrtz8MYp6Sw6sCLt75RD8eAzY26rici");
     }
+
 
     public void refresh_view(){
         TextView updated_list_view = (TextView) findViewById(R.id.fridge_list);
