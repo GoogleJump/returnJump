@@ -83,19 +83,11 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-
                 long rowId = (Long) view.getTag(R.id.food_item_id);
 
-
-//                FridgeItem fridgeItem = dbHelper.get(rowId);
-//
-//                String name = fridgeItem.getFoodItem();
-//                String date = fridgeItem.getExpiryDate(); // Then extract the day,month,year from this
-
-
-                FoodItem testItem = foodItems.get(0);
-                String name = testItem.getFoodName();
-                int date = testItem.getDaysGood();
+                FridgeItem fridgeItem = dbHelper.get(rowId);
+                String name = fridgeItem.getFoodItem();
+                String date = fridgeItem.getExpiryDate(); // Then extract the day,month,year from this
 
                 Toast.makeText(getApplicationContext(), name + "  " + date, Toast.LENGTH_LONG).show();
 
@@ -105,15 +97,11 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
                 if(fragmentManager.findFragmentByTag("EDIT_ACTIVITY_TAG")==null){
-                 //   EditNameFragment editNameFragmentActivity = new EditNameFragment();
-                  //  fragmentTransaction.add(editNameFragmentActivity, "EDIT_ACTIVITY_TAG");
+                    //EditNameFragment editNameFragmentActivity = new EditNameFragment();
+                    //fragmentTransaction.add(editNameFragmentActivity, "EDIT_ACTIVITY_TAG");
                 }
 
                 fragmentTransaction.commit();
-
-
-
-
 
                 return true;
             }

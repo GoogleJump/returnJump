@@ -156,7 +156,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
 
         String[] projection = getColumns();
 
-        String whereColumn = DatabaseContract.FridgeTable._ID;
+        String whereColumn = DatabaseContract.FridgeTable._ID + "=?";
         String[] whereValue = { Long.toString(rowId) };
 
         Cursor c = db.query(
@@ -168,6 +168,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
                 null,                                     // don't filter by row groups
                 null                                      // The sort order
         );
+        c.moveToFirst();
 
         // Get values in column
         String hash = c.getString(
