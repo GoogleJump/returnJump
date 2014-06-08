@@ -187,83 +187,6 @@ public class MyParse {
     }
     */
 
-    private static List<FridgeItem> getLocalFridge(Context context) {
-        List<FridgeItem> localFridge = new ArrayList<FridgeItem>();
-        Cursor c = new FridgeDbHelper(context).read(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE + " ASC");
-        c.moveToFirst();
-
-        while (!c.isAfterLast()) {
-            long rowId = c.getLong(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable._ID)
-            );
-            String hash = c.getString(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_HASH)
-            );
-            String foodItem = c.getString(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM)
-            );
-            String rawFoodItem = c.getString(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM)
-            );
-            String expiryDate = c.getString(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)
-            );
-            String createdDate = c.getString(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_CREATED_DATE)
-            );
-            String updatedDate = c.getString(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE)
-            );
-            String updatedBy = c.getString(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY)
-            );
-            int fromImage = c.getInt(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE)
-            );
-            byte[] image = c.getBlob(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE)
-            );
-            byte[] imageBinarized = c.getBlob(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED)
-            );
-            int dismissed = c.getInt(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED)
-            );
-            int expired = c.getInt(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED)
-            );
-            int editedCart = c.getInt(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_CART)
-            );
-            int editedFridge = c.getInt(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_FRIDGE)
-            );
-            int deletedCart = c.getInt(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_CART)
-            );
-            int deletedFridge = c.getInt(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_FRIDGE)
-            );
-            int notifiedPush = c.getInt(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_PUSH)
-            );
-            int notifiedEmail = c.getInt(
-                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_EMAIL)
-            );
-
-            localFridge.add(new FridgeItem(rowId, hash, foodItem, rawFoodItem, expiryDate, createdDate, updatedDate, updatedBy,
-                    fromImage, image, imageBinarized, dismissed, expired, editedCart, editedFridge, deletedCart,
-                    deletedFridge, notifiedPush, notifiedEmail));
-
-            if (imageBinarized != null) {
-                Log.wtf("TESTINGGGGGG:", Integer.toString(imageBinarized.length));
-            }
-            c.moveToNext();
-        }
-
-        return localFridge;
-    }
-
     private static HashMap<String, ParseObject> getParseCloudFridgeHash(List<ParseObject> parseCloudFridge) {
         HashMap<String, ParseObject> parseCloudFridgeHash = new HashMap<String, ParseObject>();
         int n = parseCloudFridge.size();
@@ -278,15 +201,86 @@ public class MyParse {
         return parseCloudFridgeHash;
     }
 
-    private static void updateCloud(final Context context, List<FridgeItem> localFridge, HashMap<String, ParseObject> parseCloudFridgeHash) {
-        int n = localFridge.size();
+    private static FridgeItem getLocalFridgeItem(Cursor c) {
 
-        for (int i = 0; i < n; i++) {
-            FridgeItem localFridgeItem = localFridge.get(i);
+        long rowId = c.getLong(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable._ID)
+        );
+        String hash = c.getString(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_HASH)
+        );
+        String foodItem = c.getString(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM)
+        );
+        String rawFoodItem = c.getString(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM)
+        );
+        String expiryDate = c.getString(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)
+        );
+        String createdDate = c.getString(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_CREATED_DATE)
+        );
+        String updatedDate = c.getString(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE)
+        );
+        String updatedBy = c.getString(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY)
+        );
+        int fromImage = c.getInt(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE)
+        );
+        byte[] image = c.getBlob(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE)
+        );
+        byte[] imageBinarized = c.getBlob(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED)
+        );
+        int dismissed = c.getInt(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED)
+        );
+        int expired = c.getInt(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED)
+        );
+        int editedCart = c.getInt(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_CART)
+        );
+        int editedFridge = c.getInt(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_FRIDGE)
+        );
+        int deletedCart = c.getInt(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_CART)
+        );
+        int deletedFridge = c.getInt(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_FRIDGE)
+        );
+        int notifiedPush = c.getInt(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_PUSH)
+        );
+        int notifiedEmail = c.getInt(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_EMAIL)
+        );
+
+        return new FridgeItem(rowId, hash, foodItem, rawFoodItem, expiryDate, createdDate, updatedDate, updatedBy,
+                fromImage, image, imageBinarized, dismissed, expired, editedCart, editedFridge, deletedCart,
+                deletedFridge, notifiedPush, notifiedEmail);
+
+    }
+
+    // TODO: Still need a callback on the last item to display completion
+    private static void backupToCloud(final Context context, HashMap<String, ParseObject> parseCloudFridgeHash) {
+
+        List<FridgeItem> localFridge = new ArrayList<FridgeItem>();
+        Cursor c = new FridgeDbHelper(context).read(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE + " ASC");
+        c.moveToFirst();
+
+        while (!c.isAfterLast()) {
+            FridgeItem localFridgeItem = getLocalFridgeItem(c);
+
             ParseObject parseCloudItem = parseCloudFridgeHash.get(localFridgeItem.getHash());
             boolean updated = false;
 
-            if (parseCloudItem == null) {
+            if (parseCloudItem == null) { // This is a new item
 
                 ParseObject newParseCloudItem = new ParseObject(getUserParseClass());
 
@@ -321,7 +315,7 @@ public class MyParse {
 
                 newParseCloudItem.saveEventually();
 
-            } else if (!localFridgeItem.getUpdatedDate().equals(parseCloudItem.getString("updatedDate"))) {
+            } else if (!localFridgeItem.getUpdatedDate().equals(parseCloudItem.getString("updatedDate"))) { // This item is just being updated
 
                 parseCloudItem.put("foodItem", localFridgeItem.getFoodItem());
                 parseCloudItem.put("expiryDate", localFridgeItem.getExpiryDate());
@@ -340,9 +334,9 @@ public class MyParse {
 
             }
 
+            c.moveToNext();
         }
 
-        // Still need a callback on the last item to display completion
     }
 
     public static void saveFridgeToCloud(final Context context) {
@@ -359,7 +353,7 @@ public class MyParse {
                         public void done(List<ParseObject> fridgeList, ParseException e) {
                             if (e == null) {
                                 //syncFridges(getLocalFridge(context), getCloudFridge(fridgeList));
-                                updateCloud(context, getLocalFridge(context), getParseCloudFridgeHash(fridgeList));
+                                backupToCloud(context, getParseCloudFridgeHash(fridgeList));
                             } else {
                                 fallback(e.getMessage());
                             }
