@@ -85,7 +85,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
                 long rowId = (Long) view.getTag(R.id.food_item_id);
 
-                FridgeItem fridgeItem = dbHelper.get(rowId);
+                FridgeItem fridgeItem = dbHelper.getRowById(rowId, true);
                 String name = fridgeItem.getFoodItem();
                 String date = fridgeItem.getExpiryDate(); // Then extract the day,month,year from this
 

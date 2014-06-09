@@ -201,72 +201,6 @@ public class MyParse {
         return parseCloudFridgeHash;
     }
 
-    private static FridgeItem getLocalFridgeItem(Cursor c) {
-
-        long rowId = c.getLong(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable._ID)
-        );
-        String hash = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_HASH)
-        );
-        String foodItem = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM)
-        );
-        String rawFoodItem = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM)
-        );
-        String expiryDate = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)
-        );
-        String createdDate = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_CREATED_DATE)
-        );
-        String updatedDate = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE)
-        );
-        String updatedBy = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY)
-        );
-        int fromImage = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE)
-        );
-        byte[] image = c.getBlob(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE)
-        );
-        byte[] imageBinarized = c.getBlob(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED)
-        );
-        int dismissed = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED)
-        );
-        int expired = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED)
-        );
-        int editedCart = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_CART)
-        );
-        int editedFridge = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_FRIDGE)
-        );
-        int deletedCart = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_CART)
-        );
-        int deletedFridge = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_FRIDGE)
-        );
-        int notifiedPush = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_PUSH)
-        );
-        int notifiedEmail = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_EMAIL)
-        );
-
-        return new FridgeItem(rowId, hash, foodItem, rawFoodItem, expiryDate, createdDate, updatedDate, updatedBy,
-                fromImage, image, imageBinarized, dismissed, expired, editedCart, editedFridge, deletedCart,
-                deletedFridge, notifiedPush, notifiedEmail);
-
-    }
-
     // TODO: Still need a callback on the last item to display completion
     private static void backupToCloud(final Context context, HashMap<String, ParseObject> parseCloudFridgeHash) {
 
@@ -275,7 +209,7 @@ public class MyParse {
         c.moveToFirst();
 
         while (!c.isAfterLast()) {
-            FridgeItem localFridgeItem = getLocalFridgeItem(c);
+            FridgeItem localFridgeItem = FridgeDbHelper.cursorToFridgeItem(c, false);
 
             ParseObject parseCloudItem = parseCloudFridgeHash.get(localFridgeItem.getHash());
             boolean updated = false;
@@ -294,10 +228,14 @@ public class MyParse {
                 byte[] image = localFridgeItem.getImage();
                 byte[] imageBinarized = localFridgeItem.getImageBinarized();
                 if (image != null) {
-                    newParseCloudItem.put("image", new ParseFile("image.jpg", image));
+                    ParseFile pfImage = new ParseFile("image.jpg", image);
+                    pfImage.saveInBackground(); // Need a save eventually
+                    newParseCloudItem.put("image", pfImage);
                 }
                 if (imageBinarized != null) {
-                    newParseCloudItem.put("imageBinarized", new ParseFile("imageBinarized.jpg", imageBinarized));
+                    ParseFile pfImageBinarized = new ParseFile("imageBinarized.jpg", imageBinarized);
+                    pfImageBinarized.saveInBackground();
+                    newParseCloudItem.put("imageBinarized", pfImageBinarized);
                 }
 
                 newParseCloudItem.put("foodItem", localFridgeItem.getFoodItem());

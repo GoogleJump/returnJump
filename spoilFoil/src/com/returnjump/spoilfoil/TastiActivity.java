@@ -332,7 +332,7 @@ public class TastiActivity extends Activity {
             for (int i = 0; i < n; ++i) {
                 FoodItem item = shoppingCart.get(i);
 
-                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), null, shoppingCartImages.get(i));
+                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), shoppingCartImages.get(i), shoppingCartImages.get(i));
                 dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, null, null, null, null);
             }
 
@@ -340,10 +340,9 @@ public class TastiActivity extends Activity {
             for (int j = 0; j < m; ++j) {
                 FoodItem item = deletedCart.get(j);
 
-                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), null, deletedCartImages.get(j));
+                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), deletedCartImages.get(j), deletedCartImages.get(j));
                 dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
             }
-
 
             finish();
         }
