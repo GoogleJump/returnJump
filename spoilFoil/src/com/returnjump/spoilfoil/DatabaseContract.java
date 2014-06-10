@@ -12,6 +12,7 @@ public final class DatabaseContract {
     public static final int BOOL_TRUE = 1;
     public static final int BOOL_FALSE = 0;
     public static final String COMMA_SEP = ",";
+    public static final String QUESTION_MARK = "?";
     public static final String FORMAT_DATE = "yyyy-MM-dd";
     public static final String FORMAT_DATETIME = "yyyy-MM-dd-H-m-s-S";
     

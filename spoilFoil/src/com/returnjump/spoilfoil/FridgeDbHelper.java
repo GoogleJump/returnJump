@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -15,11 +16,13 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
+import android.provider.ContactsContract;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 public class FridgeDbHelper extends SQLiteOpenHelper {
     
@@ -125,7 +128,153 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return cal;
     }
 
-    private String[] getColumns() {
+    public static FridgeItem cursorToFridgeItem(Cursor c, Boolean isMinimal) {
+
+        long rowId;
+        String hash, foodItem, rawFoodItem, expiryDate, createdDate, updatedDate, updatedBy;
+        int fromImage, dismissed, expired, editedCart, editedFridge, deletedCart, deletedFridge,
+                notifiedPush, notifiedEmail;
+        byte[] image, imageBinarized;
+
+
+        rowId = c.getLong(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable._ID)
+        );
+        foodItem = c.getString(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM)
+        );
+        expiryDate = c.getString(
+                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)
+        );
+
+        if (!isMinimal) {
+            hash = c.getString(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_HASH)
+            );
+            rawFoodItem = c.getString(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM)
+            );
+            createdDate = c.getString(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_CREATED_DATE)
+            );
+            updatedDate = c.getString(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE)
+            );
+            updatedBy = c.getString(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY)
+            );
+            fromImage = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE)
+            );
+            image = c.getBlob(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE)
+            );
+            imageBinarized = c.getBlob(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED)
+            );
+            dismissed = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED)
+            );
+            expired = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED)
+            );
+            editedCart = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_CART)
+            );
+            editedFridge = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_FRIDGE)
+            );
+            deletedCart = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_CART)
+            );
+            deletedFridge = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_FRIDGE)
+            );
+            notifiedPush = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_PUSH)
+            );
+            notifiedEmail = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_EMAIL)
+            );
+
+            return new FridgeItem(rowId, hash, foodItem, rawFoodItem, expiryDate, createdDate, updatedDate, updatedBy,
+                    fromImage, image, imageBinarized, dismissed, expired, editedCart, editedFridge, deletedCart,
+                    deletedFridge, notifiedPush, notifiedEmail);
+        }
+
+        return new FridgeItem(rowId, foodItem, expiryDate);
+
+    }
+
+    /*
+        Gets the first item in the data base that matches the query
+        TODO: getAll()
+
+        Example:
+            To get a row by its id - getFirst(DatabaseContract.FridgeTable._ID, "=", "5", true);
+
+     */
+    public FridgeItem getFirst(String column, String operator, String value, boolean isMinimal) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = getColumns(isMinimal);
+
+        String whereColumn = column + operator + DatabaseContract.QUESTION_MARK;
+        String[] whereValue = { value };
+
+        Cursor c = db.query(
+                DatabaseContract.FridgeTable.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                whereColumn,                              // The columns for the WHERE clause
+                whereValue,                               // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                      // The sort order
+        );
+        c.moveToFirst();
+
+        return cursorToFridgeItem(c, isMinimal);
+    }
+
+    public List<FridgeItem> getAll(String column, String operator, String value, boolean isMinimal) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = getColumns(isMinimal);
+
+        String whereColumn = column + operator + DatabaseContract.QUESTION_MARK;
+        String[] whereValue = { value };
+
+        Cursor c = db.query(
+                DatabaseContract.FridgeTable.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                whereColumn,                              // The columns for the WHERE clause
+                whereValue,                               // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                      // The sort order
+        );
+        c.moveToFirst();
+
+        List<FridgeItem> fridgeItems = new ArrayList<FridgeItem>();
+
+        while (!c.isAfterLast()) {
+            fridgeItems.add(cursorToFridgeItem(c, isMinimal));
+        }
+
+        return fridgeItems;
+    }
+
+    public FridgeItem getRowById(long rowId, boolean isMinimal) {
+        return getFirst(DatabaseContract.FridgeTable._ID, "=", Long.toString(rowId), isMinimal);
+    }
+
+    private String[] getColumns(boolean isMinimal) {
+        String[] columnsMinimal = {
+                DatabaseContract.FridgeTable._ID,
+                DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM,
+                DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE,
+        };
+
         String[] columns = {
                 DatabaseContract.FridgeTable._ID,
                 DatabaseContract.FridgeTable.COLUMN_NAME_HASH,
@@ -148,94 +297,20 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
                 DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_EMAIL,
         };
 
-        return columns;
+        if (isMinimal) {
+            return columnsMinimal;
+        } else {
+            return columns;
+        }
+
     }
 
-    public FridgeItem get(long rowId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        String[] projection = getColumns();
-
-        String whereColumn = DatabaseContract.FridgeTable._ID;
-        String[] whereValue = { Long.toString(rowId) };
-
-        Cursor c = db.query(
-                DatabaseContract.FridgeTable.TABLE_NAME,  // The table to query
-                projection,                               // The columns to return
-                whereColumn,                              // The columns for the WHERE clause
-                whereValue,                               // The values for the WHERE clause
-                null,                                     // don't group the rows
-                null,                                     // don't filter by row groups
-                null                                      // The sort order
-        );
-
-        // Get values in column
-        String hash = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_HASH)
-        );
-        String foodItem = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM)
-        );
-        String rawFoodItem = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM)
-        );
-        String expiryDate = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)
-        );
-        String createdDate = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_CREATED_DATE)
-        );
-        String updatedDate = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE)
-        );
-        String updatedBy = c.getString(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY)
-        );
-        int fromImage = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE)
-        );
-        byte[] image = c.getBlob(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE)
-        );
-        byte[] imageBinarized = c.getBlob(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED)
-        );
-        int dismissed = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED)
-        );
-        int expired = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED)
-        );
-        int editedCart = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_CART)
-        );
-        int editedFridge = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_FRIDGE)
-        );
-        int deletedCart = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_CART)
-        );
-        int deletedFridge = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_FRIDGE)
-        );
-        int notifiedPush = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_PUSH)
-        );
-        int notifiedEmail = c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_EMAIL)
-        );
-
-        return new FridgeItem(rowId, hash, foodItem, rawFoodItem, expiryDate, createdDate, updatedDate, updatedBy,
-                fromImage, image, imageBinarized, dismissed, expired, editedCart, editedFridge, deletedCart,
-                deletedFridge, notifiedPush, notifiedEmail);
-    }
-    
     public Cursor read(String sortBy) {
         SQLiteDatabase db = this.getReadableDatabase();
         
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
-        String[] projection = getColumns();
+        String[] projection = getColumns(false);
 
         // How you want the results sorted in the resulting Cursor
         String sortOrder;

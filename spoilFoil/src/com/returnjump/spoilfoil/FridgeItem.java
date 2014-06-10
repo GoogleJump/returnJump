@@ -63,6 +63,15 @@ public class FridgeItem {
 
     }
 
+    // Minimal constructor
+    public FridgeItem(long rowId, String foodItem, String expiryDate) {
+
+        this.rowId = rowId;
+        this.foodItem = foodItem;
+        this.expiryDate = expiryDate;
+
+    }
+
 
 
     private static boolean intToBoolean(int n) {
