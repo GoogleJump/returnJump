@@ -1,14 +1,18 @@
 package com.returnjump.spoilfoil;
 
+import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,173 +26,109 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
-public class KelseyActivity extends FragmentActivity implements CalendarDatePickerDialog.OnDateSetListener {
-//public class KelseyActivity extends Activity {
+public class KelseyActivity extends FragmentActivity implements CalendarDatePickerDialog.OnDateSetListener, EditNameFragment.OnEditNameButtonClickedListener {
 
     private ArrayAdapter<FoodItem> adapter;
     private ArrayList<FoodItem> foodItems = new ArrayList<FoodItem>();
     private FridgeDbHelper dbHelper;
-    private static final String EXPIRY_DATE_PICKER_TAG = "expiry_date_picker";
+    private SwipeDismissListViewTouchListener touchListener;
+    protected ListView fridgeListView;
+    private boolean editingItem = false;
+    EditNameFragment editNameFragment;
+    private String EDIT_FRAG_TAG = "edit_frag_tag";
+    private String CAL_PICKER_TAG = "cal_frag_tag";
 
-    ListView fridgeListView;
-
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_kelsey);
-
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_kelsey);
         dbHelper = new FridgeDbHelper(this);
         // dbHelper.onUpgrade(dbHelper.getWritableDatabase(), 1, 1); // Use this to delete database
-
         fridgeListView = (ListView) findViewById(R.id.foodItemListView);
-        SwipeDismissListViewTouchListener touchListener =
-                new SwipeDismissListViewTouchListener(fridgeListView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
-                    @Override
-                    public boolean canDismiss(int position) {
-                        return true;
-                    }
-
-                    @Override
-                    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-                        // reverseSortedPositions always has a length = 1
-                        int position = reverseSortedPositions[0];
-
-                        //View child = MyApplication.getViewByPosition(position, fridgeListView);
-                        View child = adapter.getView(position, null, fridgeListView);
-
-                        // Set visible to false in the database for the item that was swiped
-                        if (child != null) {
-                            long rowId = (Long) child.getTag(R.id.food_item_id);
-                            dbHelper.update(rowId, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
-
-                            adapter.remove(adapter.getItem(position));
-                            updateListView(foodItems);
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Delete failed.", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+        this.initializeSwipeDismissListener();
         fridgeListView.setOnTouchListener(touchListener);
         fridgeListView.setOnScrollListener(touchListener.makeScrollListener());
-
-        fridgeListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                long rowId = (Long) view.getTag(R.id.food_item_id);
-
-                FridgeItem fridgeItem = dbHelper.getRowById(rowId, true);
-                String name = fridgeItem.getFoodItem();
-                String date = fridgeItem.getExpiryDate(); // Then extract the day,month,year from this
-
-                Toast.makeText(getApplicationContext(), name + "  " + date, Toast.LENGTH_LONG).show();
-
-                Log.d("      $$$$$$$ onLongPress", name + "  " + date + "     yeahhh ");
-
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-                if(fragmentManager.findFragmentByTag("EDIT_ACTIVITY_TAG")==null){
-                    //EditNameFragment editNameFragmentActivity = new EditNameFragment();
-                    //fragmentTransaction.add(editNameFragmentActivity, "EDIT_ACTIVITY_TAG");
-                }
-
-                fragmentTransaction.commit();
-
-                return true;
-            }
-        });
-
-
+        this.initializeLongClickListener();
         populateListView(foodItems);
-		
-		findViewById(R.id.submitNewItemButton).setOnClickListener(addNewItemToListView);
-		findViewById(R.id.daysGoodTextView).setOnClickListener(openCalendarDialogClick);
-		findViewById(R.id.daysGoodTextView).setOnFocusChangeListener(openCalendarDialogFocus);
+        findViewById(R.id.submitNewItemButton).setOnClickListener(addNewItemToListView);
+        findViewById(R.id.daysGoodTextView).setOnClickListener(openCalendarDialogClick);
+        findViewById(R.id.daysGoodTextView).setOnFocusChangeListener(openCalendarDialogFocus);
 
-	}
+    }
 
-	@Override
-	protected void onRestart() {
-	    super.onRestart();
-	    
-	    populateListView(foodItems);
-	}
-	
-	private Calendar getCalendar(int daysFromToday) {
-	    Calendar c = GregorianCalendar.getInstance();
-	    c.add(Calendar.DATE, daysFromToday);
-	    
-	    return c;
-	}
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        populateListView(foodItems);
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.kelsey, menu);
-		return true;
-	}
+    private Calendar getCalendar(int daysFromToday) {
+        Calendar c = GregorianCalendar.getInstance();
+        c.add(Calendar.DATE, daysFromToday);
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-	    int itemId = item.getItemId();
-	    
-	    if (itemId == R.id.action_settings) {
-	        Intent intent = new Intent(this, SettingsActivity.class);
+        return c;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.kelsey, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+
+        if (itemId == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
 
             return true;
-	    } else if (itemId == R.id.action_arturo) {
-	        Intent intent = new Intent(this, ArturoActivity.class);
+        } else if (itemId == R.id.action_arturo) {
+            Intent intent = new Intent(this, ArturoActivity.class);
             startActivity(intent);
-            
+
             return true;
-	    } else if (itemId == R.id.action_camera) {
-	        Intent intent = new Intent(this, TastiActivity.class);
-	        startActivity(intent);
-	        
-	        return true;
-	    } else {
-	        return super.onOptionsItemSelected(item);
-	    }
-	}
+        } else if (itemId == R.id.action_camera) {
+            Intent intent = new Intent(this, TastiActivity.class);
+            startActivity(intent);
 
-	private void copyDatabaseToList() {
-	    Cursor c = dbHelper.read(null);
-	    c.moveToFirst();
-	    foodItems.clear();
-	    
-	    while (!c.isAfterLast()) {
-	        long id = c.getLong(
-	                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable._ID)
-	                );
-	        String foodName = c.getString(
-	                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM)
-	                );
-	        Calendar expiryDate = FridgeDbHelper.stringToCalendar(c.getString(
-	                c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)), DatabaseContract.FORMAT_DATE
-	                );
-	        boolean dismissed = c.getInt(c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED)) != 0;
-	        
-	        if (!dismissed) {
-	            foodItems.add(new FoodItem(id, foodName, expiryDate, 0));
-	        }
-	        
-	        c.moveToNext();
-	    }
-	}
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+    }
 
-	// We should sort our list by descending expiry date
-	private void populateListView(ArrayList<FoodItem> list) {
-	    copyDatabaseToList();
+    private void copyDatabaseToList() {
+        Cursor c = dbHelper.read(null);
+        c.moveToFirst();
+        foodItems.clear();
+
+        while (!c.isAfterLast()) {
+            long id = c.getLong(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable._ID)
+            );
+            String foodName = c.getString(
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM)
+            );
+            Calendar expiryDate = FridgeDbHelper.stringToCalendar(c.getString(
+                            c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)), DatabaseContract.FORMAT_DATE
+            );
+            boolean dismissed = c.getInt(c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED)) != 0;
+
+            if (!dismissed) {
+                foodItems.add(new FoodItem(id, foodName, expiryDate, 0));
+            }
+
+            c.moveToNext();
+        }
+    }
+
+    // We should sort our list by descending expiry date
+    private void populateListView(ArrayList<FoodItem> list) {
+        copyDatabaseToList();
         adapter = new MyFoodAdapter(this, R.layout.list_fooditems, list);
 
         TextView emptyFridge = (TextView) findViewById(R.id.empty_fridge);
@@ -206,14 +146,17 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         }
     }
 
-	private void updateListView(ArrayList<FoodItem> list) {
-	    TextView emptyFridge = (TextView) findViewById(R.id.empty_fridge);
 
-	    adapter.notifyDataSetChanged();
+   //helper method to consolidate setting views
+
+    private void updateListView(ArrayList<FoodItem> list) {
+        TextView emptyFridge = (TextView) findViewById(R.id.empty_fridge);
+
+        adapter.notifyDataSetChanged();
 
         //toggles the "your fridge is empty :(" eventually we should
         // have a cool graphic of an empty fridge here or something
-	    if (list.size() == 0) {
+        if (list.size() == 0) {
             fridgeListView.setVisibility(View.GONE);
             emptyFridge.setVisibility(View.VISIBLE);
         } else {
@@ -222,13 +165,14 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         }
     }
 
+    //we could find where to insert this in log(n) time
     private int insertToSortedList(FoodItem item) {
         int n = foodItems.size();
         int i = 0;
 
         while ((i < n) && ((item.getDaysGood() > foodItems.get(i).getDaysGood()) ||
-                          ((item.getDaysGood() == foodItems.get(i).getDaysGood()) &&
-                          (item.getFoodName().compareTo(foodItems.get(i).getFoodName())) > 0)))  {
+                ((item.getDaysGood() == foodItems.get(i).getDaysGood()) &&
+                        (item.getFoodName().compareTo(foodItems.get(i).getFoodName())) > 0))) {
             i++;
         }
 
@@ -282,8 +226,8 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         }
 
     }
-	
-	private OnClickListener addNewItemToListView = new OnClickListener() {
+
+    private OnClickListener addNewItemToListView = new OnClickListener() {
 
         @Override
         public void onClick(View v) {
@@ -345,13 +289,10 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
             int day = c.get(Calendar.DAY_OF_MONTH);
 
             FragmentManager fm = getSupportFragmentManager();
-
             CalendarDatePickerDialog calendarDatePickerDialog = CalendarDatePickerDialog
                     .newInstance(KelseyActivity.this, year, month, day);
+            calendarDatePickerDialog.setYearRange(year, calendarDatePickerDialog.getMaxYear());
             calendarDatePickerDialog.show(fm, "FRAG_TAG_DATE_PICKER");
-
-            calendarDatePickerDialog.setYearRange(year,calendarDatePickerDialog.getMaxYear());
-
             findViewById(R.id.daysGoodTextView).clearFocus();
 
 
@@ -364,9 +305,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
             if (hasFocus) {
-
-
-// Use the current date as the default date in the picker
+                // Use the current date as the default date in the picker
                 final Calendar c = Calendar.getInstance();
                 int year = c.get(Calendar.YEAR);
                 int month = c.get(Calendar.MONTH);
@@ -376,12 +315,8 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
                 CalendarDatePickerDialog calendarDatePickerDialog = CalendarDatePickerDialog
                         .newInstance(KelseyActivity.this, year, month, day);
-
-                calendarDatePickerDialog.setYearRange(year,calendarDatePickerDialog.getMaxYear());
-
-                calendarDatePickerDialog.show(fm, "FRAG_TAG_DATE_PICKER");
-
-
+                calendarDatePickerDialog.setYearRange(year, calendarDatePickerDialog.getMaxYear());
+                calendarDatePickerDialog.show(fm, calendarDatePickerDialog.toString());
                 findViewById(R.id.daysGoodTextView).clearFocus();
             }
         }
@@ -390,95 +325,124 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     //Sets the daysGood field
     @Override
     public void onDateSet(CalendarDatePickerDialog dialog, int year, int monthOfYear, int dayOfMonth) {
+        if (!editingItem) {
+            // Do something with the date chosen by the user
+            TextView daysGood = (TextView) findViewById(R.id.daysGoodTextView);
+            // Display selected date in the TextView
+            Calendar expiryDate = new GregorianCalendar(year, monthOfYear, dayOfMonth);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
+            daysGood.setText(dateFormat.format(expiryDate.getTime()));
+            // Set hidden data in view for calculations when Add button is pressed
+            daysGood.setTag(R.id.year_id, year);
+            daysGood.setTag(R.id.month_id, monthOfYear);
+            daysGood.setTag(R.id.day_id, dayOfMonth);
 
-        // Do something with the date chosen by the user
-        TextView daysGood = (TextView) findViewById(R.id.daysGoodTextView);
+        } else {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.remove(getSupportFragmentManager().findFragmentByTag(EDIT_FRAG_TAG));
+            ft.commit();
+            editingItem = false;
+            Calendar expiryDate = new GregorianCalendar(year, monthOfYear, dayOfMonth);
+            dbHelper.update(editNameFragment.getArguments().getLong("rowId"),editNameFragment.getArguments().getString("name"), expiryDate, null, null, null, null, null,
+                    null, null, null, null);
+            Toast.makeText(getApplicationContext(), "Item edited!", Toast.LENGTH_LONG).show();
 
-        // Display selected date in the TextView
-        Calendar expiryDate = new GregorianCalendar(year, monthOfYear, dayOfMonth);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
-        daysGood.setText(dateFormat.format(expiryDate.getTime()));
+            // there should be a faster way to update the listview immediately after editing an item?
+            populateListView(foodItems);
 
-//            // Set hidden data in view for calculations when Add button is pressed
-        daysGood.setTag(R.id.year_id, year);
-        daysGood.setTag(R.id.month_id, monthOfYear);
-        daysGood.setTag(R.id.day_id, dayOfMonth);
+        }
+    }
 
+    public void editItemSequence(View view) {
+        long rowId = (Long) view.getTag(R.id.food_item_id);
+        FridgeItem fridgeItem = dbHelper.getRowById(rowId, true);
+        String itemName = fridgeItem.getFoodItem();
+        String itemDate = fridgeItem.getExpiryDate(); // Then extract the day,month,year from this
+        editingItem = true;
+        editNameFragment = new EditNameFragment();
+        Bundle args = new Bundle();
+        args.putString("name", itemName);
+        args.putString("date", itemDate);
+        args.putLong("rowId", rowId);
+        editNameFragment.setArguments(args);
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.add(editNameFragment, EDIT_FRAG_TAG);
+        fragmentTransaction.addToBackStack(EDIT_FRAG_TAG);
+        fragmentTransaction.commit();
     }
 
     @Override
-    public void onResume() {
-        // Reattaching to the fragment
-        super.onResume();
-        CalendarDatePickerDialog calendarDatePickerDialog = (CalendarDatePickerDialog) getSupportFragmentManager()
-                .findFragmentByTag(EXPIRY_DATE_PICKER_TAG);
-        if (calendarDatePickerDialog != null) {
-            calendarDatePickerDialog.setOnDateSetListener(this);
-        }
+    public void onEditNameButtonClicked() {
+        Calendar c = (getCalendarFromDateString(editNameFragment.getArguments().getString("date"))!=null) ? getCalendarFromDateString(editNameFragment.getArguments().getString("date")) : Calendar.getInstance();
+        CalendarDatePickerDialog calendarDatePickerDialog = CalendarDatePickerDialog
+                .newInstance(KelseyActivity.this, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+        calendarDatePickerDialog.setYearRange(c.get(Calendar.YEAR), calendarDatePickerDialog.getMaxYear());
+        editingItem = true;
+        Bundle args = new Bundle();
+        calendarDatePickerDialog.show(getSupportFragmentManager(), CAL_PICKER_TAG);
+
     }
 
-    /* Old DatePicker (Leave it for now)
+    public void initializeLongClickListener() {
 
-    private OnClickListener openCalendarDialogClick = new OnClickListener() {
-
-        @Override
-        public void onClick(View v) {            
-            DialogFragment newFragment = new DatePickerFragment();
-            newFragment.show(getFragmentManager(), "datePicker");
-
-            findViewById(R.id.daysGoodTextView).clearFocus();
-        }
-        
-    };
-    
-    private OnFocusChangeListener openCalendarDialogFocus = new OnFocusChangeListener() {
-        
-        @Override
-        public void onFocusChange(View v, boolean hasFocus) {
-        if (hasFocus) {
-            DialogFragment newFragment = new DatePickerFragment();
-            newFragment.show(getFragmentManager(), "datePicker");
-
-            findViewById(R.id.daysGoodTextView).clearFocus();
-        }
-        }
-    };
-    
-    public static class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            // Use the current date as the default date in the picker
-            final Calendar c = Calendar.getInstance();
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int day = c.get(Calendar.DAY_OF_MONTH);
-            
-            DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), this, year, month, day);
-            datePickerDialog.setTitle("Enter expiry date"); // (Only shows on tablets)
-            datePickerDialog.getDatePicker().setMinDate(Calendar.getInstance().getTimeInMillis() / 86400000L * 86400000L);
-            // Probably should set a maximum date too
-            // Calendar shown on tablets needs to be set to current date
-            
-            return datePickerDialog;
-        }
-        
-        public void onDateSet(DatePicker view, int year, int month, int day) {
-            // Do something with the date chosen by the user
-            TextView daysGood = (TextView) getActivity().findViewById(R.id.daysGoodTextView);
-            
-            // Display selected date in the TextView
-            Calendar expiryDate = new GregorianCalendar(year, month, day);
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
-            daysGood.setText(dateFormat.format(expiryDate.getTime()));
-            
-            // Set hidden data in view for calculations when Add button is pressed
-            daysGood.setTag(R.id.year_id, year);
-            daysGood.setTag(R.id.month_id, month);
-            daysGood.setTag(R.id.day_id, day);
-        }
-        
+        fridgeListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                editItemSequence(view);
+                return true;
+            }
+        });
     }
-    */
 
+    public void initializeSwipeDismissListener() {
+        touchListener =
+                new SwipeDismissListViewTouchListener(fridgeListView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                    @Override
+                    public boolean canDismiss(int position) {
+                        return true;
+                    }
+
+                    @Override
+                    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                        // reverseSortedPositions always has a length = 1
+                        int position = reverseSortedPositions[0];
+
+                        //View child = MyApplication.getViewByPosition(position, fridgeListView);
+                        View child = adapter.getView(position, null, fridgeListView);
+
+                        // Set visible to false in the database for the item that was swiped
+                        if (child != null) {
+                            long rowId = (Long) child.getTag(R.id.food_item_id);
+                            dbHelper.update(rowId, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
+
+                            adapter.remove(adapter.getItem(position));
+                            updateListView(foodItems);
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Delete failed.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+
+    }
+
+    /**
+     * @param date a String representing a date in YYYY-MM-DD format
+     * @return a Calendar object with the date of the arg passed in, null if date is in an invalid format
+     */
+    public Calendar getCalendarFromDateString(String date){
+        if(date.length()==10) {
+            try {
+                int year = Integer.parseInt(date.substring(0, 4));
+                int month = (Integer.parseInt(date.substring(5, 7))-1);
+                int day = Integer.parseInt(date.substring(8, 10));
+                Calendar c = Calendar.getInstance();
+                c.set(year,month,day);
+                return c;
+            } catch (NumberFormatException n) {
+                return null;
+            }
+        }
+        return null;
+    }
 }

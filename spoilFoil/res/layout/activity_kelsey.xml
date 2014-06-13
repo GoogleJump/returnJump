@@ -12,6 +12,7 @@
         android:layout_margin="10dp"
         android:background="@drawable/bg_card" />
 
+
     <TextView
         android:id="@+id/empty_fridge"
         android:layout_width="match_parent"
@@ -22,7 +23,8 @@
         android:visibility="gone"
         android:focusable="true" 
         android:focusableInTouchMode="true" />
-    
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

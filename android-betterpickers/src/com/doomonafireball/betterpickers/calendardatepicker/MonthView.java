@@ -196,8 +196,7 @@ public abstract class MonthView extends View {
         mMonthTitleTypeface = res.getString(R.string.sans_serif);
 
         mDayTextColor = res.getColor(R.color.date_picker_text_normal);
-        // how can I reference this color from the spoilFoil package in
-       // mTodayNumberColor =res.getColor();
+        mTodayNumberColor =res.getColor(R.color.spoilfoil_theme);
         mMonthTitleColor = res.getColor(R.color.white);
         mMonthTitleBGColor = res.getColor(R.color.circle_background);
 
