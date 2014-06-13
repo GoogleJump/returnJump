@@ -16,7 +16,7 @@
             android:paddingLeft="10dp"
             android:text="@string/edit_text_new_foodItem"
             android:textColor="@color/black"
-            android:textSize="18sp"
+            android:textSize="22sp"
             android:maxLines="1"
             android:ellipsize="end" />
 
