@@ -3,12 +3,9 @@ package com.returnjump.spoilfoil;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.NotificationManager;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.RingtoneManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -26,12 +23,14 @@ import com.parse.Parse;
 import com.parse.ParseCloud;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 
 public class ArturoActivity extends Activity {
     List<String> fridge = new ArrayList<String>();
     List<FoodItem> ItemsToNotify = new ArrayList<FoodItem>();
+    private FridgeDbHelper dbhelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +38,6 @@ public class ArturoActivity extends Activity {
         setContentView(R.layout.activity_arturo);
         setupActionBar();
         findViewById(R.id.pushing_my_buttons).setOnClickListener(set_number);
-        findViewById(R.id.popping_my_buttons).setOnClickListener(notify_me);
         findViewById(R.id.send_emails).setOnClickListener(sendemail);
         // Show the Up button in the action bar.
         Parse.initialize(this, getResources().getString(R.string.parse_app_id), "S4JauKQ70Rrtz8MYp6Sw6sCLt75RD8eAzY26rici");
@@ -63,37 +61,10 @@ public class ArturoActivity extends Activity {
         }
     };
 
-    /* public static boolean isValidEmailAddress(String email) {
-        boolean result = true;
-        try {
-            InternetAddress emailAddr = new InternetAddress(email);
-            emailAddr.validate();
-        } catch (AddressException ex) {
-            result = false;
-        }
-        return result;
-    } */
-
-    private boolean haveNetworkConnection() {
-        boolean haveConnectedWifi = false;
-        boolean haveConnectedMobile = false;
-
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
-        for (NetworkInfo ni : netInfo) {
-            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
-                if (ni.isConnected())
-                    haveConnectedWifi = true;
-            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
-                if (ni.isConnected())
-                    haveConnectedMobile = true;
-        }
-        return haveConnectedWifi || haveConnectedMobile;
-    }
 
 
         public void cloudEmailSender(String fooditem){
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplication());
             String email = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
             HashMap<String, Object> params = new HashMap<String, Object>();
             params.put("address", email);
@@ -118,20 +89,31 @@ public class ArturoActivity extends Activity {
 
         }
     };
-    public OnClickListener notify_me = new OnClickListener(){
-        public void onClick(View view){
-            if (!fridge.isEmpty()){
-                String item_popped = fridge.get(fridge.size()-1);
-                fridge.remove(fridge.size()-1);
-                // Creates the Notification mBuilder
+
+    public void ExpiredItemsNotifier() {
+        List<FridgeItem> expiring_Items = dbhelper.getAll(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, "<", FridgeDbHelper.calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME), true);
+        if (expiring_Items.size() != 0) {
+            NotificationSender(expiring_Items);
+        }
+    };
+
+    public void NotificationSender(List<FridgeItem> items_expiring) {
+
+               // Creates the Notification mBuilder
                 NotificationCompat.Builder mBuilder =
-                        new NotificationCompat.Builder(view.getContext())
+                        new NotificationCompat.Builder(getApplicationContext())
                                 .setSmallIcon(R.drawable.ic_notification)
-                                .setContentTitle("Testing notifications")
-                                .setContentText(item_popped)
+                                .setContentTitle("Expiring Items")
                                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                 .setVibrate(new long[]{ 0, 1000 })
                                 .setLights(Color.GREEN, 500, 1000);
+                String current_text = "The following items are about to expire: ";
+                int number_items_expiring = 0;
+                for (int i=0; i < items_expiring.size(); i ++){
+                    current_text += items_expiring.get(i).getFoodItem() + " ";
+                    number_items_expiring ++;
+                }
+                mBuilder.setContentText(current_text).setNumber(number_items_expiring);
                 //sets the type of alert
                 int mNotificationId = 001;
                 // Gets an instance of the NotificationManager service
@@ -139,13 +121,12 @@ public class ArturoActivity extends Activity {
                         (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                 // Builds the notification and issues it.
                 mNotifyMgr.notify(mNotificationId, mBuilder.build());
-                refresh_view();
-            }
-        }
     };
-    /**
-     * Set up the {@link android.app.ActionBar}, if the API is available.
-     */
+
+
+        /**
+         * Set up the {@link android.app.ActionBar}, if the API is available.
+         */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void setupActionBar() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
