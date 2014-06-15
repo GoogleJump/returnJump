@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:id="@+id/edit_name_dialog_layout"
+    android:padding="@dimen/activity_vertical_margin"
+    android:background="@drawable/dialog_background"
+
+    >
+
+    <EditText
+        android:id="@+id/edit_text_dialog"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|center_horizontal"
+        android:hint=""
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="0dp"
+        android:textSize="30sp"
+        android:padding="@dimen/separator_padding"
+        android:inputType="textCapWords"
+        android:singleLine="true"
+        android:background="@drawable/rounded_edit_text"
+        android:imeOptions="actionNext"
+        android:autoText="true"
+        android:scrollHorizontally="true"
+
+        />
+
+    <ImageButton
+        android:id="@+id/submit_new_item_button_dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|center_horizontal"
+        android:layout_marginLeft="15dp"
+        android:src="@drawable/ic_action_add"
+        android:contentDescription="@string/add"
+        android:background="@drawable/button"
+        />
+
+
+</LinearLayout>
