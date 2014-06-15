@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_horizontal"
         android:layout_marginLeft="15dp"
-        android:src="@drawable/ic_action_add"
+        android:src="@drawable/ic_action_content_edit"
         android:contentDescription="@string/add"
         android:background="@drawable/button"
         />

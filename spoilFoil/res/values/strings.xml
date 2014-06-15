@@ -16,8 +16,8 @@
     <string name="notification_email_summary">Receive email notifications</string>
     <string name="email_address">Email address</string>
     <string name="header_cloud">Cloud</string>
-    <string name="sync_to_cloud">Sync to cloud</string>
-    <string name="sync_to_cloud_summary">Sync your fridge data to the cloud for cross-device access</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sync_now_summary">Click to sync all your fridge data to the cloud</string>
     <string name="notification_time">Expiry reminder time</string>
     <string name="auto_sync">Sync automatically</string>
     <string name="auto_sync_summary">Any changes to your fridge will automatically be saved</string>

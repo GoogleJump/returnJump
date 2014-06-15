@@ -1,5 +1,9 @@
 package com.returnjump.spoilfoil;
 
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
@@ -27,8 +31,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
+import com.squareup.seismic.ShakeDetector;
 
-public class KelseyActivity extends FragmentActivity implements CalendarDatePickerDialog.OnDateSetListener, EditNameFragment.OnEditNameButtonClickedListener {
+public class KelseyActivity extends FragmentActivity implements CalendarDatePickerDialog.OnDateSetListener, EditNameFragment.OnEditNameButtonClickedListener, ShakeDetector.Listener {
 
     private ArrayAdapter<FoodItem> adapter;
     private ArrayList<FoodItem> foodItems = new ArrayList<FoodItem>();
@@ -39,21 +44,32 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     EditNameFragment editNameFragment;
     private String EDIT_FRAG_TAG = "edit_frag_tag";
     private String CAL_PICKER_TAG = "cal_frag_tag";
+    private SensorManager sensorManager;
+    private ShakeDetector sd;
+    //private Sensor mAccelerometer;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kelsey);
+
         dbHelper = new FridgeDbHelper(this);
         // dbHelper.onUpgrade(dbHelper.getWritableDatabase(), 1, 1); // Use this to delete database
         fridgeListView = (ListView) findViewById(R.id.foodItemListView);
+
         this.initializeSwipeDismissListener();
         fridgeListView.setOnTouchListener(touchListener);
         fridgeListView.setOnScrollListener(touchListener.makeScrollListener());
         this.initializeLongClickListener();
+
         populateListView(foodItems);
+
         findViewById(R.id.submitNewItemButton).setOnClickListener(addNewItemToListView);
         findViewById(R.id.daysGoodTextView).setOnClickListener(openCalendarDialogClick);
         findViewById(R.id.daysGoodTextView).setOnFocusChangeListener(openCalendarDialogFocus);
+
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        sd = new ShakeDetector(this);
+        sd.start(sensorManager);
 
     }
 
@@ -61,6 +77,22 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     protected void onRestart() {
         super.onRestart();
         populateListView(foodItems);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        sd = new ShakeDetector(this);
+        sd.start(sensorManager);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        sd = new ShakeDetector(this);
+        sd.stop();
     }
 
     private Calendar getCalendar(int daysFromToday) {
@@ -181,52 +213,6 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         return i;
     }
 
-    private class ColorFlashTask extends AsyncTask<Integer, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Integer... index) {
-            //final View item = MyApplication.getViewByPosition(index[0], fridgeListView);
-            final View item = adapter.getView(index[0], null, fridgeListView);
-
-            // Fade in
-            for (int x = 0; x < 64; x++) {
-                final int alpha = x;
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        item.setBackgroundColor(Color.argb(alpha, 134, 179, 0));
-                    }
-                });
-
-                try {
-                    Thread.sleep(5);
-                } catch (InterruptedException e) {
-                }
-            }
-
-            // Fade out
-            for (int y = 63; y >= 0; y--) {
-                final int alpha = y;
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        item.setBackgroundColor(Color.argb(alpha, 134, 179, 0));
-                    }
-                });
-
-                try {
-                    Thread.sleep(5);
-                } catch (InterruptedException e) {
-                }
-            }
-
-            return null;
-        }
-
-    }
-
     private OnClickListener addNewItemToListView = new OnClickListener() {
 
         @Override
@@ -262,8 +248,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                 daysGoodField.setTag(R.id.year_id, 0);
                 daysGoodField.setTag(R.id.month_id, 0);
                 daysGoodField.setTag(R.id.day_id, 0);
-                fridgeListView.smoothScrollToPosition(index); //fridgeListView.setSelection(index);
-                //new ColorFlashTask().execute(index);
+                fridgeListView.smoothScrollToPosition(index);
 
             } else if (foodName.equals("")) {
                 // Set focus and show keyboard
@@ -373,7 +358,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
     @Override
     public void onEditNameButtonClicked() {
-        Calendar c = (getCalendarFromDateString(editNameFragment.getArguments().getString("date"))!=null) ? getCalendarFromDateString(editNameFragment.getArguments().getString("date")) : Calendar.getInstance();
+        Calendar c = FridgeDbHelper.stringToCalendar(editNameFragment.getArguments().getString("date"), DatabaseContract.FORMAT_DATE);
         CalendarDatePickerDialog calendarDatePickerDialog = CalendarDatePickerDialog
                 .newInstance(KelseyActivity.this, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
         calendarDatePickerDialog.setYearRange(c.get(Calendar.YEAR), calendarDatePickerDialog.getMaxYear());
@@ -426,23 +411,9 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
     }
 
-    /**
-     * @param date a String representing a date in YYYY-MM-DD format
-     * @return a Calendar object with the date of the arg passed in, null if date is in an invalid format
-     */
-    public Calendar getCalendarFromDateString(String date){
-        if(date.length()==10) {
-            try {
-                int year = Integer.parseInt(date.substring(0, 4));
-                int month = (Integer.parseInt(date.substring(5, 7))-1);
-                int day = Integer.parseInt(date.substring(8, 10));
-                Calendar c = Calendar.getInstance();
-                c.set(year,month,day);
-                return c;
-            } catch (NumberFormatException n) {
-                return null;
-            }
-        }
-        return null;
+    @Override
+    public void hearShake() {
+        Toast.makeText(this, "Expired food has been dismissed.", Toast.LENGTH_SHORT).show();
     }
+
 }

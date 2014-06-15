@@ -39,12 +39,13 @@
             android:key="checkbox_auto"
             android:title="@string/auto_sync"
             android:summary="@string/auto_sync_summary"
-            android:defaultValue="true" />
+            android:defaultValue="true"
+            android:enabled="false" />
 
         <Preference
             android:key="preference_sync"
-            android:title="@string/sync_to_cloud"
-            android:summary="@string/sync_to_cloud_summary" />
+            android:title="@string/sync_now"
+            android:summary="@string/sync_now_summary" />
 
     </PreferenceCategory>
 
