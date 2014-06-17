@@ -1,8 +1,5 @@
 package com.returnjump.spoilfoil;
 
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
@@ -15,8 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -83,7 +78,6 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     protected void onResume() {
         super.onResume();
 
-        sd = new ShakeDetector(this);
         sd.start(sensorManager);
     }
 
@@ -91,7 +85,6 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     protected void onPause() {
         super.onPause();
 
-        sd = new ShakeDetector(this);
         sd.stop();
     }
 
@@ -328,7 +321,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
             ft.commit();
             editingItem = false;
             Calendar expiryDate = new GregorianCalendar(year, monthOfYear, dayOfMonth);
-            dbHelper.update(editNameFragment.getArguments().getLong("rowId"),editNameFragment.getArguments().getString("name"), expiryDate, null, null, null, null, null,
+            dbHelper.update(editNameFragment.getArguments().getLong("rowId"),editNameFragment.getArguments().getString("name"), expiryDate, null, null, null, null, DatabaseContract.BOOL_TRUE,
                     null, null, null, null);
             Toast.makeText(getApplicationContext(), "Item edited!", Toast.LENGTH_LONG).show();
 

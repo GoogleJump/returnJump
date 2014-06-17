@@ -16,6 +16,10 @@ public class MyApplication extends Application {
 
 	}
 
+    /*
+        Add any global methods below
+     */
+
     public static View getViewByPosition(int position, ListView listView) {
         final int firstListItemPosition = listView.getFirstVisiblePosition();
         final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
