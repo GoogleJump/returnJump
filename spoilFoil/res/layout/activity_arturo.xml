@@ -3,11 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
-    
-    <TextView android:id="@+id/fridge_list" 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+
 
     <Button
         android:id="@+id/pushing_my_buttons"
@@ -15,13 +11,8 @@
         android:layout_height="wrap_content"
         android:text="Push" />
 
-    <Button
-        android:id="@+id/popping_my_buttons"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Pop" />
-    
-     <EditText android:id="@+id/email_address" 
+
+     <EditText android:id="@+id/email_address"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint= "@string/enter_email"
