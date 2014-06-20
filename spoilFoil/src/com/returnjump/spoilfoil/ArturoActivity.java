@@ -2,9 +2,6 @@ package com.returnjump.spoilfoil;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -38,17 +35,17 @@ public class ArturoActivity extends Activity {
         findViewById(R.id.pushing_my_buttons).setOnClickListener(notifier);
         findViewById(R.id.send_emails).setOnClickListener(sendemail);
         // Alarm Set up
-        Intent intent = new Intent(getApplicationContext(), NotificationAlarm.class);
-        PendingIntent AlarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
-// hi
-        // Schedule the alarm!
-        AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
-        am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, System.currentTimeMillis(), 5*1000, AlarmIntent);
+        //Calendar cal = Calendar.getInstance();
+
+        //Intent intent = new Intent(getBaseContext(), NotificationAlarm.class);
+        //PendingIntent pIntent = PendingIntent.getBroadcast(getBaseContext(), 0, intent, 0);
+
+        //AlarmManager alarm = (AlarmManager) getSystemService(getBaseContext().ALARM_SERVICE);
+        //alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), (60 * 1000* 60 * 24), pIntent);
 
         // Show the Up button in the action bar.
         Parse.initialize(this, getResources().getString(R.string.parse_app_id), "S4JauKQ70Rrtz8MYp6Sw6sCLt75RD8eAzY26rici");
     }
-
 
     public OnClickListener sendemail = new OnClickListener(){
         public void onClick(View View){

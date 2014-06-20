@@ -39,11 +39,12 @@
             android:name="com.returnjump.spoilfoil.ArturoActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_arturo"
-            android:parentActivityName="com.returnjump.spoilfoil.KelseyActivity" />
+            android:parentActivityName="com.returnjump.spoilfoil.KelseyActivity"
+        />
 
             <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
 
-        <receiver android:name="com.returnjump.spoilfoil.NotificationAlarm" />
+
 
         <activity
             android:name="com.returnjump.spoilfoil.TastiActivity"
@@ -64,7 +65,9 @@
                 android:value="com.returnjump.spoilfoil.KelseyActivity" />
         </activity>
 
+        <receiver  android:process=":remote" android:name=".NotificationAlarm"></receiver>
 
     </application>
+
 
 </manifest>
