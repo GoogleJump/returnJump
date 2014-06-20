@@ -2,17 +2,14 @@ package com.returnjump.spoilfoil;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.NotificationManager;
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
-import android.support.v4.app.NotificationCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +29,7 @@ public class ArturoActivity extends Activity {
     List<FoodItem> ItemsToNotify = new ArrayList<FoodItem>();
     private FridgeDbHelper dbhelper;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +37,14 @@ public class ArturoActivity extends Activity {
         setupActionBar();
         findViewById(R.id.pushing_my_buttons).setOnClickListener(notifier);
         findViewById(R.id.send_emails).setOnClickListener(sendemail);
+        // Alarm Set up
+        Intent intent = new Intent(getApplicationContext(), NotificationAlarm.class);
+        PendingIntent AlarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+// hi
+        // Schedule the alarm!
+        AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
+        am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, System.currentTimeMillis(), 5*1000, AlarmIntent);
+
         // Show the Up button in the action bar.
         Parse.initialize(this, getResources().getString(R.string.parse_app_id), "S4JauKQ70Rrtz8MYp6Sw6sCLt75RD8eAzY26rici");
     }
@@ -52,7 +58,8 @@ public class ArturoActivity extends Activity {
     public OnClickListener notifier = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            NotificationSender();
+            NotificationSender ns = new NotificationSender(getApplicationContext());
+            ns.sendNotifications();
         }
     };
 
@@ -79,43 +86,9 @@ public class ArturoActivity extends Activity {
     /* public void ExpiredItemsNotifier() {
         List<FridgeItem> expiring_Items = dbhelper.getAll(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, "<", FridgeDbHelper.calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME), true);
         if (expiring_Items.size() != 0) {
-            NotificationSender(expiring_Items);
+            notificationSender.sendNotification(expiring_Items);
         }
     }; */
-
-    public void NotificationSender(/*List<FridgeItem>items_expiring  */ ) {
-
-               //Setting up the intent for the notification
-        Intent intent = new Intent(getApplicationContext(), KelseyActivity.class);
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-               // Creates the Notification mBuilder
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(getApplicationContext())
-                        .setSmallIcon(R.drawable.ic_notification)
-                        .setContentTitle("Expiring Items")
-                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                        .setVibrate(new long[]{ 0, 1000 })
-                        .setLights(Color.GREEN, 500, 1000);
-        String current_text = "The following items are about to expire: ";
-        int number_items_expiring = 0;
-        //for (int i=0; i < items_expiring.size(); i ++){
-        //    current_text += items_expiring.get(i).getFoodItem() + " ";
-         //   number_items_expiring ++;
-        //}
-        mBuilder.setContentText(current_text)
-                .setNumber(number_items_expiring)
-                .setContentIntent(pIntent)
-                .setAutoCancel(true);
-        //sets the type of alert
-        int mNotificationId = 001;
-        // Gets an instance of the NotificationManager service
-        NotificationManager mNotifyMgr =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        // Builds the notification and issues it.
-        mNotifyMgr.notify(mNotificationId, mBuilder.build());
-    };
-
 
         /**
          * Set up the {@link android.app.ActionBar}, if the API is available.
