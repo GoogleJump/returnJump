@@ -19,6 +19,9 @@ public class NotificationSender{
         };
 
         public void sendNotifications(){
+            /**
+             *
+             */
 
         //Setting up the intent for the notification
         Intent intent = new Intent(this.context, KelseyActivity.class);
