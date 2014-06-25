@@ -208,10 +208,10 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
 
     /*
         Gets the first item in the data base that matches the query
-        TODO: getAll()
 
-        Example:
-            To get a row by its id - getFirst(DatabaseContract.FridgeTable._ID, "=", "5", true);
+        Example
+            To get a row by its id:
+                getFirst(DatabaseContract.FridgeTable._ID, "=", "5", true);
 
      */
     public FridgeItem getFirst(String column, String operator, String value, boolean isMinimal) {
@@ -236,13 +236,30 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return cursorToFridgeItem(c, isMinimal);
     }
 
-    public List<FridgeItem> getAll(String column, String operator, String value, boolean isMinimal) {
+    /*
+        Returns an array of items in the data base that matches the query
+
+        Note
+            conjunction should always have N-1 elements, where N is the number of elements in column/operator
+
+        Example
+            To get all items with expiry date before Jan. 1, 2014 and haven't been dismissed:
+                getAll([DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED], [DatabaseContract.FridgeTable.AND], ["<", "="], ["2014-01-01", DatabaseContract.FridgeTable.BOOL_FALSE], true);
+
+     */
+    public List<FridgeItem> getAll(String[] column, String[] operator, String[] whereValue, String[] conjunction, boolean isMinimal) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         String[] projection = getColumns(isMinimal);
 
-        String whereColumn = column + operator + DatabaseContract.QUESTION_MARK;
-        String[] whereValue = { value };
+        String whereColumn = "";
+        int n = column.length;
+
+        for (int i = 0; i < n; ++i) {
+            String conj = (i == n-1) ? "" : " " + conjunction[i] + " ";
+
+            whereColumn += column[i] + operator[i] + DatabaseContract.QUESTION_MARK + conj;
+        }
 
         Cursor c = db.query(
                 DatabaseContract.FridgeTable.TABLE_NAME,  // The table to query
