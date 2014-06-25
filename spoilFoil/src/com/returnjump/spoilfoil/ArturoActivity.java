@@ -43,8 +43,6 @@ public class ArturoActivity extends Activity {
         //AlarmManager alarm = (AlarmManager) getSystemService(getBaseContext().ALARM_SERVICE);
         //alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), (60 * 1000* 60 * 24), pIntent);
 
-        // Show the Up button in the action bar.
-        Parse.initialize(this, getResources().getString(R.string.parse_app_id), "S4JauKQ70Rrtz8MYp6Sw6sCLt75RD8eAzY26rici");
     }
 
     public OnClickListener sendemail = new OnClickListener(){

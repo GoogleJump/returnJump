@@ -11,6 +11,8 @@ public final class DatabaseContract {
     private static final String BLOB_TYPE = " BLOB";
     public static final int BOOL_TRUE = 1;
     public static final int BOOL_FALSE = 0;
+    public static final String BOOL_TRUE_STR = "1";
+    public static final String BOOL_FALSE_STR = "0";
     public static final String AND = "AND";
     public static final String OR = "OR";
     public static final String COMMA_SEP = ",";
