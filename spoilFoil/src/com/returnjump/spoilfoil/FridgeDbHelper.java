@@ -244,7 +244,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
 
         Example
             To get all items with expiry date before Jan. 1, 2014 and haven't been dismissed:
-                getAll([DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED], [DatabaseContract.FridgeTable.AND], ["<", "="], ["2014-01-01", DatabaseContract.FridgeTable.BOOL_FALSE], true);
+                dbHelper.getAll(new String[]{DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED}, new String[]{DatabaseContract.AND}, new String[]{"<", "="}, new String[]{"2014-01-01", DatabaseContract.BOOL_FALSE_STR}, true);
 
      */
     public List<FridgeItem> getAll(String[] column, String[] operator, String[] whereValue, String[] conjunction, boolean isMinimal) {
