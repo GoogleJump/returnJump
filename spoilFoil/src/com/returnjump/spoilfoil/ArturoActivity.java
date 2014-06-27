@@ -14,7 +14,6 @@ import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 import com.parse.FunctionCallback;
-import com.parse.Parse;
 import com.parse.ParseCloud;
 
 import java.util.HashMap;
@@ -26,7 +25,7 @@ public class ArturoActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_arturo);
         setupActionBar();
-        findViewById(R.id.pushing_my_buttons).setOnClickListener(notifier);
+        // findViewById(R.id.pushing_my_buttons).setOnClickListener(notifier);
         findViewById(R.id.send_emails).setOnClickListener(sendemail);
         // Alarm Set up
         //Calendar cal = Calendar.getInstance();
@@ -45,13 +44,13 @@ public class ArturoActivity extends Activity {
                 cloudEmailSender("random fooditem");
         }
     };
-    public OnClickListener notifier = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            NotificationSender ns = new NotificationSender(getApplicationContext());
-            ns.sendNotifications();
-        }
-    };
+   // public OnClickListener notifier = new OnClickListener() {
+   //     @Override
+   //     public void onClick(View v) {
+    //         NotificationSender ns = new NotificationSender(getApplicationContext(), );
+    //         ns.sendNotifications();
+    //     }
+    // };
 
         public void cloudEmailSender(String fooditem){
             /** Notifies through email that that fooditem is going to expire. If it fails to send

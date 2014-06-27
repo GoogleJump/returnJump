@@ -1,6 +1,7 @@
 secret.*
 out/
 jni/
+.DS_Store
 
 # Built application files
 *.apk
