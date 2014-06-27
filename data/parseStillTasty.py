@@ -52,87 +52,144 @@ def cleanUpJson(data):
 
         # Encode to ascii
         d['name'] = d['name'][0].lower().replace(u'\u2014', '-').encode('ascii', 'replace')
-        d['pantry'] = d['pantry'].encode('ascii', 'replace')
-        d['refrigerator'] = d['refrigerator'].encode('ascii', 'replace')
-        d['freezer'] = d['freezer'].encode('ascii', 'replace')
+        d['pantry'] = d['pantry'].encode('ascii', 'replace').lower()
+        d['refrigerator'] = d['refrigerator'].encode('ascii', 'replace').lower()
+        d['freezer'] = d['freezer'].encode('ascii', 'replace').lower()
 
 data = {}
 if not True:
     # This will not execute, see cleanUpJson()
-    data = jsonToDict('stilltasty_raw.json')['data']
+    data = jsonFileToDict('stilltasty_raw.json')['data']
     cleanUpJson(data)
-    dictToJsonFile(data, 'stilltasty.json')
+    dictToJsonFile(data, 'stilltasty_clean.json')
 else:
-    data = jsonFileToDict('stilltasty.json')['data']
+    data = jsonFileToDict('stilltasty_clean.json')['data']
 
+# Sort the data based on the name
+data = sorted(data, key=lambda x: x['name'])
+
+# Here I'm comparing the length of the name before the comma and the name before
+# the -. I take the shorter one, which should be the proper name of the item
+def getFoodName(s):
+    if len(s.split(',',2)[0].strip(',- ')) < len(s.split('-',2)[0].strip(',- ')):
+        return s.split(',',2)
+    else:
+        return s.split('-',2)
+
+# Return the average of a date span. Ex. 3 -> 3, 3-5 -> 4, 10-20 -> 15
+def getStrListAvg(exp):
+    if len(exp) == 2:
+        return (int(exp[0]) + int(exp[1])) / 2
+    else:
+        return int(exp[0])
+
+def convertExpiryAmountToDays(expiry):
+    if expiry == '': # For those without dates
+        return -1   
+    elif expiry.find('day') != -1 or expiry.find('days') != -1: # Ex. "1 day", "7 days", "3-5 days"
+        exp = expiry[:expiry.find(' ')].split('-')
+        return getStrListAvg(exp)
+    elif expiry.find('week') != -1 or expiry.find('weeks') != -1: # Ex. "1 week", "3 weeks", "6-8 weeks"
+        exp = expiry[:expiry.find(' ')].split('-')
+        return getStrListAvg(exp) * 7
+    elif expiry.find('month') != -1 or expiry.find('months') != -1: # Ex. "1 month", "2 months", "7-10 months"
+        exp = expiry[:expiry.find(' ')].split('-')
+        return getStrListAvg(exp) * 30
+    elif expiry.find('year') != -1 or expiry.find('years') != -1: # You get the point by now
+        exp = expiry[:expiry.find(' ')].split('-')
+        return getStrListAvg(exp) * 365
+    elif expiry.find('keeps indefinitely') != -1: # Found several with this date set (can be an easter egg)
+        return 12345
+    elif expiry.find('hour') != -1: # I found one that expires in an hour
+        return 0
+    elif expiry.find('date on package') != -1: # Another case found
+        return -1
+    else: # nothing should go this far
+        return -1
 
 # Parse the data here
-parsedData = {}
+parsedData = []
+posOfName = {}
 for d in data:
-    s = d['name']
-    name = None
-    # Here I'm comparing the length of the name before the comma and the name before
-    # the -. I take the shorter one, which should be the proper name of the item
-    if len(s.split(',',2)[0].strip(',- ')) < len(s.split('-',2)[0].strip(',- '))
-        name = s.split(',',2)
-    else
-        name = s.split('-',2)
-    # name here is actually a list, with the first part being the name, and the second part being the description
+    item = {}
+    item['full_name'] = d['name']
+    name = getFoodName(d['name']) # name here is actually a list, with the first part being the name, and the second part being the description
+    item['name'] = name[0].strip()
 
     #Here we check if the description contains any of the unwanted tags. May need to add more tags
-    if name[1].find('UNOPENED') != -1 && name[1].find('UNOPENED OR OPENED') == -1
-        continue
-    elif name[1].find('CUT') != -1
-        continue
+    if len(name) > 1:
+        if name[1].find('unopened') != -1 and name[1].find('unopened or opened') == -1:
+            continue
+        elif name[1].find('cut') != -1:
+            continue
 
-    # cleaning up the name
-    name[0] = name[0].strip(',- ')
     # seeing if the item is already in the database
     # the following needs code to parse the adjectives and categorize it accordingly. This means
     # adding more similar blocks for different adjectives in the database
-    if not name[0] in parsedData
-        parsedData[name[0]] = {}
-    if name[1].find('COMMERCIALLY FROZEN') != -1
-        parsedData[name[0]]['frozen'] = {}
-        parsedData[name[0]]['frozen']['pantry'] = d['pantry']
-        parsedData[name[0]]['frozen']['refrigerator'] = d['refrigerator']
-        parsedData[name[0]]['frozen']['freezer'] = d['freezer']
-    elif name[1].find('COMMERCIALLY CANNED') != -1
-        parsedData[name[0]]['canned'] = {}
-        parsedData[name[0]]['canned']['pantry'] = d['pantry']
-        parsedData[name[0]]['canned']['refrigerator'] = d['refrigerator']
-        parsedData[name[0]]['canned']['freezer'] = d['freezer']
-    elif name[1].find('FRESH, RAW') != -1
-        parsedData[name[0]]['fresh'] = {}
-        parsedData[name[0]]['fresh']['pantry'] = d['pantry']
-        parsedData[name[0]]['fresh']['refrigerator'] = d['refrigerator']
-        parsedData[name[0]]['fresh']['freezer'] = d['freezer']
-    elif name[1].find('SOLD IN REFRIGERATED') != -1
-        parsedData[name[0]]['refContainer'] = {}
-        parsedData[name[0]]['refContainer']['pantry'] = d['pantry']
-        parsedData[name[0]]['refContainer']['refrigerator'] = d['refrigerator']
-        parsedData[name[0]]['refContainer']['freezer'] = d['freezer']
-    elif name[1].find('FROM CONCENTRATE') != -1
-        if name[1].find('NOT FROM CONCENTRATE') != -1
-            parsedData[name[0]]['notConcentrate'] = {}
-            parsedData[name[0]]['notConcentrate']['pantry'] = d['pantry']
-            parsedData[name[0]]['notConcentrate']['refrigerator'] = d['refrigerator']
-            parsedData[name[0]]['notConcentrate']['freezer'] = d['freezer']
-        else
-            parsedData[name[0]]['concentrate'] = {}
-            parsedData[name[0]]['concentrate']['pantry'] = d['pantry']
-            parsedData[name[0]]['concentrate']['refrigerator'] = d['refrigerator']
-            parsedData[name[0]]['concentrate']['freezer'] = d['freezer']
-    elif name[1].find('DRIED') != -1
-        parsedData[name[0]]['DRIED'] = {}
-        parsedData[name[0]]['DRIED']['pantry'] = d['pantry']
-        parsedData[name[0]]['DRIED']['refrigerator'] = d['refrigerator']
-        parsedData[name[0]]['DRIED']['freezer'] = d['freezer']
-    else
-        parsedData[name[0]]['default'] = {}
-        parsedData[name[0]]['default']['pantry'] = d['pantry']
-        parsedData[name[0]]['default']['refrigerator'] = d['refrigerator']
-        parsedData[name[0]]['default']['freezer'] = d['freezer']
+    n = 0
+    if not item['name'] in posOfName:
+        parsedData.append(item)
+        n = len(parsedData) - 1
+        posOfName[item['name']] = n
+    else:
+        n = posOfName[item['name']]
 
+    item = parsedData[n] # This isn't a new object, just a reference to the one in our data
 
+    # Initialize dictionary if not set already
+    if not 'type' in item:
+        item['type'] = {}
 
+    pantry = convertExpiryAmountToDays(d['pantry'])
+    refrigerator = convertExpiryAmountToDays(d['refrigerator'])
+    freezer = convertExpiryAmountToDays(d['freezer'])
+
+    if len(name) > 1:
+        if name[1].find('commercially frozen') != -1:
+            item['type']['frozen'] = {}
+            item['type']['frozen']['pantry'] = pantry
+            item['type']['frozen']['refrigerator'] = refrigerator
+            item['type']['frozen']['freezer'] = freezer
+        elif name[1].find('commercially canned') != -1:
+            item['type']['canned'] = {}
+            item['type']['canned']['pantry'] = pantry
+            item['type']['canned']['refrigerator'] = refrigerator
+            item['type']['canned']['freezer'] = freezer
+        elif name[1].find('fresh, raw') != -1:
+            item['type']['fresh'] = {}
+            item['type']['fresh']['pantry'] = pantry
+            item['type']['fresh']['refrigerator'] = refrigerator
+            item['type']['fresh']['freezer'] = freezer
+        elif name[1].find('sold in refrigerated') != -1:
+            item['type']['refContainer'] = {}
+            item['type']['refContainer']['pantry'] = pantry
+            item['type']['refContainer']['refrigerator'] = refrigerator
+            item['type']['refContainer']['freezer'] = freezer
+        elif name[1].find('from concentrate') != -1:
+            if name[1].find('not from concentrate') != -1:
+                item['type']['notConcentrate'] = {}
+                item['type']['notConcentrate']['pantry'] = pantry
+                item['type']['notConcentrate']['refrigerator'] = refrigerator
+                item['type']['notConcentrate']['freezer'] = freezer
+            else:
+                item['type']['concentrate'] = {}
+                item['type']['concentrate']['pantry'] = pantry
+                item['type']['concentrate']['refrigerator'] = refrigerator
+                item['type']['concentrate']['freezer'] = freezer
+        elif name[1].find('dried') != -1:
+            item['type']['dried'] = {}
+            item['type']['dried']['pantry'] = pantry
+            item['type']['dried']['refrigerator'] = refrigerator
+            item['type']['dried']['freezer'] = freezer
+        else:
+            item['type']['default'] = {}
+            item['type']['default']['pantry'] = pantry
+            item['type']['default']['refrigerator'] = refrigerator
+            item['type']['default']['freezer'] = freezer
+    else:
+        item['type']['default'] = {}
+        item['type']['default']['pantry'] = pantry
+        item['type']['default']['refrigerator'] = refrigerator
+        item['type']['default']['freezer'] = freezer
+
+dictToJsonFile(parsedData, 'stilltasty_parsed.json')
