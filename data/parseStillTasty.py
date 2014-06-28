@@ -9,7 +9,7 @@ def jsonFileToDict(file):
 
 def dictToJsonFile(data, file):
     f = open(file, 'w')
-    f.write(json.dumps({ 'data': data }))
+    f.write(json.dumps(data))
 
 # Only run this once the first time you get crawled data from StillTasty
 def cleanUpJson(data):
@@ -61,7 +61,7 @@ if not True:
     # This will not execute, see cleanUpJson()
     data = jsonFileToDict('stilltasty_raw.json')['data']
     cleanUpJson(data)
-    dictToJsonFile(data, 'stilltasty_clean.json')
+    dictToJsonFile({ 'data': data }, 'stilltasty_clean.json')
 else:
     data = jsonFileToDict('stilltasty_clean.json')['data']
 
@@ -192,4 +192,18 @@ for d in data:
         item['type']['default']['refrigerator'] = refrigerator
         item['type']['default']['freezer'] = freezer
 
-dictToJsonFile(parsedData, 'stilltasty_parsed.json')
+# Input must be sorted
+def getAlphabetPositions(parsedData):
+    positions = []
+    letter = 'a'
+
+    positions.append({ 'letter': letter, 'pos': 0 })
+
+    for x, item in enumerate(parsedData):
+        if item['name'][0] != letter:
+            letter = item['name'][0]
+            positions.append({ 'letter': letter, 'pos': x })
+
+    return positions
+
+dictToJsonFile({ 'data': parsedData, 'alphabetPos' : getAlphabetPositions(parsedData) }, 'stilltasty_parsed.json')
