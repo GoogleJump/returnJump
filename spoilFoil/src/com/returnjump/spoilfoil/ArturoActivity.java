@@ -14,29 +14,23 @@ import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 import com.parse.FunctionCallback;
-import com.parse.Parse;
 import com.parse.ParseCloud;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class ArturoActivity extends Activity {
-    List<String> fridge = new ArrayList<String>();
-    List<FoodItem> ItemsToNotify = new ArrayList<FoodItem>();
-    private FridgeDbHelper dbhelper;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_arturo);
         setupActionBar();
-        findViewById(R.id.pushing_my_buttons).setOnClickListener(notifier);
+        // findViewById(R.id.pushing_my_buttons).setOnClickListener(notifier);
         findViewById(R.id.send_emails).setOnClickListener(sendemail);
         // Alarm Set up
         //Calendar cal = Calendar.getInstance();
 
+        //Creates intent that will be called when alarm goes off
         //Intent intent = new Intent(getBaseContext(), NotificationAlarm.class);
         //PendingIntent pIntent = PendingIntent.getBroadcast(getBaseContext(), 0, intent, 0);
 
@@ -50,16 +44,23 @@ public class ArturoActivity extends Activity {
                 cloudEmailSender("random fooditem");
         }
     };
-    public OnClickListener notifier = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            NotificationSender ns = new NotificationSender(getApplicationContext());
-            ns.sendNotifications();
-        }
-    };
+   // public OnClickListener notifier = new OnClickListener() {
+   //     @Override
+   //     public void onClick(View v) {
+    //         NotificationSender ns = new NotificationSender(getApplicationContext(), );
+    //         ns.sendNotifications();
+    //     }
+    // };
 
         public void cloudEmailSender(String fooditem){
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplication());
+            /** Notifies through email that that fooditem is going to expire. If it fails to send
+             * method warns the android app. Otherwise it alerts the user that it succeeded
+             * Examples:
+             * cloudEmailSender("milk")
+             * Will send an email like so:
+             * "Hello Dear User: The following item: milk is about to expire"
+             */
+             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplication());
             String email = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
             HashMap<String, Object> params = new HashMap<String, Object>();
             params.put("address", email);
