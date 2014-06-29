@@ -3,24 +3,24 @@ package com.returnjump.spoilfoil;
 public class FridgeItem {
 
     private long rowId;
-    private String hash;
+    private String hash = null;
     private String foodItem;
-    private String rawFoodItem;
+    private String rawFoodItem = null;
     private String expiryDate;
-    private String createdDate;
-    private String updatedDate;
-    private String updatedBy;
-    private boolean fromImage;
-    private byte[] image;
-    private byte[] imageBinarized;
-    private boolean dismissed;
-    private boolean expired;
-    private boolean editedCart;
-    private boolean editedFridge;
-    private boolean deletedCart;
-    private boolean deletedFridge;
-    private boolean notifiedPush;
-    private boolean notifiedEmail;
+    private String createdDate = null;
+    private String updatedDate = null;
+    private String updatedBy = "DEVICE";
+    private boolean fromImage= false;
+    private byte[] image = null;
+    private byte[] imageBinarized = null;
+    private boolean dismissed = false;
+    private boolean expired = false;
+    private boolean editedCart = false;
+    private boolean editedFridge = false;
+    private boolean deletedCart = false;
+    private boolean deletedFridge = false;
+    private boolean notifiedPush = false;
+    private boolean notifiedEmail = false;
 
     // General constructor (Parse)
     public FridgeItem(long rowId, String hash, String foodItem, String rawFoodItem, String expiryDate,
