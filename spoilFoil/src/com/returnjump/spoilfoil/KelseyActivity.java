@@ -38,8 +38,8 @@ import java.util.GregorianCalendar;
 
 public class KelseyActivity extends FragmentActivity implements CalendarDatePickerDialog.OnDateSetListener, EditNameFragment.OnEditNameButtonClickedListener, ShakeDetector.Listener {
 
-    private ArrayAdapter<FoodItem> adapter;
-    private ArrayList<FoodItem> foodItems = new ArrayList<FoodItem>();
+    private ArrayAdapter<FridgeItem> adapter;
+    private ArrayList<FridgeItem> fridgeItems = new ArrayList<FridgeItem>();
     private FridgeDbHelper fridgeDbHelper;
     private SwipeDismissListViewTouchListener touchListener;
     protected ListView fridgeListView;
@@ -66,7 +66,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         fridgeListView.setOnScrollListener(touchListener.makeScrollListener());
         this.initializeLongClickListener();
 
-        populateListView(foodItems);
+        populateListView(fridgeItems);
 
         findViewById(R.id.submitNewItemButton).setOnClickListener(addNewItemToListView);
         findViewById(R.id.daysGoodTextView).setOnClickListener(openCalendarDialogClick);
@@ -92,7 +92,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     @Override
     protected void onRestart() {
         super.onRestart();
-        populateListView(foodItems);
+        populateListView(fridgeItems);
     }
 
     @Override
@@ -205,7 +205,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     private void copyDatabaseToList() {
         Cursor c = fridgeDbHelper.read(null);
         c.moveToFirst();
-        foodItems.clear();
+        fridgeItems.clear();
 
         while (!c.isAfterLast()) {
             long id = c.getLong(
@@ -214,13 +214,14 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
             String foodName = c.getString(
                     c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM)
             );
-            Calendar expiryDate = FridgeDbHelper.stringToCalendar(c.getString(
-                            c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)), DatabaseContract.FORMAT_DATE
+            String expiryDate = c.getString(
+                            c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)
             );
+
             boolean dismissed = c.getInt(c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED)) != 0;
 
             if (!dismissed) {
-                foodItems.add(new FoodItem(id, foodName, expiryDate, 0));
+                fridgeItems.add(new FridgeItem(id, foodName, expiryDate));
             }
 
             c.moveToNext();
@@ -228,9 +229,9 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     }
 
     // We should sort our list by descending expiry date
-    private void populateListView(ArrayList<FoodItem> list) {
+    private void populateListView(ArrayList<FridgeItem> list) {
         copyDatabaseToList();
-        adapter = new MyFoodAdapter(this, R.layout.list_fooditems, list);
+        adapter = new MyFridgeAdapter(this, R.layout.list_fooditems, list);
 
         TextView emptyFridge = (TextView) findViewById(R.id.empty_fridge);
 
@@ -250,7 +251,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
    //helper method to consolidate setting views
 
-    private void updateListView(ArrayList<FoodItem> list) {
+    private void updateListView(ArrayList<FridgeItem> list) {
         TextView emptyFridge = (TextView) findViewById(R.id.empty_fridge);
 
         adapter.notifyDataSetChanged();
@@ -267,17 +268,17 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     }
 
     //we could find where to insert this in log(n) time
-    private int insertToSortedList(FoodItem item) {
-        int n = foodItems.size();
+    private int insertToSortedList(FridgeItem item) {
+        int n = fridgeItems.size();
         int i = 0;
 
-        while ((i < n) && ((item.getDaysGood() > foodItems.get(i).getDaysGood()) ||
-                ((item.getDaysGood() == foodItems.get(i).getDaysGood()) &&
-                        (item.getFoodName().compareTo(foodItems.get(i).getFoodName())) > 0))) {
+        while ((i < n) && ((item.getDaysGood() > fridgeItems.get(i).getDaysGood()) ||
+                          ((item.getDaysGood() == fridgeItems.get(i).getDaysGood()) &&
+                          (item.getName().compareTo(fridgeItems.get(i).getName())) > 0))) {
             i++;
         }
 
-        foodItems.add(i, item);
+        fridgeItems.add(i, item);
 
         return i;
     }
@@ -305,9 +306,9 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 
                 long id = fridgeDbHelper.put(foodName, expiryDate, foodName, null, null);
-                FoodItem newFoodItem = new FoodItem(id, foodName, expiryDate, 0);
-                int index = insertToSortedList(newFoodItem); //foodItems.add(newFoodItem);
-                updateListView(foodItems);
+                FridgeItem newFridgeItem = new FridgeItem(id, foodName, FridgeDbHelper.calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
+                int index = insertToSortedList(newFridgeItem); //foodItems.add(newFoodItem);
+                updateListView(fridgeItems);
 
                 // UI clean up
                 newItemField.setText("");
@@ -402,7 +403,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
             Toast.makeText(getApplicationContext(), "Item edited!", Toast.LENGTH_LONG).show();
 
             // there should be a faster way to update the listview immediately after editing an item?
-            populateListView(foodItems);
+            populateListView(fridgeItems);
 
         }
     }
@@ -410,7 +411,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     public void editItemSequence(View view) {
         long rowId = (Long) view.getTag(R.id.food_item_id);
         FridgeItem fridgeItem = fridgeDbHelper.getRowById(rowId, true);
-        String itemName = fridgeItem.getFoodItem();
+        String itemName = fridgeItem.getName();
         String itemDate = fridgeItem.getExpiryDate(); // Then extract the day,month,year from this
         editingItem = true;
         editNameFragment = new EditNameFragment();
@@ -470,7 +471,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                             fridgeDbHelper.update(rowId, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
 
                             adapter.remove(adapter.getItem(position));
-                            updateListView(foodItems);
+                            updateListView(fridgeItems);
                         } else {
                             Toast.makeText(getApplicationContext(), "Delete failed.", Toast.LENGTH_SHORT).show();
                         }

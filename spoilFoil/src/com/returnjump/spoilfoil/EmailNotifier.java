@@ -35,7 +35,7 @@ public class EmailNotifier {
         HashMap<String, Object> params = new HashMap<String, Object>();
         String items_expiring = "";
         for (FridgeItem el : foodExpiring){
-            items_expiring += el.getFoodItem() + " ";
+            items_expiring += el.getName() + " ";
         }
         params.put("address", email);
         params.put("Expiring", items_expiring);

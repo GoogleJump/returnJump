@@ -1,11 +1,15 @@
 package com.returnjump.spoilfoil;
 
+import android.provider.ContactsContract;
+
+import java.util.GregorianCalendar;
+
 public class FridgeItem {
 
     private long rowId;
     private String hash = null;
-    private String foodItem;
-    private String rawFoodItem = null;
+    private String name;
+    private String rawName = null;
     private String expiryDate;
     private String createdDate = null;
     private String updatedDate = null;
@@ -23,15 +27,15 @@ public class FridgeItem {
     private boolean notifiedEmail = false;
 
     // General constructor (Parse)
-    public FridgeItem(long rowId, String hash, String foodItem, String rawFoodItem, String expiryDate,
+    public FridgeItem(long rowId, String hash, String name, String rawName, String expiryDate,
                       String createdDate, String updatedDate, String updatedBy, boolean fromImage,
                       byte[] image, byte[] imageBinarized, boolean dismissed, boolean expired, boolean editedCart, boolean editedFridge,
                       boolean deletedCart, boolean deletedFridge, boolean notifiedPush, boolean notifiedEmail) {
 
         this.rowId = rowId;
         this.hash = hash;
-        this.foodItem = foodItem;
-        this.rawFoodItem = rawFoodItem;
+        this.name = name;
+        this.rawName = rawName;
         this.expiryDate = expiryDate;
         this.createdDate = createdDate;
         this.updatedDate = updatedDate;
@@ -51,23 +55,33 @@ public class FridgeItem {
     }
 
     // SQLite constructor
-    public FridgeItem(long rowId, String hash, String foodItem, String rawFoodItem, String expiryDate,
+    public FridgeItem(long rowId, String hash, String name, String rawName, String expiryDate,
                       String createdDate, String updatedDate, String updatedBy, int fromImage,
                       byte[] image, byte[] imageBinarized, int dismissed, int expired, int editedCart, int editedFridge,
                       int deletedCart, int deletedFridge, int notifiedPush, int notifiedEmail) {
 
-        this(rowId, hash, foodItem, rawFoodItem, expiryDate, createdDate, updatedDate, updatedBy,
+        this(rowId, hash, name, rawName, expiryDate, createdDate, updatedDate, updatedBy,
              intToBoolean(fromImage), image, imageBinarized, intToBoolean(expired), intToBoolean(dismissed),
              intToBoolean(editedCart), intToBoolean(editedFridge), intToBoolean(deletedCart),
              intToBoolean(deletedFridge), intToBoolean(notifiedPush), intToBoolean(notifiedEmail));
 
     }
 
-    // Minimal constructor
-    public FridgeItem(long rowId, String foodItem, String expiryDate) {
+    // Camera constructor
+    public FridgeItem(long rowId, String name, String rawName, String expiryDate) {
 
         this.rowId = rowId;
-        this.foodItem = foodItem;
+        this.name = name;
+        this.rawName = name;
+        this.expiryDate = expiryDate;
+
+    }
+
+    // Minimal constructor
+    public FridgeItem(long rowId, String name, String expiryDate) {
+
+        this.rowId = rowId;
+        this.name = name;
         this.expiryDate = expiryDate;
 
     }
@@ -88,15 +102,15 @@ public class FridgeItem {
         return this.hash;
     }
 
-    public String getFoodItem() {
-        return this.foodItem;
+    public String getName() {
+        return this.name;
     }
-    public void setFoodItem(String foodItem) {
-        this.foodItem = foodItem;
+    public void setFoodItem(String name) {
+        this.name = name;
     }
 
-    public String getRawFoodItem() {
-        return this.rawFoodItem;
+    public String getRawName() {
+        return this.rawName;
     }
 
     public String getExpiryDate() {
@@ -104,6 +118,64 @@ public class FridgeItem {
     }
     public void setExpiryDate(String expiryDate) {
         this.expiryDate = expiryDate;
+    }
+    public int getDaysGood() {
+        long today = GregorianCalendar.getInstance().getTimeInMillis() / 86400000L * 86400000L;
+        long expiryDay = FridgeDbHelper.stringToCalendar(this.expiryDate, DatabaseContract.FORMAT_DATE).getTimeInMillis();
+        int diffInDays = (int) ((expiryDay - today) / 86400000L);
+
+        return diffInDays;
+    }
+    public int getExpirationNumber() {
+        int timeGood = getDaysGood();
+
+        if (timeGood >= 365) {
+            timeGood = timeGood / 365;
+        } else if (timeGood >= 28) {
+            timeGood = timeGood / 28;
+        } else if (timeGood >= 7) {
+            timeGood = timeGood / 7;
+        }
+
+        return timeGood;
+    }
+    public String getExpirationUnit() {
+        int timeGood = getDaysGood();
+        String unit;
+
+        if (timeGood >= 365) {
+            timeGood = timeGood / 365;
+
+            if (timeGood == 1) {
+                unit = "year";
+            } else {
+                unit = "years";
+            }
+        } else if (timeGood >= 28) {
+            timeGood = timeGood / 28;
+
+            if (timeGood == 1) {
+                unit = "month";
+            } else {
+                unit = "months";
+            }
+        } else if (timeGood >= 7) {
+            timeGood = timeGood / 7;
+
+            if (timeGood == 1) {
+                unit = "week";
+            } else {
+                unit = "weeks";
+            }
+        } else {
+            if (timeGood == 1) {
+                unit = "day";
+            } else {
+                unit = "days";
+            }
+        }
+
+        return unit;
     }
 
     public String getCreatedDate() {

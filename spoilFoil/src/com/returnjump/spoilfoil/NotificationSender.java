@@ -47,7 +47,7 @@ public class NotificationSender{
         String current_text = "The following items are about to expire: ";
         int number_items_expiring = items_expiring.size();
         for (int i=0; i < items_expiring.size(); i ++){
-            current_text += items_expiring.get(i).getFoodItem() + " ";
+            current_text += items_expiring.get(i).getName() + " ";
            number_items_expiring ++;
         }
         mBuilder.setContentText(current_text)

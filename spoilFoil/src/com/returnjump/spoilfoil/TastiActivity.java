@@ -59,10 +59,10 @@ public class TastiActivity extends Activity {
     private static String IMAGE_PATH;
     private static final String LANG = "eng";
 
-    private ArrayAdapter<FoodItem> adapter;
+    private ArrayAdapter<FridgeItem> adapter;
     private FridgeDbHelper dbHelper;
-    private List<FoodItem> shoppingCart = new ArrayList<FoodItem>();
-    private List<FoodItem> deletedCart = new ArrayList<FoodItem>();
+    private List<FridgeItem> shoppingCart = new ArrayList<FridgeItem>();
+    private List<FridgeItem> deletedCart = new ArrayList<FridgeItem>();
     private List<byte[]> shoppingCartImages = new ArrayList<byte[]>();
     private List<byte[]> deletedCartImages = new ArrayList<byte[]>();
 
@@ -91,7 +91,7 @@ public class TastiActivity extends Activity {
                     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                         // reverseSortedPositions always has a length = 1
                         int position = reverseSortedPositions[0];
-                        FoodItem item = adapter.getItem(position);
+                        FridgeItem item = adapter.getItem(position);
 
                         // Take the item+image and put it in the deleted cart, then remove it
                         deletedCart.add(item);
@@ -107,7 +107,7 @@ public class TastiActivity extends Activity {
 
         // Setup database and list
         dbHelper = new FridgeDbHelper(this);
-        adapter = new MyFoodAdapter(this, R.layout.list_fooditems, shoppingCart);
+        adapter = new MyFridgeAdapter(this, R.layout.list_fooditems, shoppingCart);
         cartListView.setAdapter(adapter);
 
         findViewById(R.id.checkoutButton).setOnClickListener(addToFridge);
@@ -323,17 +323,17 @@ public class TastiActivity extends Activity {
 
             // Add the shopping cart to the database
             for (int i = 0; i < n; ++i) {
-                FoodItem item = shoppingCart.get(i);
+                FridgeItem item = shoppingCart.get(i);
 
-                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), shoppingCartImages.get(i), shoppingCartImages.get(i));
+                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), shoppingCartImages.get(i), shoppingCartImages.get(i));
                 dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, null, null, null, null);
             }
 
             // Add the deleted cart to the database, setting deleted_cart to True
             for (int j = 0; j < m; ++j) {
-                FoodItem item = deletedCart.get(j);
+                FridgeItem item = deletedCart.get(j);
 
-                long id = dbHelper.put(item.getFoodName(), item.getExpiryDate(), item.getFoodName(), deletedCartImages.get(j), deletedCartImages.get(j));
+                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), deletedCartImages.get(j), deletedCartImages.get(j));
                 dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
             }
 
@@ -484,8 +484,8 @@ public class TastiActivity extends Activity {
                 // Add item to  list
                 Calendar c = GregorianCalendar.getInstance();
                 c.add(Calendar.DATE, 7); // DEFAULTED TO 1 WEEK!
-                FoodItem newFoodItem = new FoodItem(-1, recognizedText, c, 0);
-                shoppingCart.add(newFoodItem);
+                FridgeItem newFridgeItem = new FridgeItem(-1, recognizedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE), recognizedText);
+                shoppingCart.add(newFridgeItem);
                 shoppingCartImages.add(bitmapToByteArray(bitmap));
 
                 runOnUiThread(new Runnable() {

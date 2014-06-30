@@ -11,16 +11,16 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class MyFoodAdapter extends ArrayAdapter<FoodItem> {
+public class MyFridgeAdapter extends ArrayAdapter<FridgeItem> {
       private Context context;
       private int layout;
-      private List<FoodItem> foods;
+      private List<FridgeItem> fridgeItems;
       
-      public MyFoodAdapter(Context context, int layout, List<FoodItem> foods) {
-          super(context, layout, foods);
+      public MyFridgeAdapter(Context context, int layout, List<FridgeItem> fridgeItems) {
+          super(context, layout, fridgeItems);
           this.context = context;
           this.layout = layout;
-          this.foods = foods;
+          this.fridgeItems = fridgeItems;
       }
 
       @Override
@@ -31,10 +31,10 @@ public class MyFoodAdapter extends ArrayAdapter<FoodItem> {
               itemView = LayoutInflater.from(context).inflate(layout, parent, false);
           }
           
-          FoodItem currentFood = foods.get(position);
+          FridgeItem currentFood = fridgeItems.get(position);
           
           TextView foodItemName = (TextView) itemView.findViewById(R.id.food_item_name);
-          foodItemName.setText(currentFood.getFoodName());
+          foodItemName.setText(currentFood.getName());
 
           // Set up which linear layout will show since only one of the two should be
           // visible at any given time
@@ -62,7 +62,7 @@ public class MyFoodAdapter extends ArrayAdapter<FoodItem> {
           }
           
           // Set the tags for hidden data
-          itemView.setTag(R.id.food_item_id, currentFood.getId());
+          itemView.setTag(R.id.food_item_id, currentFood.getRowId());
 
           return itemView;
      }               

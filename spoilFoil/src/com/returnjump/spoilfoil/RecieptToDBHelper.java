@@ -45,5 +45,5 @@ public class RecieptToDBHelper {
         // the distance is the cost for transforming all letters in both strings
         return cost[dbItemLength-1];
     }
-s
+
 }
