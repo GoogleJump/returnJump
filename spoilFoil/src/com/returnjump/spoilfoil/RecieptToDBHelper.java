@@ -1,12 +1,11 @@
 package com.returnjump.spoilfoil;
 
+import java.util.List;
+
 /**
  * Created by Kelsey on 6/29/2014.
  */
 public class RecieptToDBHelper {
-
-    public RecieptToDBHelper(){}
-
 
     public static int editDistance (String dbItem, String recieptItem) {
         dbItem=dbItem.toLowerCase();
@@ -44,6 +43,23 @@ public class RecieptToDBHelper {
 
         // the distance is the cost for transforming all letters in both strings
         return cost[dbItemLength-1];
+    }
+
+    // If there's a tie, this will return the first item with the lowest cost
+    public static String minimumEditDistance(List<String> items, String target) {
+        String minimum = target;
+        int minCost = Integer.MAX_VALUE;
+
+        for (String item: items) {
+            int cost = editDistance(item, target);
+
+            if (cost < minCost) {
+                minimum = item;
+                minCost = cost;
+            }
+        }
+
+        return minimum;
     }
 
 }
