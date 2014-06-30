@@ -32,8 +32,9 @@ public class NotificationAlarm extends BroadcastReceiver {
 
         List<FridgeItem> foodexpiring = fridge.getAll(column, operator, wherevalue, conjunction, true);
         NotificationSender ns = new NotificationSender(context, foodexpiring);
-        //Intent scheduledIntent = new Intent(context, NotificationAlarm.class);
-        // PendingIntent pIntent = PendingIntent.getActivity(context, 0, scheduledIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        EmailNotifier emailsender = new EmailNotifier(context, foodexpiring);
+        emailsender.cloudEmailSender();
         ns.sendNotifications();
+
     }
 }

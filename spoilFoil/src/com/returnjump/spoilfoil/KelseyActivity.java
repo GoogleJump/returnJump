@@ -67,6 +67,17 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         sd = new ShakeDetector(this);
         sd.start(sensorManager);
 
+        // Alarm Set up
+        //Calendar cal = Calendar.getInstance();
+
+        //Creates intent that will be called when alarm goes off
+        //Intent intent = new Intent(getBaseContext(), NotificationAlarm.class);
+        //PendingIntent pIntent = PendingIntent.getBroadcast(getBaseContext(), 0, intent, 0);
+
+        //AlarmManager alarm = (AlarmManager) getSystemService(getBaseContext().ALARM_SERVICE);
+        //alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), (60 * 1000* 60 * 24), pIntent);
+
+
     }
 
     @Override
@@ -409,5 +420,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     public void hearShake() {
         Toast.makeText(this, "Expired food has been dismissed.", Toast.LENGTH_SHORT).show();
     }
+
+
 
 }
