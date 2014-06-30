@@ -3,27 +3,6 @@ package com.returnjump.spoilfoil;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.lang.reflect.Array;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-import com.googlecode.leptonica.android.Binarize;
-import com.googlecode.leptonica.android.Pix;
-import com.googlecode.leptonica.android.ReadFile;
-import com.googlecode.leptonica.android.WriteFile;
-import com.googlecode.tesseract.android.TessBaseAPI;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -52,6 +31,25 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.googlecode.leptonica.android.Binarize;
+import com.googlecode.leptonica.android.Pix;
+import com.googlecode.leptonica.android.ReadFile;
+import com.googlecode.leptonica.android.WriteFile;
+import com.googlecode.tesseract.android.TessBaseAPI;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 public class TastiActivity extends Activity {
 
@@ -150,11 +148,6 @@ public class TastiActivity extends Activity {
             return true;
         } else if (itemId == R.id.action_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
-
-            return true;
-        } else if (itemId == R.id.action_arturo) {
-            Intent intent = new Intent(this, ArturoActivity.class);
             startActivity(intent);
 
             return true;

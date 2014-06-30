@@ -192,11 +192,6 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
             startActivity(intent);
 
             return true;
-        } else if (itemId == R.id.action_arturo) {
-            Intent intent = new Intent(this, ArturoActivity.class);
-            startActivity(intent);
-
-            return true;
         } else if (itemId == R.id.action_camera) {
             Intent intent = new Intent(this, TastiActivity.class);
             startActivity(intent);

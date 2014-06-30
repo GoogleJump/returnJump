@@ -35,14 +35,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.returnjump.spoilfoil.ArturoActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/title_activity_arturo"
-            android:parentActivityName="com.returnjump.spoilfoil.KelseyActivity"
-        />
 
-            <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
+        <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
 
 
 
