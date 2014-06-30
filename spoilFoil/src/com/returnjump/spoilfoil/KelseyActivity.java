@@ -2,6 +2,7 @@ package com.returnjump.spoilfoil;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -24,6 +25,12 @@ import android.widget.Toast;
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
 import com.squareup.seismic.ShakeDetector;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -33,7 +40,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
     private ArrayAdapter<FoodItem> adapter;
     private ArrayList<FoodItem> foodItems = new ArrayList<FoodItem>();
-    private FridgeDbHelper dbHelper;
+    private FridgeDbHelper fridgeDbHelper;
     private SwipeDismissListViewTouchListener touchListener;
     protected ListView fridgeListView;
     private boolean editingItem = false;
@@ -48,7 +55,9 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kelsey);
 
-        dbHelper = new FridgeDbHelper(this);
+        initializeDatabase();
+
+        fridgeDbHelper = new FridgeDbHelper(this);
         // dbHelper.onUpgrade(dbHelper.getWritableDatabase(), 1, 1); // Use this to delete database
         fridgeListView = (ListView) findViewById(R.id.foodItemListView);
 
@@ -100,6 +109,66 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         sd.stop();
     }
 
+    private void initializeFoodData(FoodTableHelper foodTableHelper, ExpiryTableHelper expiryTableHelper, JSONArray data) {
+        try {
+
+            for (int i = 0; i < data.length(); i++) {
+                JSONObject item = data.getJSONObject(i);
+                JSONArray expiry = item.getJSONArray("expiry");
+
+                long rowId = foodTableHelper.put(item.getString("name"), item.getString("full_name"));
+
+                for (int j = 0; j < expiry.length(); j++) {
+                    JSONObject exp = expiry.getJSONObject(j);
+
+                    expiryTableHelper.put(rowId, exp.getString("type"), exp.getInt("freezer"), exp.getInt("pantry"), exp.getInt("refrigerator"));
+                }
+
+            }
+
+        } catch (JSONException e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    // This should be asyncronous
+    private void initializeDatabase() {
+        FoodTableHelper foodTableHelper = new FoodTableHelper(this);
+        ExpiryTableHelper expiryTableHelper = new ExpiryTableHelper(this);
+
+        if (DatabaseContract.getCurrentVersion(this) <= DatabaseContract.DATABASE_VERSION) {
+
+            Toast.makeText(this, "Initializing database.", Toast.LENGTH_LONG).show();
+
+            // Clear database
+            foodTableHelper.onUpgrade(foodTableHelper.getWritableDatabase(), -1, -1);
+            expiryTableHelper.onUpgrade(expiryTableHelper.getWritableDatabase(), -1, -1);
+
+            try {
+                AssetManager assetManager = getAssets();
+                InputStream in = assetManager.open("stilltasty_parsed.json");
+
+                byte[] buffer = new byte[in.available()];
+                in.read(buffer);
+                in.close();
+
+                String data = new String(buffer, "UTF-8");
+                JSONObject json = new JSONObject(data);
+
+                initializeFoodData(foodTableHelper, expiryTableHelper, json.getJSONArray("data"));
+
+                // Increment the current version so that when the DATABASE_VERSION is updated,
+                // this data will be updated as well
+                DatabaseContract.setCurrentVersion(DatabaseContract.DATABASE_VERSION + 1, this);
+
+            } catch (IOException e) {
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            } catch (JSONException e) {
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
     private Calendar getCalendar(int daysFromToday) {
         Calendar c = GregorianCalendar.getInstance();
         c.add(Calendar.DATE, daysFromToday);
@@ -139,7 +208,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     }
 
     private void copyDatabaseToList() {
-        Cursor c = dbHelper.read(null);
+        Cursor c = fridgeDbHelper.read(null);
         c.moveToFirst();
         foodItems.clear();
 
@@ -240,7 +309,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                 // Hide the keyboard if showing
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 
-                long id = dbHelper.put(foodName, expiryDate, foodName, null, null);
+                long id = fridgeDbHelper.put(foodName, expiryDate, foodName, null, null);
                 FoodItem newFoodItem = new FoodItem(id, foodName, expiryDate, 0);
                 int index = insertToSortedList(newFoodItem); //foodItems.add(newFoodItem);
                 updateListView(foodItems);
@@ -333,7 +402,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
             ft.commit();
             editingItem = false;
             Calendar expiryDate = new GregorianCalendar(year, monthOfYear, dayOfMonth);
-            dbHelper.update(editNameFragment.getArguments().getLong("rowId"),editNameFragment.getArguments().getString("name"), expiryDate, null, null, null, null, DatabaseContract.BOOL_TRUE,
+            fridgeDbHelper.update(editNameFragment.getArguments().getLong("rowId"),editNameFragment.getArguments().getString("name"), expiryDate, null, null, null, null, DatabaseContract.BOOL_TRUE,
                     null, null, null, null);
             Toast.makeText(getApplicationContext(), "Item edited!", Toast.LENGTH_LONG).show();
 
@@ -345,7 +414,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
     public void editItemSequence(View view) {
         long rowId = (Long) view.getTag(R.id.food_item_id);
-        FridgeItem fridgeItem = dbHelper.getRowById(rowId, true);
+        FridgeItem fridgeItem = fridgeDbHelper.getRowById(rowId, true);
         String itemName = fridgeItem.getFoodItem();
         String itemDate = fridgeItem.getExpiryDate(); // Then extract the day,month,year from this
         editingItem = true;
@@ -403,7 +472,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                         // Set visible to false in the database for the item that was swiped
                         if (child != null) {
                             long rowId = (Long) child.getTag(R.id.food_item_id);
-                            dbHelper.update(rowId, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
+                            fridgeDbHelper.update(rowId, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
 
                             adapter.remove(adapter.getItem(position));
                             updateListView(foodItems);

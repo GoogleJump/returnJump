@@ -16,7 +16,7 @@
             android:paddingLeft="10dp"
             android:text="@string/edit_text_new_foodItem"
             android:textColor="@color/black"
-            android:textSize="22sp"
+            android:textSize="@dimen/large"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -40,7 +40,7 @@
             android:layout_gravity="center"
             android:text="@string/expired"
             android:textColor="@color/theme_red"
-            android:textSize="18sp"
+            android:textSize="@dimen/medium"
             android:maxLines="1" />
 
     </LinearLayout>
@@ -60,7 +60,7 @@
             android:layout_gravity="center"
             android:text="@string/number"
             android:textColor="@color/black"
-            android:textSize="18sp"
+            android:textSize="@dimen/medium"
             android:maxLines="1"
             android:ellipsize="end" />
     
@@ -71,7 +71,7 @@
             android:layout_gravity="center"
             android:text="@string/days"
             android:textColor="@color/black"
-            android:textSize="12sp"
+            android:textSize="@dimen/small"
             android:maxLines="1" />
         
     </LinearLayout>

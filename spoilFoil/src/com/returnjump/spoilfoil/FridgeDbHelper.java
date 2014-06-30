@@ -11,12 +11,20 @@ import java.util.GregorianCalendar;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.widget.Toast;
+
+import com.parse.FindCallback;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.SaveCallback;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,9 +33,13 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 public class FridgeDbHelper extends SQLiteOpenHelper {
-    
+
+    private Context context;
+
     public FridgeDbHelper(Context context) {
         super(context, DatabaseContract.DATABASE_NAME, null, DatabaseContract.DATABASE_VERSION);
+
+        this.context = context;
     }
     
     public void onCreate(SQLiteDatabase db) {
@@ -84,8 +96,9 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
         String calNow = calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME);
+        String hash = getMD5Hash(foodItem + calNow);
 
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_HASH, getMD5Hash(foodItem + calNow));
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_HASH, hash);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM, rawFoodItem);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
@@ -112,6 +125,18 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
                 DatabaseContract.FridgeTable.TABLE_NAME,
                 null,
                 values);
+
+        // Save to cloud
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.context);
+        boolean auto = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_AUTO, true);
+        if (auto) {
+            MyParse.saveFridgeItemEventually(
+                    new FridgeItem(newRowId, hash, foodItem, rawFoodItem, calendarToString(expiryDate,
+                            DatabaseContract.FORMAT_DATE), calNow, calNow, "DEVICE", false, image, imageBinarized,
+                            false, false, false, false, false, false, false, false),
+                    true, context
+            );
+        }
         
         return newRowId;
     }
@@ -276,6 +301,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
 
         while (!c.isAfterLast()) {
             fridgeItems.add(cursorToFridgeItem(c, isMinimal));
+            c.moveToNext();
         }
 
         return fridgeItems;
@@ -405,5 +431,13 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
             values,
             selection,
             selectionArgs);
+
+        // Save to cloud
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.context);
+        boolean auto = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_AUTO, true);
+        if (auto) {
+            MyParse.saveFridgeItemEventually(getRowById(rowId, false), false, context);
+        }
+
     }
 }

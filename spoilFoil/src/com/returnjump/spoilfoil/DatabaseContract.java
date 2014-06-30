@@ -1,10 +1,13 @@
 package com.returnjump.spoilfoil;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 
 public final class DatabaseContract {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 5;
     public static final String DATABASE_NAME = "database.db";
     private static final String TEXT_TYPE = " TEXT";
     private static final String INTEGER_TYPE = " INTEGER";
@@ -24,7 +27,17 @@ public final class DatabaseContract {
     // give it an empty *private* constructor.
     private DatabaseContract() {}
 
-    // Inner class that defines the table contents
+    public static int getCurrentVersion(Context context) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+
+        return sharedPref.getInt(SettingsActivity.DB_VERSION, 1);
+    }
+
+    public static void setCurrentVersion(int version, Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences.edit().putInt(SettingsActivity.DB_VERSION, version).commit();
+    }
+
     public static abstract class FridgeTable implements BaseColumns {
         public static final String TABLE_NAME = "fridge";
         public static final String COLUMN_NAME_HASH = "hash";
@@ -72,4 +85,46 @@ public final class DatabaseContract {
         public static final String SQL_DELETE_TABLE =
             "DROP TABLE IF EXISTS " + FridgeTable.TABLE_NAME;
     }
+
+    public static abstract class FoodTable implements BaseColumns {
+        public static final String TABLE_NAME = "food";
+        public static final String COLUMN_NAME_NAME = "name";
+        public static final String COLUMN_NAME_FULL_NAME = "full_name";
+        public static final String COLUMN_NAME_FIRST_LETTER = "first_letter";
+
+        public static final String SQL_CREATE_TABLE =
+                "CREATE TABLE " + TABLE_NAME + " (" +
+                        FoodTable._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
+                        FoodTable.COLUMN_NAME_NAME + TEXT_TYPE + COMMA_SEP +
+                        FoodTable.COLUMN_NAME_FULL_NAME + TEXT_TYPE + COMMA_SEP +
+                        FoodTable.COLUMN_NAME_FIRST_LETTER + TEXT_TYPE +
+                        " )";
+
+        public static final String SQL_DELETE_TABLE =
+                "DROP TABLE IF EXISTS " + FoodTable.TABLE_NAME;
+    }
+
+    public static abstract class ExpiryTable implements BaseColumns {
+        public static final String TABLE_NAME = "expiry";
+        public static final String COLUMN_NAME_FOOD_ID = "food_id";
+        public static final String COLUMN_NAME_TYPE = "type";
+        public static final String COLUMN_NAME_FREEZER = "freezer";
+        public static final String COLUMN_NAME_PANTRY = "pantry";
+        public static final String COLUMN_NAME_REFRIGERATOR = "refrigerator";
+
+        public static final String SQL_CREATE_TABLE =
+                "CREATE TABLE " + TABLE_NAME + " (" +
+                        ExpiryTable._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
+                        ExpiryTable.COLUMN_NAME_FOOD_ID + INTEGER_TYPE + COMMA_SEP +
+                        ExpiryTable.COLUMN_NAME_TYPE + TEXT_TYPE + COMMA_SEP +
+                        ExpiryTable.COLUMN_NAME_FREEZER + INTEGER_TYPE + COMMA_SEP +
+                        ExpiryTable.COLUMN_NAME_PANTRY + INTEGER_TYPE + COMMA_SEP +
+                        ExpiryTable.COLUMN_NAME_REFRIGERATOR + INTEGER_TYPE + COMMA_SEP +
+                        "FOREIGN KEY (" + ExpiryTable.COLUMN_NAME_FOOD_ID + ") REFERENCES " + FoodTable.TABLE_NAME + "(" + FoodTable._ID + ")" +
+                        " )";
+
+        public static final String SQL_DELETE_TABLE =
+                "DROP TABLE IF EXISTS " + ExpiryTable.TABLE_NAME;
+    }
+
 }

@@ -6,4 +6,9 @@
     -->
     <dimen name="activity_horizontal_margin">128dp</dimen>
 
+    <!-- Font sizes -->
+    <dimen name="small">20dp</dimen>
+    <dimen name="medium">26dp</dimen>
+    <dimen name="large">30dp</dimen>
+
 </resources>

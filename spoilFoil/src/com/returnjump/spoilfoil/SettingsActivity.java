@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SettingsActivity extends PreferenceActivity {
+    final public static String DB_VERSION = "db_version";
     final public static String PREF_TIME = "preference_time";
     final public static String PREF_CHECKBOX_PUSH = "checkbox_push";
     final public static String PREF_CHECKBOX_EMAIL = "checkbox_email";

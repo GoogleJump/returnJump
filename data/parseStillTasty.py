@@ -137,60 +137,39 @@ for d in data:
     item = parsedData[n] # This isn't a new object, just a reference to the one in our data
 
     # Initialize dictionary if not set already
-    if not 'type' in item:
-        item['type'] = {}
+    if not 'expiry' in item:
+        item['expiry'] = []
 
     pantry = convertExpiryAmountToDays(d['pantry'])
     refrigerator = convertExpiryAmountToDays(d['refrigerator'])
     freezer = convertExpiryAmountToDays(d['freezer'])
 
+    expiry = {}
     if len(name) > 1:
         if name[1].find('commercially frozen') != -1:
-            item['type']['frozen'] = {}
-            item['type']['frozen']['pantry'] = pantry
-            item['type']['frozen']['refrigerator'] = refrigerator
-            item['type']['frozen']['freezer'] = freezer
+            expiry['type'] = 'frozen'
         elif name[1].find('commercially canned') != -1:
-            item['type']['canned'] = {}
-            item['type']['canned']['pantry'] = pantry
-            item['type']['canned']['refrigerator'] = refrigerator
-            item['type']['canned']['freezer'] = freezer
+            expiry['type'] = 'canned'
         elif name[1].find('fresh, raw') != -1:
-            item['type']['fresh'] = {}
-            item['type']['fresh']['pantry'] = pantry
-            item['type']['fresh']['refrigerator'] = refrigerator
-            item['type']['fresh']['freezer'] = freezer
+            expiry['type'] = 'fresh'
         elif name[1].find('sold in refrigerated') != -1:
-            item['type']['refContainer'] = {}
-            item['type']['refContainer']['pantry'] = pantry
-            item['type']['refContainer']['refrigerator'] = refrigerator
-            item['type']['refContainer']['freezer'] = freezer
+            expiry['type'] = 'refContainer'
         elif name[1].find('from concentrate') != -1:
             if name[1].find('not from concentrate') != -1:
-                item['type']['notConcentrate'] = {}
-                item['type']['notConcentrate']['pantry'] = pantry
-                item['type']['notConcentrate']['refrigerator'] = refrigerator
-                item['type']['notConcentrate']['freezer'] = freezer
+                expiry['type'] = 'notConcentrate'
             else:
-                item['type']['concentrate'] = {}
-                item['type']['concentrate']['pantry'] = pantry
-                item['type']['concentrate']['refrigerator'] = refrigerator
-                item['type']['concentrate']['freezer'] = freezer
+                expiry['type'] = 'concentrate'
         elif name[1].find('dried') != -1:
-            item['type']['dried'] = {}
-            item['type']['dried']['pantry'] = pantry
-            item['type']['dried']['refrigerator'] = refrigerator
-            item['type']['dried']['freezer'] = freezer
+            expiry['type'] = 'dried'
         else:
-            item['type']['default'] = {}
-            item['type']['default']['pantry'] = pantry
-            item['type']['default']['refrigerator'] = refrigerator
-            item['type']['default']['freezer'] = freezer
+            expiry['type'] = 'default'
     else:
-        item['type']['default'] = {}
-        item['type']['default']['pantry'] = pantry
-        item['type']['default']['refrigerator'] = refrigerator
-        item['type']['default']['freezer'] = freezer
+        expiry['type'] = 'default'
+
+    expiry['pantry'] = pantry
+    expiry['refrigerator'] = refrigerator
+    expiry['freezer'] = freezer
+    item['expiry'].append(expiry)
 
 # Input must be sorted
 def getAlphabetPositions(parsedData):
@@ -206,4 +185,5 @@ def getAlphabetPositions(parsedData):
 
     return positions
 
+# Turns out that we don't really need the alphabet positons, the SQL DB handles that
 dictToJsonFile({ 'data': parsedData, 'alphabetPos' : getAlphabetPositions(parsedData) }, 'stilltasty_parsed.json')

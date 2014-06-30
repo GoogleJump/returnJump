@@ -29,10 +29,10 @@ import java.util.List;
 public class MyParse {
     final public static int PE_ObjectNotFound = 101;
 
-    private static interface MyCallbackInterface {
+    public static interface MyCallbackInterface {
 
         public void success(Object result);
-        public void error();
+        public void error(); // Too many duplicates, make a default method for this
         public void fallback(String message);
 
     }
@@ -80,62 +80,60 @@ public class MyParse {
 
     public static void savePreferenceToCloud(final Context context) {
 
-        if (networkConnectionType(context) != -1) {
-            isUserClassSet(new MyCallbackInterface() {
+        isUserClassSet(new MyCallbackInterface() {
 
-                @Override
-                public void success(Object result) {
-                    ParseObject user = (ParseObject) result;
-                    SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-                    String emailAddress = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
-                    boolean notifyPush = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, true);
-                    boolean notifyEmail = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, false);
+            @Override
+            public void success(Object result) {
+                ParseObject user = (ParseObject) result;
+                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+                String emailAddress = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
+                boolean notifyPush = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, true);
+                boolean notifyEmail = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, false);
 
-                    user.put("email", emailAddress);
-                    user.put("notifyPush", notifyPush);
-                    user.put("notifyEmail", notifyEmail);
+                user.put("email", emailAddress);
+                user.put("notifyPush", notifyPush);
+                user.put("notifyEmail", notifyEmail);
 
-                    user.saveEventually(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e == null) {
-                                fallback("Preferences saved to cloud.");
-                            } else {
-                                fallback(e.getMessage());
-                            }
+                user.saveEventually(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e == null) {
+                            fallback("Preferences saved to cloud.");
+                        } else {
+                            fallback(e.getMessage());
                         }
-                    });
-                }
+                    }
+                });
+            }
 
-                @Override
-                public void error() {
+            @Override
+            public void error() {
 
-                    ParseObject userClass = new ParseObject(getUserParseClass());
+                ParseObject userClass = new ParseObject(getUserParseClass());
 
-                    userClass.saveEventually(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e == null) {
-                                ParseObject user = new ParseObject("Users");
+                userClass.saveEventually(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e == null) {
+                            ParseObject user = new ParseObject("Users");
 
-                                user.put("installationObjectId", getInstallation().getObjectId());
-                                user.put("installationId", getInstallationId());
+                            user.put("installationObjectId", getInstallation().getObjectId());
+                            user.put("installationId", getInstallationId());
 
-                                success(user);
-                            } else {
-                                fallback(e.getMessage());
-                            }
+                            success(user);
+                        } else {
+                            fallback(e.getMessage());
                         }
-                    });
+                    }
+                });
 
-                }
+            }
 
-                @Override
-                public void fallback(String message) {
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+            @Override
+            public void fallback(String message) {
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            }
+        }, context);
 
     }
 
@@ -201,6 +199,117 @@ public class MyParse {
         return parseCloudFridgeHash;
     }
 
+    private static void saveNewFridgeItemEventually(FridgeItem fridgeItem) {
+        ParseObject parseObject = new ParseObject(getUserParseClass());
+
+        // This data should never be modified
+        parseObject.put("rowId", fridgeItem.getRowId());
+        parseObject.put("hash", fridgeItem.getHash());
+        parseObject.put("rawFoodItem", fridgeItem.getRawFoodItem());
+        parseObject.put("createdDate", fridgeItem.getCreatedDate());
+        parseObject.put("fromImage", fridgeItem.isFromImage());
+
+        byte[] image = fridgeItem.getImage();
+        byte[] imageBinarized = fridgeItem.getImageBinarized();
+        if (image != null) {
+            ParseFile pfImage = new ParseFile("image.jpg", image);
+            pfImage.saveInBackground(); // Need a save eventually
+            parseObject.put("image", pfImage);
+        }
+        if (imageBinarized != null) {
+            ParseFile pfImageBinarized = new ParseFile("imageBinarized.jpg", imageBinarized);
+            pfImageBinarized.saveInBackground();
+            parseObject.put("imageBinarized", pfImageBinarized);
+        }
+
+        saveUpdatedFridgeItemEventually(fridgeItem, parseObject);
+        
+    }
+
+    private static void saveUpdatedFridgeItemEventually(FridgeItem fridgeItem, ParseObject parseObject) {
+
+        // Modifiable data
+        parseObject.put("foodItem", fridgeItem.getFoodItem());
+        parseObject.put("expiryDate", fridgeItem.getExpiryDate());
+        parseObject.put("updatedDate", fridgeItem.getUpdatedDate());
+        parseObject.put("updatedBy", fridgeItem.getUpdatedBy());
+        parseObject.put("dismissed", fridgeItem.isDismissed());
+        parseObject.put("expired", fridgeItem.isExpired());
+        parseObject.put("editedCart", fridgeItem.isEditedCart());
+        parseObject.put("editedFridge", fridgeItem.isEditedFridge());
+        parseObject.put("deletedCart", fridgeItem.isDeletedCart());
+        parseObject.put("deletedFridge", fridgeItem.isDeletedFridge());
+        parseObject.put("notifiedPush", fridgeItem.isNotifiedPush());
+        parseObject.put("notifiedEmail", fridgeItem.isNotifiedEmail());
+
+        parseObject.saveEventually();
+
+    }
+
+    public static void saveFridgeItemEventually(final FridgeItem fridgeItem, final boolean isNew, final Context context) {
+        MyParse.isUserClassSet(new MyParse.MyCallbackInterface() {
+            @Override
+            public void success(Object result) {
+
+                if (isNew) {
+                    saveNewFridgeItemEventually(fridgeItem);
+                } else {
+                    ParseQuery<ParseObject> query = ParseQuery.getQuery(MyParse.getUserParseClass());
+                    query.whereEqualTo("hash", fridgeItem.getHash());
+                    query.getFirstInBackground(new GetCallback<ParseObject>() {
+                        @Override
+                        public void done(ParseObject parseObject, ParseException e) {
+                            if (e == null) {
+                                saveUpdatedFridgeItemEventually(fridgeItem, parseObject);
+                            } else {
+                                fallback(e.getMessage());
+                            }
+                        }
+                    });
+                }
+
+            }
+
+            @Override
+            public void error() {
+
+                ParseObject userClass = new ParseObject(getUserParseClass());
+
+                userClass.saveEventually(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e == null) {
+                            ParseObject user = new ParseObject("Users");
+
+                            user.put("installationObjectId", getInstallation().getObjectId());
+                            user.put("installationId", getInstallationId());
+
+                            user.saveEventually(new SaveCallback() {
+                                @Override
+                                public void done(ParseException e) {
+                                    if (e == null) {
+                                        success(null);
+                                    } else {
+                                        fallback(e.getMessage());
+                                    }
+                                }
+                            });
+
+                        } else {
+                            fallback(e.getMessage());
+                        }
+                    }
+                });
+
+            }
+
+            @Override
+            public void fallback(String message) {
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            }
+        }, context);
+    }
+
     // TODO: Still need a callback on the last item to display completion
     private static void backupToCloud(final Context context, HashMap<String, ParseObject> parseCloudFridgeHash) {
 
@@ -216,59 +325,11 @@ public class MyParse {
 
             if (parseCloudItem == null) { // This is a new item
 
-                ParseObject newParseCloudItem = new ParseObject(getUserParseClass());
-
-                // Non-changable data
-                newParseCloudItem.put("rowId", localFridgeItem.getRowId());
-                newParseCloudItem.put("hash", localFridgeItem.getHash());
-                newParseCloudItem.put("rawFoodItem", localFridgeItem.getRawFoodItem());
-                newParseCloudItem.put("createdDate", localFridgeItem.getCreatedDate());
-                newParseCloudItem.put("fromImage", localFridgeItem.isFromImage());
-
-                byte[] image = localFridgeItem.getImage();
-                byte[] imageBinarized = localFridgeItem.getImageBinarized();
-                if (image != null) {
-                    ParseFile pfImage = new ParseFile("image.jpg", image);
-                    pfImage.saveInBackground(); // Need a save eventually
-                    newParseCloudItem.put("image", pfImage);
-                }
-                if (imageBinarized != null) {
-                    ParseFile pfImageBinarized = new ParseFile("imageBinarized.jpg", imageBinarized);
-                    pfImageBinarized.saveInBackground();
-                    newParseCloudItem.put("imageBinarized", pfImageBinarized);
-                }
-
-                newParseCloudItem.put("foodItem", localFridgeItem.getFoodItem());
-                newParseCloudItem.put("expiryDate", localFridgeItem.getExpiryDate());
-                newParseCloudItem.put("updatedDate", localFridgeItem.getUpdatedDate());
-                newParseCloudItem.put("updatedBy", localFridgeItem.getUpdatedBy());
-                newParseCloudItem.put("dismissed", localFridgeItem.isDismissed());
-                newParseCloudItem.put("expired", localFridgeItem.isExpired());
-                newParseCloudItem.put("editedCart", localFridgeItem.isEditedCart());
-                newParseCloudItem.put("editedFridge", localFridgeItem.isEditedFridge());
-                newParseCloudItem.put("deletedCart", localFridgeItem.isDeletedCart());
-                newParseCloudItem.put("deletedFridge", localFridgeItem.isDeletedFridge());
-                newParseCloudItem.put("notifiedPush", localFridgeItem.isNotifiedPush());
-                newParseCloudItem.put("notifiedEmail", localFridgeItem.isNotifiedEmail());
-
-                newParseCloudItem.saveEventually();
+                saveNewFridgeItemEventually(localFridgeItem);
 
             } else if (!localFridgeItem.getUpdatedDate().equals(parseCloudItem.getString("updatedDate"))) { // This item is just being updated
 
-                parseCloudItem.put("foodItem", localFridgeItem.getFoodItem());
-                parseCloudItem.put("expiryDate", localFridgeItem.getExpiryDate());
-                parseCloudItem.put("updatedDate", localFridgeItem.getUpdatedDate());
-                parseCloudItem.put("updatedBy", localFridgeItem.getUpdatedBy());
-                parseCloudItem.put("dismissed", localFridgeItem.isDismissed());
-                parseCloudItem.put("expired", localFridgeItem.isExpired());
-                parseCloudItem.put("editedCart", localFridgeItem.isEditedCart());
-                parseCloudItem.put("editedFridge", localFridgeItem.isEditedFridge());
-                parseCloudItem.put("deletedCart", localFridgeItem.isDeletedCart());
-                parseCloudItem.put("deletedFridge", localFridgeItem.isDeletedFridge());
-                parseCloudItem.put("notifiedPush", localFridgeItem.isNotifiedPush());
-                parseCloudItem.put("notifiedEmail", localFridgeItem.isNotifiedEmail());
-
-                parseCloudItem.saveEventually();
+                saveUpdatedFridgeItemEventually(localFridgeItem, parseCloudItem);
 
             }
 
@@ -279,85 +340,85 @@ public class MyParse {
 
     public static void saveFridgeToCloud(final Context context) {
 
-        if (networkConnectionType(context) != -1) {
-            isUserClassSet(new MyCallbackInterface() {
-                @Override
-                public void success(Object result) {
+        isUserClassSet(new MyCallbackInterface() {
+            @Override
+            public void success(Object result) {
 
-                    fallback("Syncing...");
+                fallback("Syncing...");
 
-                    ParseQuery<ParseObject> query = ParseQuery.getQuery(getUserParseClass());
-                    query.findInBackground(new FindCallback<ParseObject>() {
-                        public void done(List<ParseObject> fridgeList, ParseException e) {
-                            if (e == null) {
-                                //syncFridges(getLocalFridge(context), getCloudFridge(fridgeList));
-                                backupToCloud(context, getParseCloudFridgeHash(fridgeList));
-                            } else {
-                                fallback(e.getMessage());
-                            }
+                ParseQuery<ParseObject> query = ParseQuery.getQuery(getUserParseClass());
+                query.findInBackground(new FindCallback<ParseObject>() {
+                    public void done(List<ParseObject> fridgeList, ParseException e) {
+                        if (e == null) {
+                            //syncFridges(getLocalFridge(context), getCloudFridge(fridgeList));
+                            backupToCloud(context, getParseCloudFridgeHash(fridgeList));
+                        } else {
+                            fallback(e.getMessage());
                         }
-                    });
-                }
+                    }
+                });
+            }
 
-                @Override
-                public void error() {
+            @Override
+            public void error() {
 
-                    ParseObject userClass = new ParseObject(getUserParseClass());
+                ParseObject userClass = new ParseObject(getUserParseClass());
 
-                    userClass.saveEventually(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e == null) {
-                                ParseObject user = new ParseObject("Users");
+                userClass.saveEventually(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e == null) {
+                            ParseObject user = new ParseObject("Users");
 
-                                user.put("installationObjectId", getInstallation().getObjectId());
-                                user.put("installationId", getInstallationId());
+                            user.put("installationObjectId", getInstallation().getObjectId());
+                            user.put("installationId", getInstallationId());
 
-                                user.saveEventually(new SaveCallback() {
-                                    @Override
-                                    public void done(ParseException e) {
-                                        if (e == null) {
-                                            success(null);
-                                        } else {
-                                            fallback(e.getMessage());
-                                        }
+                            user.saveEventually(new SaveCallback() {
+                                @Override
+                                public void done(ParseException e) {
+                                    if (e == null) {
+                                        success(null);
+                                    } else {
+                                        fallback(e.getMessage());
                                     }
-                                });
+                                }
+                            });
 
-                            } else {
-                                fallback(e.getMessage());
-                            }
+                        } else {
+                            fallback(e.getMessage());
                         }
-                    });
+                    }
+                });
 
-                }
+            }
 
-                @Override
-                public void fallback(String message) {
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+            @Override
+            public void fallback(String message) {
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            }
+        }, context);
 
     }
 
-    private static void isUserClassSet(final MyCallbackInterface myCallback) {
+    public static void isUserClassSet(final MyCallbackInterface myCallback, Context context) {
         final String installationId = getInstallationId();
 
-        ParseQuery query = ParseQuery.getQuery("Users");
-        query.whereEqualTo("installationId", installationId);
-        query.getFirstInBackground(new GetCallback() {
-            @Override
-            public void done(ParseObject user, ParseException e) {
-                if (e == null) { // User class has been set
-                    myCallback.success(user);
-                } else if (e.getCode() == PE_ObjectNotFound) { // User class has not been set
-                    myCallback.error();
-                } else {
-                    myCallback.fallback(e.getMessage());
+        if (networkConnectionType(context) != -1) {
+            ParseQuery query = ParseQuery.getQuery("Users");
+            query.whereEqualTo("installationId", installationId);
+            query.getFirstInBackground(new GetCallback() {
+                @Override
+                public void done(ParseObject user, ParseException e) {
+                    if (e == null) { // User class has been set
+                        myCallback.success(user);
+                    } else if (e.getCode() == PE_ObjectNotFound) { // User class has not been set
+                        myCallback.error();
+                    } else {
+                        myCallback.fallback(e.getMessage());
+                    }
                 }
-            }
-        });
+            });
+        }
 
     }
 }
