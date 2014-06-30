@@ -7,7 +7,7 @@ import android.provider.BaseColumns;
 
 public final class DatabaseContract {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 3;
+    public static final int DATABASE_VERSION = 5;
     public static final String DATABASE_NAME = "database.db";
     private static final String TEXT_TYPE = " TEXT";
     private static final String INTEGER_TYPE = " INTEGER";
@@ -116,30 +116,15 @@ public final class DatabaseContract {
                 "CREATE TABLE " + TABLE_NAME + " (" +
                         ExpiryTable._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
                         ExpiryTable.COLUMN_NAME_FOOD_ID + INTEGER_TYPE + COMMA_SEP +
-                        "FOREIGN KEY (" + ExpiryTable.COLUMN_NAME_FOOD_ID + ") REFERENCES " + FoodTable.TABLE_NAME + "(" + FoodTable._ID + ")" + COMMA_SEP +
                         ExpiryTable.COLUMN_NAME_TYPE + TEXT_TYPE + COMMA_SEP +
                         ExpiryTable.COLUMN_NAME_FREEZER + INTEGER_TYPE + COMMA_SEP +
                         ExpiryTable.COLUMN_NAME_PANTRY + INTEGER_TYPE + COMMA_SEP +
-                        ExpiryTable.COLUMN_NAME_REFRIGERATOR + INTEGER_TYPE +
+                        ExpiryTable.COLUMN_NAME_REFRIGERATOR + INTEGER_TYPE + COMMA_SEP +
+                        "FOREIGN KEY (" + ExpiryTable.COLUMN_NAME_FOOD_ID + ") REFERENCES " + FoodTable.TABLE_NAME + "(" + FoodTable._ID + ")" +
                         " )";
 
         public static final String SQL_DELETE_TABLE =
                 "DROP TABLE IF EXISTS " + ExpiryTable.TABLE_NAME;
     }
 
-    public static abstract class LetterTable implements BaseColumns {
-        public static final String TABLE_NAME = "letters";
-        public static final String COLUMN_NAME_LETTER = "letter";
-        public static final String COLUMN_NAME_POSITION = "position";
-
-        public static final String SQL_CREATE_TABLE =
-                "CREATE TABLE " + TABLE_NAME + " (" +
-                        LetterTable._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
-                        LetterTable.COLUMN_NAME_LETTER + TEXT_TYPE + COMMA_SEP +
-                        LetterTable.COLUMN_NAME_POSITION + INTEGER_TYPE +
-                        " )";
-
-        public static final String SQL_DELETE_TABLE =
-                "DROP TABLE IF EXISTS " + LetterTable.TABLE_NAME;
-    }
 }

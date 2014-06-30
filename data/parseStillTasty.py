@@ -185,4 +185,5 @@ def getAlphabetPositions(parsedData):
 
     return positions
 
+# Turns out that we don't really need the alphabet positons, the SQL DB handles that
 dictToJsonFile({ 'data': parsedData, 'alphabetPos' : getAlphabetPositions(parsedData) }, 'stilltasty_parsed.json')

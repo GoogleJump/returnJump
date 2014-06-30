@@ -2,39 +2,31 @@ package com.returnjump.spoilfoil;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.preference.PreferenceManager;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 
-public class LetterDbHelper extends SQLiteOpenHelper {
+// Database to store the names of the parsed food data
+public class FoodTableHelper extends SQLiteOpenHelper {
 
     private Context context;
 
-    public LetterDbHelper(Context context) {
+    public FoodTableHelper(Context context) {
         super(context, DatabaseContract.DATABASE_NAME, null, DatabaseContract.DATABASE_VERSION);
 
         this.context = context;
     }
     
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(DatabaseContract.LetterTable.SQL_CREATE_TABLE);
+        db.execSQL(DatabaseContract.FoodTable.SQL_CREATE_TABLE);
     }
     
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(DatabaseContract.LetterTable.SQL_DELETE_TABLE);
+        db.execSQL(DatabaseContract.FoodTable.SQL_DELETE_TABLE);
         onCreate(db);
     }
     
@@ -45,40 +37,42 @@ public class LetterDbHelper extends SQLiteOpenHelper {
     public long size() {
         SQLiteDatabase db = this.getReadableDatabase();
         
-        return DatabaseUtils.queryNumEntries(db, DatabaseContract.LetterTable.TABLE_NAME);
+        return DatabaseUtils.queryNumEntries(db, DatabaseContract.FoodTable.TABLE_NAME);
     }
-    
-    public long put(String letter, int position) {
+
+    public long put(String name, String fullName) {
         SQLiteDatabase db = this.getWritableDatabase();
-        
+
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
 
-        values.put(DatabaseContract.LetterTable.COLUMN_NAME_LETTER, letter);
-        values.put(DatabaseContract.LetterTable.COLUMN_NAME_POSITION, position);
+        values.put(DatabaseContract.FoodTable.COLUMN_NAME_NAME, name);
+        values.put(DatabaseContract.FoodTable.COLUMN_NAME_FULL_NAME, fullName);
+        values.put(DatabaseContract.FoodTable.COLUMN_NAME_FIRST_LETTER, name.substring(0, 1));
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId;
         newRowId = db.insert(
-                DatabaseContract.LetterTable.TABLE_NAME,
+                DatabaseContract.FoodTable.TABLE_NAME,
                 null,
                 values);
-        
+
         return newRowId;
     }
 
-    public int getPosition(String letter) {
+    // Returns a list of food names that begin with letter
+    public List<String> getAllByLetter(String letter) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         String[] projection = {
-                DatabaseContract.LetterTable.COLUMN_NAME_POSITION
+                DatabaseContract.FoodTable.COLUMN_NAME_NAME
         };
 
-        String whereColumn = DatabaseContract.LetterTable.COLUMN_NAME_LETTER + "=" + DatabaseContract.QUESTION_MARK;
+        String whereColumn = DatabaseContract.FoodTable.COLUMN_NAME_FIRST_LETTER + "=" + DatabaseContract.QUESTION_MARK;
         String[] whereValue = { letter.toLowerCase() };
 
         Cursor c = db.query(
-                DatabaseContract.LetterTable.TABLE_NAME,  // The table to query
+                DatabaseContract.FoodTable.TABLE_NAME,  // The table to query
                 projection,                               // The columns to return
                 whereColumn,                              // The columns for the WHERE clause
                 whereValue,                               // The values for the WHERE clause
@@ -88,9 +82,16 @@ public class LetterDbHelper extends SQLiteOpenHelper {
         );
         c.moveToFirst();
 
-        return c.getInt(
-                c.getColumnIndexOrThrow(DatabaseContract.LetterTable.COLUMN_NAME_POSITION)
-        );
+        List<String> foodName = new ArrayList<String>();
+
+        while (!c.isAfterLast()) {
+            foodName.add(c.getString(
+                    c.getColumnIndexOrThrow(DatabaseContract.FoodTable.COLUMN_NAME_NAME)
+            ));
+            c.moveToNext();
+        }
+
+        return foodName;
     }
 
 }

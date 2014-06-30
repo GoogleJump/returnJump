@@ -100,12 +100,21 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         sd.stop();
     }
 
-    private void initializeLetters(LetterDbHelper letterDbHelper, JSONArray data) {
+    private void initializeFoodData(FoodTableHelper foodTableHelper, ExpiryTableHelper expiryTableHelper, JSONArray data) {
         try {
 
             for (int i = 0; i < data.length(); i++) {
                 JSONObject item = data.getJSONObject(i);
-                letterDbHelper.put(item.getString("letter"), item.getInt("pos"));
+                JSONArray expiry = item.getJSONArray("expiry");
+
+                long rowId = foodTableHelper.put(item.getString("name"), item.getString("full_name"));
+
+                for (int j = 0; j < expiry.length(); j++) {
+                    JSONObject exp = expiry.getJSONObject(j);
+
+                    expiryTableHelper.put(rowId, exp.getString("type"), exp.getInt("freezer"), exp.getInt("pantry"), exp.getInt("refrigerator"));
+                }
+
             }
 
         } catch (JSONException e) {
@@ -113,17 +122,18 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         }
     }
 
-    private void initializeFoodData() {
-
-    }
-
+    // This should be asyncronous
     private void initializeDatabase() {
-        LetterDbHelper letterDbHelper = new LetterDbHelper(this);
+        FoodTableHelper foodTableHelper = new FoodTableHelper(this);
+        ExpiryTableHelper expiryTableHelper = new ExpiryTableHelper(this);
 
         if (DatabaseContract.getCurrentVersion(this) <= DatabaseContract.DATABASE_VERSION) {
 
+            Toast.makeText(this, "Initializing database.", Toast.LENGTH_LONG).show();
+
             // Clear database
-            letterDbHelper.onUpgrade(letterDbHelper.getWritableDatabase(), -1, -1);
+            foodTableHelper.onUpgrade(foodTableHelper.getWritableDatabase(), -1, -1);
+            expiryTableHelper.onUpgrade(expiryTableHelper.getWritableDatabase(), -1, -1);
 
             try {
                 AssetManager assetManager = getAssets();
@@ -136,8 +146,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                 String data = new String(buffer, "UTF-8");
                 JSONObject json = new JSONObject(data);
 
-                initializeLetters(letterDbHelper, json.getJSONArray("alphabetPos"));
-                initializeFoodData();
+                initializeFoodData(foodTableHelper, expiryTableHelper, json.getJSONArray("data"));
 
                 // Increment the current version so that when the DATABASE_VERSION is updated,
                 // this data will be updated as well
