@@ -19,7 +19,7 @@
         android:hint=""
         android:layout_marginTop="0dp"
         android:layout_marginLeft="0dp"
-        android:textSize="30sp"
+        android:textSize="@dimen/large"
         android:padding="@dimen/separator_padding"
         android:inputType="textCapWords"
         android:singleLine="true"
