@@ -31,7 +31,7 @@ public class RecieptToDBHelper {
                 int match = (dbItem.charAt(dIndex-1)==recieptItem.charAt(rIndex-1))?0:1;
 
                 int cost_replace = cost[dIndex-1]+match;
-                int cost_insert  = cost[dIndex]+1;
+                int cost_insert  = cost[dIndex]+4;
                 int cost_delete  = newcost[dIndex-1]+1;
 
                 newcost[dIndex] = Math.min(Math.min(cost_insert, cost_delete),cost_replace );
