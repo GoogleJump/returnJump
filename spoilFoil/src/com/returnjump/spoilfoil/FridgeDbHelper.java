@@ -93,7 +93,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_CREATED_DATE, calNow);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE, calNow);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY, "DEVICE");
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE, DatabaseContract.BOOL_FALSE);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE, isFromImage);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE, image);
         //values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED, imageBinarized);
