@@ -30,7 +30,7 @@ public final class DatabaseContract {
     public static int getCurrentVersion(Context context) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 
-        return sharedPref.getInt(SettingsActivity.DB_VERSION, 1);
+        return sharedPref.getInt(SettingsActivity.DB_VERSION, SettingsActivity.DB_VERSION_DEFAULT);
     }
 
     public static void setCurrentVersion(int version, Context context) {

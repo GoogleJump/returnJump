@@ -29,16 +29,19 @@ import java.util.regex.Pattern;
 
 public class SettingsActivity extends PreferenceActivity {
     final public static String DB_VERSION = "db_version";
+    final public static String ALARM_SET = "alarm_set";
     final public static String PREF_TIME = "preference_time";
-    final public static String PREF_TIME_DEFAULT = "08:00";
     final public static String PREF_CHECKBOX_PUSH = "checkbox_push";
-    final public static boolean PREF_CHECKBOX_PUSH_DEFAULT = true;
     final public static String PREF_CHECKBOX_EMAIL = "checkbox_email";
-    final public static boolean PREF_CHECKBOX_EMAIL_DEFAULT = false;
     final public static String PREF_EMAIL_ADDRESS = "email_address";
     final public static String PREF_CHECKBOX_AUTO = "checkbox_auto";
     final public static String PREF_SYNC = "preference_sync";
 
+    final public static int DB_VERSION_DEFAULT = 1;
+    final public static boolean ALARM_SET_DEFAULT = false;
+    final public static String PREF_TIME_DEFAULT = "08:00";
+    final public static boolean PREF_CHECKBOX_PUSH_DEFAULT = true;
+    final public static boolean PREF_CHECKBOX_EMAIL_DEFAULT = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,38 +53,55 @@ public class SettingsActivity extends PreferenceActivity {
                 .commit();
     }
 
-    public static void initializeAlarm(Context context){
+    public static boolean isUserNotificationEnabled(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         boolean pushPref = sharedPreferences.getBoolean(PREF_CHECKBOX_PUSH, PREF_CHECKBOX_PUSH_DEFAULT);
         boolean emailPref = sharedPreferences.getBoolean(PREF_CHECKBOX_EMAIL, PREF_CHECKBOX_EMAIL_DEFAULT);
 
-        // Only initialize the alarm if the user wants notifications
-        if (pushPref || emailPref) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
+        return pushPref || emailPref;
+    }
 
-            // Get the hour and minute set by the user's preference
-            String prefTime = sharedPreferences.getString(PREF_TIME, PREF_TIME_DEFAULT);
-            int hour = getHourFromPrefTime(prefTime);
-            int minute = getMinFromPrefTime(prefTime);
+    public static boolean getAlarmSet(Context context) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 
-            // Set the calendar time to the hour and minute preferred
-            calendar.set(Calendar.HOUR_OF_DAY, hour);
-            calendar.set(Calendar.MINUTE, minute);
+        return sharedPref.getBoolean(ALARM_SET, ALARM_SET_DEFAULT);
+    }
 
-            Log.wtf("PREF TIME", prefTime);
-            Log.wtf("HOUR OF DAY", Integer.toString(hour));
-            Log.wtf("MINUTE", Integer.toString(minute));
-            Log.wtf("TIME", calendar.toString());
+    private static void setAlarmSet(boolean set, Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences.edit().putBoolean(ALARM_SET, set).commit();
+    }
 
-            //Creates intent that will be called when alarm goes off
-            Intent intent = new Intent(context, NotificationAlarm.class);
-            PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+    public static void initializeAlarm(Context context){
 
-            AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-                    AlarmManager.INTERVAL_DAY, alarmIntent);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+
+        // Get the hour and minute set by the user's preference
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String prefTime = sharedPreferences.getString(PREF_TIME, PREF_TIME_DEFAULT);
+        int hour = getHourFromPrefTime(prefTime);
+        int minute = getMinFromPrefTime(prefTime);
+
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        //Creates intent that will be called when alarm goes off
+        Intent intent = new Intent(context, NotificationAlarm.class);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY, alarmIntent);
+
+        BootReceiver.enable(context);
+
+        // Set flag so that alarm gets initialized once in the main activity
+        if (!getAlarmSet(context)) {
+            setAlarmSet(true, context);
         }
 
     }
@@ -229,14 +249,16 @@ public class SettingsActivity extends PreferenceActivity {
                     newEmailPref = (Boolean) value;
                 }
 
-                if (newEmailPref || newEmailPref) {
+                if (newPushPref || newEmailPref) {
                     // If at least one notification is on, set the alarm
+                    initializeAlarm(context);
                 } else { // User does not want notifications, cancel the alarm
                     Intent intent = new Intent(context, NotificationAlarm.class);
                     PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
                     AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
                     alarmMgr.cancel(alarmIntent);
+                    BootReceiver.disable(context);
                 }
 
                 return true;
@@ -303,6 +325,11 @@ public class SettingsActivity extends PreferenceActivity {
             sharedPreferences.edit().putString(PREF_TIME, newPrefTime).commit();
 
             preference.setSummary(prefTimePrettyPrint(newPrefTime));
+
+            // Update notification alarm
+            if (isUserNotificationEnabled(getActivity())) {
+                initializeAlarm(getActivity());
+            }
         }
     }
 

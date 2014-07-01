@@ -531,6 +531,9 @@ public class TastiActivity extends Activity {
                 long rowId = foodTableHelper.getRowIdByName(matchedText);
                 int days = getDaysUntilExpiry(rowId);
 
+                Log.wtf("ORIGINAL", recognizedText);
+                Log.wtf("MATCH", matchedText);
+
                 // Add item to list
                 Calendar c = GregorianCalendar.getInstance();
                 c.add(Calendar.DATE, days);

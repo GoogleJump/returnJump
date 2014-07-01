@@ -15,12 +15,23 @@ import java.util.List;
  */
 public class NotificationSender{
         public Context context;
-        public List<FridgeItem> items_expiring;
+        public List<FridgeItem> expiringFridgeItems;
 
-        public NotificationSender(Context context, List<FridgeItem> items_expiring){
-            this.items_expiring = items_expiring;
+        public NotificationSender(Context context, List<FridgeItem> expiringFridgeItems){
+            this.expiringFridgeItems = expiringFridgeItems;
             this.context = context;
         };
+
+        private String generateMessage() {
+            if (expiringFridgeItems.size() == 1) {
+                return "Your %s has expired".format(expiringFridgeItems.get(0).getName());
+            } else if (expiringFridgeItems.size() == 2) {
+                return "Your %s and %s have expired".format(expiringFridgeItems.get(0).getName(), expiringFridgeItems.get(1).getName());
+            } else {
+                int random = (int) (Math.random() * expiringFridgeItems.size());
+                return "Your %s and %d others have expired.".format(expiringFridgeItems.get(random).getName(), expiringFridgeItems.size());
+            }
+        }
 
         public void sendNotifications(){
             /**
@@ -32,34 +43,26 @@ public class NotificationSender{
              * ns.sendNotifications;
              */
 
-        //Setting up the intent for the notification
-        Intent intent = new Intent(this.context, KelseyActivity.class);
-        PendingIntent pIntent = PendingIntent.getActivity(context, 0, intent, 0);
+            //Setting up the intent for the notification
+            Intent intent = new Intent(this.context, KelseyActivity.class);
+            PendingIntent pIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
-        // Creates the Notification mBuilder
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_notification)
-                        .setContentTitle("Expiring Items")
-                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                        .setVibrate(new long[]{ 0, 500, 250, 500 })
-                        .setLights(Color.GREEN, 500, 1000);
-        String current_text = "The following items are about to expire: ";
-        int number_items_expiring = items_expiring.size();
-        for (int i=0; i < items_expiring.size(); i ++){
-            current_text += items_expiring.get(i).getName() + " ";
-           number_items_expiring ++;
+            // Creates the Notification mBuilder
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(context)
+                            .setSmallIcon(R.drawable.ic_notification)
+                            .setContentTitle("Expiring Items")
+                            .setContentText(generateMessage())
+                            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                            .setVibrate(new long[]{ 0, 250, 100, 250 })
+                            .setLights(Color.GREEN, 500, 1000)
+                            .setNumber(expiringFridgeItems.size())
+                            .setContentIntent(pIntent)
+                            .setAutoCancel(true);
+
+            int mNotificationId = 001;
+            NotificationManager mNotifyMgr =
+                    (NotificationManager) context.getSystemService(this.context.NOTIFICATION_SERVICE);
+            mNotifyMgr.notify(mNotificationId, mBuilder.build());
         }
-        mBuilder.setContentText(current_text)
-                .setNumber(number_items_expiring)
-                .setContentIntent(pIntent)
-                .setAutoCancel(true);
-        //sets the type of alert
-        int mNotificationId = 001;
-        // Gets an instance of the NotificationManager service
-        NotificationManager mNotifyMgr =
-                (NotificationManager) this.context.getSystemService(this.context.NOTIFICATION_SERVICE);
-        // Builds the notification and issues it.
-        mNotifyMgr.notify(mNotificationId, mBuilder.build());
-    };
 }

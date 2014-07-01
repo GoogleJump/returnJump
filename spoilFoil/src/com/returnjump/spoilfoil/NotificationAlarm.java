@@ -24,8 +24,6 @@ public class NotificationAlarm extends BroadcastReceiver {
          * user locally.
          */
 
-        Log.wtf("RECEIVER", "CALLED!");
-
         FridgeDbHelper fridgeDbHelper = new FridgeDbHelper(context);
         final Calendar rightnow = Calendar.getInstance();
         String[] column = {DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE,DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED};
@@ -33,21 +31,25 @@ public class NotificationAlarm extends BroadcastReceiver {
         String[] wherevalue = {FridgeDbHelper.calendarToString(rightnow, DatabaseContract.FORMAT_DATE), DatabaseContract.BOOL_FALSE_STR};
         String[] conjunction = {DatabaseContract.AND};
 
-        List<FridgeItem> foodexpiring = fridgeDbHelper.getAll(column, operator, wherevalue, conjunction, true);
+        List<FridgeItem> expiringFridgeItems = fridgeDbHelper.getAll(column, operator, wherevalue, conjunction, true);
 
-        // Only send notifications the the preferences set in their settings
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean pushPref = sharedPreferences.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, SettingsActivity.PREF_CHECKBOX_PUSH_DEFAULT);
-        boolean emailPref = sharedPreferences.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, SettingsActivity.PREF_CHECKBOX_EMAIL_DEFAULT);
+        // Trigger notifications if something is about to expire
+        if (expiringFridgeItems.size() > 0) {
 
-        if (pushPref) {
-            NotificationSender ns = new NotificationSender(context, foodexpiring);
-            ns.sendNotifications();
-        }
+            // Only send notifications the the preferences set in their settings
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            boolean pushPref = sharedPreferences.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, SettingsActivity.PREF_CHECKBOX_PUSH_DEFAULT);
+            boolean emailPref = sharedPreferences.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, SettingsActivity.PREF_CHECKBOX_EMAIL_DEFAULT);
 
-        if (emailPref) {
-            EmailNotifier emailsender = new EmailNotifier(context, foodexpiring);
-            emailsender.cloudEmailSender();
+            if (pushPref) {
+                NotificationSender ns = new NotificationSender(context, expiringFridgeItems);
+                ns.sendNotifications();
+            }
+
+            if (emailPref) {
+                EmailNotifier emailSender = new EmailNotifier(context, expiringFridgeItems);
+                emailSender.cloudEmailSender();
+            }
         }
 
     }

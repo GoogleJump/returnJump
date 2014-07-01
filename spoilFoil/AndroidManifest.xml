@@ -55,9 +55,10 @@
                 android:value="com.returnjump.spoilfoil.KelseyActivity" />
         </activity>
 
-        <receiver android:name=".NotificationAlarm" >
+        <receiver android:name="com.returnjump.spoilfoil.NotificationAlarm"></receiver>
+        <receiver android:name="com.returnjump.spoilfoil.BootReceiver" android:enabled="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
             </intent-filter>
         </receiver>
 

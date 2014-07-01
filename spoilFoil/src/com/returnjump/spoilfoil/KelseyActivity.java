@@ -55,9 +55,6 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     private SensorManager sensorManager;
     private ShakeDetector sd;
 
-
-    //private Sensor mAccelerometer;
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kelsey);
@@ -82,7 +79,10 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         sd = new ShakeDetector(this);
         sd.start(sensorManager);
 
-        SettingsActivity.initializeAlarm(this);
+        // Initialize the alarm if it hasn't been initialized before and the user wants a notif
+        if (!SettingsActivity.getAlarmSet(this) && SettingsActivity.isUserNotificationEnabled(this)) {
+            SettingsActivity.initializeAlarm(this);
+        }
 
     }
 
@@ -130,8 +130,6 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
     // This should be asyncronous
     private void initializeDatabase() {
-        Toast.makeText(this, "Test A.", Toast.LENGTH_LONG).show();
-        Toast.makeText(getApplicationContext(), "Test B.", Toast.LENGTH_LONG).show();
 
         if (DatabaseContract.getCurrentVersion(this) <= DatabaseContract.DATABASE_VERSION) {
             Toast.makeText(this, "Initializing database.", Toast.LENGTH_LONG).show();
