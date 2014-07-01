@@ -283,9 +283,6 @@ public class TastiActivity extends Activity {
                 Matrix mtx = new Matrix();
                 mtx.preRotate(rotate);
 
-                Log.e("SpoilFoil", "WIDTH: " + Integer.toString(w));
-                Log.e("SpoilFoil", "HEIGHT: " + Integer.toString(h));
-
                 // Rotating image
                 return Bitmap.createBitmap(image, 0, 0, w, h, mtx, false);
             }
@@ -330,16 +327,16 @@ public class TastiActivity extends Activity {
             for (int i = 0; i < n; ++i) {
                 FridgeItem item = shoppingCart.get(i);
 
-                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), shoppingCartImages.get(i), shoppingCartImages.get(i));
-                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, null, null, null, null);
+                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, shoppingCartImages.get(i), shoppingCartImages.get(i));
+                dbHelper.update(id, null, null, null, null, null, null, null, null, null, null, null);
             }
 
             // Add the deleted cart to the database, setting deleted_cart to True
             for (int j = 0; j < m; ++j) {
                 FridgeItem item = deletedCart.get(j);
 
-                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), deletedCartImages.get(j), deletedCartImages.get(j));
-                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
+                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, deletedCartImages.get(j), deletedCartImages.get(j));
+                dbHelper.update(id, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
             }
 
             finish();
@@ -532,11 +529,12 @@ public class TastiActivity extends Activity {
             if (!recognizedTextFromFirstLetter.equals("")) {
                 String matchedText = findMatchInDatabase(recognizedTextFromFirstLetter);
                 long rowId = foodTableHelper.getRowIdByName(matchedText);
+                int days = getDaysUntilExpiry(rowId);
 
                 // Add item to list
                 Calendar c = GregorianCalendar.getInstance();
-                c.add(Calendar.DATE, 7); // DEFAULTED TO 1 WEEK!
-                FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE), recognizedText);
+                c.add(Calendar.DATE, days);
+                FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, recognizedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE));
                 shoppingCart.add(newFridgeItem);
                 shoppingCartImages.add(bitmapToByteArray(bitmap));
 

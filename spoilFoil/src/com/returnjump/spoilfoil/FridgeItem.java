@@ -1,6 +1,7 @@
 package com.returnjump.spoilfoil;
 
 import android.provider.ContactsContract;
+import android.util.Log;
 
 import java.util.GregorianCalendar;
 
@@ -121,7 +122,7 @@ public class FridgeItem {
     }
     public int getDaysGood() {
         long today = GregorianCalendar.getInstance().getTimeInMillis() / 86400000L * 86400000L;
-        long expiryDay = FridgeDbHelper.stringToCalendar(this.expiryDate, DatabaseContract.FORMAT_DATE).getTimeInMillis();
+        long expiryDay = FridgeDbHelper.stringToCalendar(getExpiryDate(), DatabaseContract.FORMAT_DATE).getTimeInMillis();
         int diffInDays = (int) ((expiryDay - today) / 86400000L);
 
         return diffInDays;
