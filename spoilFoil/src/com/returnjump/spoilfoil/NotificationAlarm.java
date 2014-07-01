@@ -25,11 +25,10 @@ public class NotificationAlarm extends BroadcastReceiver {
                 Toast.LENGTH_LONG).show();
         fridge = new FridgeDbHelper(context);
         final Calendar rightnow = Calendar.getInstance();
-        final DateFormat date_string = new SimpleDateFormat("yyyy-MM-dd");
         String [] column = {DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE,DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED};
-        String[] operator =  {DatabaseContract.AND};
-        String [] wherevalue = {"<", "="};
-        String[] conjunction = {date_string.format(rightnow.getTime()), DatabaseContract.BOOL_FALSE_STR};
+        String[] operator =  {"<", "="};
+        String [] wherevalue = {FridgeDbHelper.calendarToString(rightnow, DatabaseContract.FORMAT_DATE), DatabaseContract.BOOL_FALSE_STR};
+        String[] conjunction = {DatabaseContract.AND};
 
         List<FridgeItem> foodexpiring = fridge.getAll(column, operator, wherevalue, conjunction, true);
         NotificationSender ns = new NotificationSender(context, foodexpiring);
