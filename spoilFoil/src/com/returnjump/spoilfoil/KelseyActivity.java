@@ -1,5 +1,7 @@
 package com.returnjump.spoilfoil;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
@@ -75,17 +77,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sd = new ShakeDetector(this);
         sd.start(sensorManager);
-
-        // Alarm Set up
-        //Calendar cal = Calendar.getInstance();
-
-        //Creates intent that will be called when alarm goes off
-        //Intent intent = new Intent(getBaseContext(), NotificationAlarm.class);
-        //PendingIntent pIntent = PendingIntent.getBroadcast(getBaseContext(), 0, intent, 0);
-
-        //AlarmManager alarm = (AlarmManager) getSystemService(getBaseContext().ALARM_SERVICE);
-        //alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), (60 * 1000* 60 * 24), pIntent);
-
+        setAlarm();
 
     }
 
@@ -132,6 +124,18 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     }
 
     // This should be asyncronous
+    private void setAlarm(){
+
+        Calendar cal = Calendar.getInstance();
+
+        //Creates intent that will be called when alarm goes off
+        Intent alarmintent = new Intent(getBaseContext(), NotificationAlarm.class);
+        PendingIntent pIntent = PendingIntent.getBroadcast(getBaseContext(), 0, alarmintent, 0);
+
+        AlarmManager alarm = (AlarmManager) getSystemService(getBaseContext().ALARM_SERVICE);
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), (60 * 1000* 60 * 24), pIntent);
+    }
+
     private void initializeDatabase() {
         FoodTableHelper foodTableHelper = new FoodTableHelper(this);
         ExpiryTableHelper expiryTableHelper = new ExpiryTableHelper(this);
@@ -215,7 +219,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                     c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM)
             );
             String expiryDate = c.getString(
-                            c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)
+                    c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)
             );
 
             boolean dismissed = c.getInt(c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED)) != 0;
