@@ -60,6 +60,30 @@ public class FoodTableHelper extends SQLiteOpenHelper {
         return newRowId;
     }
 
+    public long getRowIdByName(String name) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = {
+                DatabaseContract.FoodTable._ID
+        };
+
+        String whereColumn = DatabaseContract.FoodTable.COLUMN_NAME_NAME + "=" + DatabaseContract.QUESTION_MARK;
+        String[] whereValue = { name };
+
+        Cursor c = db.query(
+                DatabaseContract.FoodTable.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                whereColumn,                              // The columns for the WHERE clause
+                whereValue,                               // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                      // The sort order
+        );
+        c.moveToFirst();
+
+        return c.getLong(c.getColumnIndexOrThrow(DatabaseContract.FoodTable._ID));
+    }
+
     // Returns a list of food names that begin with letter
     public List<String> getAllByLetter(String letter) {
         SQLiteDatabase db = this.getReadableDatabase();

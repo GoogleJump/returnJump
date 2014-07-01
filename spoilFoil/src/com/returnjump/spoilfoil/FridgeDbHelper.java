@@ -78,7 +78,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return hash;
     }
     
-    public long put(String foodItem, Calendar expiryDate, String rawFoodItem, byte[] image, byte[] imageBinarized) {
+    public long put(String foodItem, Calendar expiryDate, String rawFoodItem, int isFromImage, byte[] image, byte[] imageBinarized) {
         SQLiteDatabase db = this.getWritableDatabase();
         
         // Create a new map of values, where column names are the keys
@@ -118,12 +118,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.context);
         boolean auto = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_AUTO, true);
         if (auto) {
-            MyParse.saveFridgeItemEventually(
-                    new FridgeItem(newRowId, hash, foodItem, rawFoodItem, calendarToString(expiryDate,
-                            DatabaseContract.FORMAT_DATE), calNow, calNow, "DEVICE", false, image, imageBinarized,
-                            false, false, false, false, false, false, false, false),
-                    true, context
-            );
+            MyParse.saveFridgeItemEventually(getRowById(newRowId, false), true, context);
         }
         
         return newRowId;

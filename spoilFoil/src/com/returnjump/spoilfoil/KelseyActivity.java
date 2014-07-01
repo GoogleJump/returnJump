@@ -221,7 +221,6 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
             String expiryDate = c.getString(
                     c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE)
             );
-
             boolean dismissed = c.getInt(c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED)) != 0;
 
             if (!dismissed) {
@@ -309,7 +308,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                 // Hide the keyboard if showing
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 
-                long id = fridgeDbHelper.put(foodName, expiryDate, foodName, null, null);
+                long id = fridgeDbHelper.put(foodName, expiryDate, foodName, DatabaseContract.BOOL_FALSE, null, null);
                 FridgeItem newFridgeItem = new FridgeItem(id, foodName, FridgeDbHelper.calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
                 int index = insertToSortedList(newFridgeItem); //foodItems.add(newFoodItem);
                 updateListView(fridgeItems);
