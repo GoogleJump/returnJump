@@ -7,7 +7,7 @@ import android.provider.BaseColumns;
 
 public final class DatabaseContract {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 6;
+    public static final int DATABASE_VERSION = 8;
     public static final String DATABASE_NAME = "database.db";
     private static final String TEXT_TYPE = " TEXT";
     private static final String INTEGER_TYPE = " INTEGER";

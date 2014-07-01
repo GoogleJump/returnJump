@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -59,11 +60,10 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kelsey);
 
-        initializeDatabase();
-
         fridgeDbHelper = new FridgeDbHelper(this);
-        // dbHelper.onUpgrade(dbHelper.getWritableDatabase(), 1, 1); // Use this to delete database
         fridgeListView = (ListView) findViewById(R.id.foodItemListView);
+
+        initializeDatabase();
 
         this.initializeSwipeDismissListener();
         fridgeListView.setOnTouchListener(touchListener);
@@ -125,7 +125,6 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         }
     }
 
-    // This should be asyncronous
     private void setAlarm(){
         //SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         //String time_pref = sharedPref.getString(SettingsActivity.PREF_TIME_DEFAULT, "");
@@ -144,13 +143,13 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), (5000), pIntent);
     }
 
+    // This should be asyncronous
     private void initializeDatabase() {
-        FoodTableHelper foodTableHelper = new FoodTableHelper(this);
-        ExpiryTableHelper expiryTableHelper = new ExpiryTableHelper(this);
-
         if (DatabaseContract.getCurrentVersion(this) <= DatabaseContract.DATABASE_VERSION) {
-
             Toast.makeText(this, "Initializing database.", Toast.LENGTH_LONG).show();
+
+            FoodTableHelper foodTableHelper = new FoodTableHelper(this);
+            ExpiryTableHelper expiryTableHelper = new ExpiryTableHelper(this);
 
             // Clear database
             foodTableHelper.onUpgrade(foodTableHelper.getWritableDatabase(), -1, -1);

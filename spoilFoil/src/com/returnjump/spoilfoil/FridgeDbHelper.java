@@ -1,14 +1,5 @@
 package com.returnjump.spoilfoil;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -18,6 +9,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 public class FridgeDbHelper extends SQLiteOpenHelper {
@@ -93,7 +92,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_CREATED_DATE, calNow);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE, calNow);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY, "DEVICE");
-        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE, DatabaseContract.BOOL_FALSE);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE, isFromImage);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE, image);
         //values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED, imageBinarized);
