@@ -2,9 +2,13 @@ package com.returnjump.spoilfoil;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 // Database to store the expiration amount of the parsed food data
 // with a relation to FoodDbHelper
@@ -57,6 +61,54 @@ public class ExpiryTableHelper extends SQLiteOpenHelper {
                 values);
 
         return newRowId;
+    }
+
+    public List<FoodExpiry> getAllByFoodId(long foodId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = {
+                DatabaseContract.ExpiryTable.COLUMN_NAME_TYPE,
+                DatabaseContract.ExpiryTable.COLUMN_NAME_FREEZER,
+                DatabaseContract.ExpiryTable.COLUMN_NAME_PANTRY,
+                DatabaseContract.ExpiryTable.COLUMN_NAME_REFRIGERATOR
+        };
+
+        String whereColumn = DatabaseContract.ExpiryTable.COLUMN_NAME_FOOD_ID + "=" + DatabaseContract.QUESTION_MARK;
+        String[] whereValue = { Long.toString(foodId) };
+
+        Cursor c = db.query(
+                DatabaseContract.ExpiryTable.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                whereColumn,                              // The columns for the WHERE clause
+                whereValue,                               // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                      // The sort order
+        );
+        c.moveToFirst();
+
+        List<FoodExpiry> foodExpiry = new ArrayList<FoodExpiry>();
+
+        while (!c.isAfterLast()) {
+            String type = c.getString(
+                    c.getColumnIndexOrThrow(DatabaseContract.ExpiryTable.COLUMN_NAME_TYPE)
+            );
+            int freezer = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.ExpiryTable.COLUMN_NAME_FREEZER)
+            );
+            int pantry = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.ExpiryTable.COLUMN_NAME_PANTRY)
+            );
+            int refrigerator = c.getInt(
+                    c.getColumnIndexOrThrow(DatabaseContract.ExpiryTable.COLUMN_NAME_REFRIGERATOR)
+            );
+
+            foodExpiry.add(new FoodExpiry(type, freezer, pantry, refrigerator));
+
+            c.moveToNext();
+        }
+
+        return foodExpiry;
     }
 
 }

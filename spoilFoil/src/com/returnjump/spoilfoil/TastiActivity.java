@@ -65,6 +65,8 @@ public class TastiActivity extends Activity {
     private List<FridgeItem> deletedCart = new ArrayList<FridgeItem>();
     private List<byte[]> shoppingCartImages = new ArrayList<byte[]>();
     private List<byte[]> deletedCartImages = new ArrayList<byte[]>();
+    private FoodTableHelper foodTableHelper;
+    private ExpiryTableHelper expiryTableHelper;
 
     ListView cartListView;
 
@@ -109,6 +111,9 @@ public class TastiActivity extends Activity {
         dbHelper = new FridgeDbHelper(this);
         adapter = new MyFridgeAdapter(this, R.layout.list_fooditems, shoppingCart);
         cartListView.setAdapter(adapter);
+
+        foodTableHelper = new FoodTableHelper(this);
+        expiryTableHelper = new ExpiryTableHelper(this);
 
         findViewById(R.id.checkoutButton).setOnClickListener(addToFridge);
 
@@ -342,6 +347,49 @@ public class TastiActivity extends Activity {
 
     };
 
+    private static int getPositionOfFirstLetter(String text) {
+        text = text.toLowerCase();
+
+        for (int i = 0; i < text.length(); i++) {
+            int c = (int) text.charAt(i); // ascii value of character
+
+            if (c >= 'a' && c <= 'z') {
+                return i;
+            }
+        }
+
+        return text.length();
+    }
+
+    private String findMatchInDatabase(String text) {
+        // Later we can get the database to pass the name and row id so we don't need to do a second lookup
+        // (also prevents error where matchedText isnt in db when getting rowId
+        String matchedText = RecieptToDBHelper.minimumEditDistance(foodTableHelper.getAllByLetter(text.substring(0,1)), text);
+
+        return matchedText;
+    }
+
+    // Chooses a random type for now
+    private int getDaysUntilExpiry(long rowId) {
+        List<FoodExpiry> foodExpiryList = expiryTableHelper.getAllByFoodId(rowId);
+        int random = (int) (Math.random() * foodExpiryList.size());
+        FoodExpiry foodExpiry = foodExpiryList.get(random);
+        int days = -1;
+
+        // Since we aren't asking the user where they'll store the food,
+        // we will give preference based on the order below
+        // (Food is more likely to be put in the refrigerator than a freezer)
+        if (foodExpiry.getRefrigeratorDays() != -1) {
+            days = foodExpiry.getRefrigeratorDays();
+        } else if (foodExpiry.getPantryDays() != -1) {
+            days = foodExpiry.getPantryDays();
+        } else {
+            days = foodExpiry.getFreezerDays();
+        }
+
+        return days;
+    }
+
     private class BinarizeImageTask extends AsyncTask<String, Void, Bitmap> {
 
         protected void onPreExecute () {
@@ -477,14 +525,18 @@ public class TastiActivity extends Activity {
             String recognizedText = baseApi.getUTF8Text().trim();
             baseApi.end();
 
-            // This is where the algorithm should take recognizedText and extract the right word(s)
-            // and expiry date out of it
+            // Start at the first letter
+            int firstLetterPos = getPositionOfFirstLetter(recognizedText);
+            String recognizedTextFromFirstLetter = recognizedText.substring(firstLetterPos);
 
-            if (!recognizedText.equals("")) {
-                // Add item to  list
+            if (!recognizedTextFromFirstLetter.equals("")) {
+                String matchedText = findMatchInDatabase(recognizedTextFromFirstLetter);
+                long rowId = foodTableHelper.getRowIdByName(matchedText);
+
+                // Add item to list
                 Calendar c = GregorianCalendar.getInstance();
                 c.add(Calendar.DATE, 7); // DEFAULTED TO 1 WEEK!
-                FridgeItem newFridgeItem = new FridgeItem(-1, recognizedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE), recognizedText);
+                FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE), recognizedText);
                 shoppingCart.add(newFridgeItem);
                 shoppingCartImages.add(bitmapToByteArray(bitmap));
 
