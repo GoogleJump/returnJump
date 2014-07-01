@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="20" />
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" />
@@ -16,7 +16,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <application
         android:name="com.returnjump.spoilfoil.MyApplication"
         android:allowBackup="true"
@@ -35,11 +36,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
-
-
-
         <activity
             android:name="com.returnjump.spoilfoil.TastiActivity"
             android:configChanges="orientation|screenSize"
@@ -59,7 +55,11 @@
                 android:value="com.returnjump.spoilfoil.KelseyActivity" />
         </activity>
 
-        <receiver  android:process=":remote" android:name=".NotificationAlarm"></receiver>
+        <receiver android:name=".NotificationAlarm" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

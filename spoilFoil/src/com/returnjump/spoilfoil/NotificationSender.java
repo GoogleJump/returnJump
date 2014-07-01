@@ -42,7 +42,7 @@ public class NotificationSender{
                         .setSmallIcon(R.drawable.ic_notification)
                         .setContentTitle("Expiring Items")
                         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                        .setVibrate(new long[]{ 0, 1000 })
+                        .setVibrate(new long[]{ 0, 500, 250, 500 })
                         .setLights(Color.GREEN, 500, 1000);
         String current_text = "The following items are about to expire: ";
         int number_items_expiring = items_expiring.size();

@@ -4,10 +4,12 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -77,7 +79,8 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sd = new ShakeDetector(this);
         sd.start(sensorManager);
-        setAlarm();
+
+        SettingsActivity.initializeAlarm(this);
 
     }
 
@@ -121,18 +124,6 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         } catch (JSONException e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
-    }
-
-    private void setAlarm(){
-
-        Calendar cal = Calendar.getInstance();
-
-        //Creates intent that will be called when alarm goes off
-        Intent alarmintent = new Intent(getBaseContext(), NotificationAlarm.class);
-        PendingIntent pIntent = PendingIntent.getBroadcast(getBaseContext(), 0, alarmintent, 0);
-
-        AlarmManager alarm = (AlarmManager) getSystemService(getBaseContext().ALARM_SERVICE);
-        alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), (60 * 1000* 60 * 24), pIntent);
     }
 
     // This should be asyncronous

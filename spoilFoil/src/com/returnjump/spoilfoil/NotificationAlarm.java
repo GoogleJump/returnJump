@@ -3,38 +3,54 @@ package com.returnjump.spoilfoil;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by arturomenacruz on 2014-06-17.
  */
 public class NotificationAlarm extends BroadcastReceiver {
+
     //Method gets called when the alarm goes off
-    private FridgeDbHelper fridge;
     @Override
     public void onReceive(Context context, Intent intent) {
         /** Once alarm is fired checks for all items that are expiring within the database and notifies
          * user locally.
          */
-        Toast.makeText(context, "Don't panik but your time is up!!!!.",
-                Toast.LENGTH_LONG).show();
-        fridge = new FridgeDbHelper(context);
+
+        Log.wtf("RECEIVER", "CALLED!");
+
+        FridgeDbHelper fridgeDbHelper = new FridgeDbHelper(context);
         final Calendar rightnow = Calendar.getInstance();
-        String [] column = {DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE,DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED};
+        String[] column = {DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE,DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED};
         String[] operator =  {"<", "="};
-        String [] wherevalue = {FridgeDbHelper.calendarToString(rightnow, DatabaseContract.FORMAT_DATE), DatabaseContract.BOOL_FALSE_STR};
+        String[] wherevalue = {FridgeDbHelper.calendarToString(rightnow, DatabaseContract.FORMAT_DATE), DatabaseContract.BOOL_FALSE_STR};
         String[] conjunction = {DatabaseContract.AND};
 
-        List<FridgeItem> foodexpiring = fridge.getAll(column, operator, wherevalue, conjunction, true);
-        NotificationSender ns = new NotificationSender(context, foodexpiring);
-        EmailNotifier emailsender = new EmailNotifier(context, foodexpiring);
-        emailsender.cloudEmailSender();
-        ns.sendNotifications();
+        List<FridgeItem> foodexpiring = fridgeDbHelper.getAll(column, operator, wherevalue, conjunction, true);
+
+        // Only send notifications the the preferences set in their settings
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean pushPref = sharedPreferences.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, SettingsActivity.PREF_CHECKBOX_PUSH_DEFAULT);
+        boolean emailPref = sharedPreferences.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, SettingsActivity.PREF_CHECKBOX_EMAIL_DEFAULT);
+
+        if (pushPref) {
+            NotificationSender ns = new NotificationSender(context, foodexpiring);
+            ns.sendNotifications();
+        }
+
+        if (emailPref) {
+            EmailNotifier emailsender = new EmailNotifier(context, foodexpiring);
+            emailsender.cloudEmailSender();
+        }
 
     }
 }
