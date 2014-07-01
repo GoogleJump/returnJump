@@ -33,8 +33,8 @@ public class NotificationAlarm extends BroadcastReceiver {
 
         List<FridgeItem> foodexpiring = fridge.getAll(column, operator, wherevalue, conjunction, true);
         NotificationSender ns = new NotificationSender(context, foodexpiring);
-        EmailNotifier emailsender = new EmailNotifier(context, foodexpiring);
-        emailsender.cloudEmailSender();
+        //EmailNotifier emailsender = new EmailNotifier(context, foodexpiring);
+        //emailsender.cloudEmailSender();
         ns.sendNotifications();
 
     }

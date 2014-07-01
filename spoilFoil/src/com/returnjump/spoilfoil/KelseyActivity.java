@@ -51,6 +51,8 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     private String CAL_PICKER_TAG = "cal_frag_tag";
     private SensorManager sensorManager;
     private ShakeDetector sd;
+
+
     //private Sensor mAccelerometer;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,15 +127,21 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
     // This should be asyncronous
     private void setAlarm(){
-
+        //SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        //String time_pref = sharedPref.getString(SettingsActivity.PREF_TIME_DEFAULT, "");
+       /* Date dat = new Date();
+        Calendar cal_alarm = Calendar.getInstance();
+        cal_alarm.setTime(dat);
+        cal_alarm.set(Calendar.HOUR_OF_DAY,  2);
+        cal_alarm.set(Calendar.MINUTE, 05);
+        */
         Calendar cal = Calendar.getInstance();
-
         //Creates intent that will be called when alarm goes off
         Intent alarmintent = new Intent(getBaseContext(), NotificationAlarm.class);
         PendingIntent pIntent = PendingIntent.getBroadcast(getBaseContext(), 0, alarmintent, 0);
 
         AlarmManager alarm = (AlarmManager) getSystemService(getBaseContext().ALARM_SERVICE);
-        alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), (60 * 1000* 60 * 24), pIntent);
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), (5000), pIntent);
     }
 
     private void initializeDatabase() {
