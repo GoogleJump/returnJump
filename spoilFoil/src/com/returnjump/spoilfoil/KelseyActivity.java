@@ -54,6 +54,8 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     private String CAL_PICKER_TAG = "cal_frag_tag";
     private SensorManager sensorManager;
     private ShakeDetector sd;
+
+
     //private Sensor mAccelerometer;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +130,9 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
     // This should be asyncronous
     private void initializeDatabase() {
+        Toast.makeText(this, "Test A.", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Test B.", Toast.LENGTH_LONG).show();
+
         if (DatabaseContract.getCurrentVersion(this) <= DatabaseContract.DATABASE_VERSION) {
             Toast.makeText(this, "Initializing database.", Toast.LENGTH_LONG).show();
 
