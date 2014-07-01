@@ -1,8 +1,5 @@
 package com.returnjump.spoilfoil;
 
-import android.provider.ContactsContract;
-import android.util.Log;
-
 import java.util.GregorianCalendar;
 
 public class FridgeItem {
