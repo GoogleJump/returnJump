@@ -15,21 +15,21 @@ import java.util.List;
  */
 public class NotificationSender{
         public Context context;
-        public List<FridgeItem> expiringFridgeItems;
+        public List<FridgeItem> expiredFridgeItems;
 
         public NotificationSender(Context context, List<FridgeItem> expiringFridgeItems){
-            this.expiringFridgeItems = expiringFridgeItems;
+            this.expiredFridgeItems = expiringFridgeItems;
             this.context = context;
         };
 
         private String generateMessage() {
-            if (expiringFridgeItems.size() == 1) {
-                return "Your %s has expired".format(expiringFridgeItems.get(0).getName());
-            } else if (expiringFridgeItems.size() == 2) {
-                return "Your %s and %s have expired".format(expiringFridgeItems.get(0).getName(), expiringFridgeItems.get(1).getName());
+            if (expiredFridgeItems.size() == 1) {
+                return String.format("Your %s has expired", expiredFridgeItems.get(0).getName());
+            } else if (expiredFridgeItems.size() == 2) {
+                return String.format("Your %s and %s have expired", expiredFridgeItems.get(0).getName(), expiredFridgeItems.get(1).getName());
             } else {
-                int random = (int) (Math.random() * expiringFridgeItems.size());
-                return "Your %s and %d others have expired.".format(expiringFridgeItems.get(random).getName(), expiringFridgeItems.size());
+                int random = (int) (Math.random() * expiredFridgeItems.size());
+                return String.format("Your %s and %d others have expired", expiredFridgeItems.get(random).getName(), expiredFridgeItems.size());
             }
         }
 
@@ -56,7 +56,7 @@ public class NotificationSender{
                             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                             .setVibrate(new long[]{ 0, 250, 100, 250 })
                             .setLights(Color.GREEN, 500, 1000)
-                            .setNumber(expiringFridgeItems.size())
+                            .setNumber(expiredFridgeItems.size())
                             .setContentIntent(pIntent)
                             .setAutoCancel(true);
 

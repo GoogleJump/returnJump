@@ -40,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 public class KelseyActivity extends FragmentActivity implements CalendarDatePickerDialog.OnDateSetListener, EditNameFragment.OnEditNameButtonClickedListener, ShakeDetector.Listener {
 
@@ -69,7 +70,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         fridgeListView.setOnScrollListener(touchListener.makeScrollListener());
         this.initializeLongClickListener();
 
-        populateListView(fridgeItems);
+        populateListView();
 
         findViewById(R.id.submitNewItemButton).setOnClickListener(addNewItemToListView);
         findViewById(R.id.daysGoodTextView).setOnClickListener(openCalendarDialogClick);
@@ -89,7 +90,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     @Override
     protected void onRestart() {
         super.onRestart();
-        populateListView(fridgeItems);
+        populateListView();
     }
 
     @Override
@@ -200,6 +201,8 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     }
 
     private void copyDatabaseToList() {
+        boolean isAtLeastOneExpired = false;
+
         Cursor c = fridgeDbHelper.read(null);
         c.moveToFirst();
         fridgeItems.clear();
@@ -218,16 +221,25 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
             if (!dismissed) {
                 fridgeItems.add(new FridgeItem(id, foodName, expiryDate));
+
+                // Check if the item has expired
+                if (expiryDate.compareTo(FridgeDbHelper.calendarToString(Calendar.getInstance(), DatabaseContract.FORMAT_DATE)) <= 0) {
+                    isAtLeastOneExpired = true;
+                }
             }
 
             c.moveToNext();
         }
+
+        if (isAtLeastOneExpired) {
+            Toast.makeText(this, "Shake to dismiss expired food.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     // We should sort our list by descending expiry date
-    private void populateListView(ArrayList<FridgeItem> list) {
+    private void populateListView() {
         copyDatabaseToList();
-        adapter = new MyFridgeAdapter(this, R.layout.list_fooditems, list);
+        adapter = new MyFridgeAdapter(this, R.layout.list_fooditems, fridgeItems);
 
         TextView emptyFridge = (TextView) findViewById(R.id.empty_fridge);
 
@@ -235,7 +247,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
         //toggles the "your fridge is empty :(" eventually we should
         // have a cool graphic of an empty fridge here or something
-        if (list.size() == 0) {
+        if (fridgeItems.size() == 0) {
             fridgeListView.setVisibility(View.GONE);
             emptyFridge.setVisibility(View.VISIBLE);
         } else {
@@ -247,14 +259,14 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
    //helper method to consolidate setting views
 
-    private void updateListView(ArrayList<FridgeItem> list) {
+    private void updateListView() {
         TextView emptyFridge = (TextView) findViewById(R.id.empty_fridge);
 
         adapter.notifyDataSetChanged();
 
         //toggles the "your fridge is empty :(" eventually we should
         // have a cool graphic of an empty fridge here or something
-        if (list.size() == 0) {
+        if (fridgeItems.size() == 0) {
             fridgeListView.setVisibility(View.GONE);
             emptyFridge.setVisibility(View.VISIBLE);
         } else {
@@ -304,7 +316,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                 long id = fridgeDbHelper.put(foodName, expiryDate, foodName, DatabaseContract.BOOL_FALSE, null, null);
                 FridgeItem newFridgeItem = new FridgeItem(id, foodName, FridgeDbHelper.calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
                 int index = insertToSortedList(newFridgeItem); //foodItems.add(newFoodItem);
-                updateListView(fridgeItems);
+                updateListView();
 
                 // UI clean up
                 newItemField.setText("");
@@ -399,7 +411,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
             Toast.makeText(getApplicationContext(), "Item edited!", Toast.LENGTH_LONG).show();
 
             // there should be a faster way to update the listview immediately after editing an item?
-            populateListView(fridgeItems);
+            populateListView();
 
         }
     }
@@ -467,7 +479,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                             fridgeDbHelper.update(rowId, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
 
                             adapter.remove(adapter.getItem(position));
-                            updateListView(fridgeItems);
+                            updateListView();
                         } else {
                             Toast.makeText(getApplicationContext(), "Delete failed.", Toast.LENGTH_SHORT).show();
                         }
@@ -479,7 +491,26 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
     @Override
     public void hearShake() {
-        Toast.makeText(this, "Expired food has been dismissed.", Toast.LENGTH_SHORT).show();
+
+        String[] column = {DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED};
+        String[] operator =  {"<=", "="};
+        String[] wherevalue = {FridgeDbHelper.calendarToString(Calendar.getInstance(), DatabaseContract.FORMAT_DATE), DatabaseContract.BOOL_FALSE_STR};
+        String[] conjunction = {DatabaseContract.AND};
+
+        List<FridgeItem> expiredFridgeItems = fridgeDbHelper.getAll(column, operator, wherevalue, conjunction, true);
+
+        for (int i = 0; i < expiredFridgeItems.size(); i++) {
+            FridgeItem fridgeItem = expiredFridgeItems.get(i);
+
+            fridgeDbHelper.update(fridgeItem.getRowId(), null, null, null, DatabaseContract.BOOL_TRUE, DatabaseContract.BOOL_TRUE, null, null, null, null, null, null);
+        }
+
+        if (expiredFridgeItems.size() > 0) {
+            Toast.makeText(this, "Expired food has been dismissed.", Toast.LENGTH_SHORT).show();
+
+            // there should be a faster way to update the listview immediately after editing an item?
+            populateListView();
+        }
     }
 
 
