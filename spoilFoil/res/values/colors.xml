@@ -17,7 +17,8 @@
 <resources>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
-    <color name="theme">#86B300</color>
-    <color name="theme_dark">#739900</color>
-    <color name="theme_red">#CC0000</color>
+    <color name="light_gray_bg">#F0F0F0</color>
+    <color name="theme">#99CC00</color>
+    <color name="theme_dark">#669900</color>
+    <color name="theme_red">#FF4444</color>
 </resources>
