@@ -28,8 +28,13 @@ public class NotificationSender{
             } else if (expiredFridgeItems.size() == 2) {
                 return String.format("Your %s and %s have expired", expiredFridgeItems.get(0).getName(), expiredFridgeItems.get(1).getName());
             } else {
+                String plural = "";
+                if (expiredFridgeItems.size() > 3) {
+                    plural = "s";
+                }
+
                 int random = (int) (Math.random() * expiredFridgeItems.size());
-                return String.format("Your %s and %d others have expired", expiredFridgeItems.get(random).getName(), expiredFridgeItems.size());
+                return String.format("Your %s and %d other%s have expired", expiredFridgeItems.get(random).getName(), expiredFridgeItems.size(), plural);
             }
         }
 

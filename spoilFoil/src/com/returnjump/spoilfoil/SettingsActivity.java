@@ -97,7 +97,7 @@ public class SettingsActivity extends PreferenceActivity {
         alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
                 AlarmManager.INTERVAL_DAY, alarmIntent);
 
-        BootReceiver.enable(context);
+        //BootReceiver.enable(context);
 
         // Set flag so that alarm gets initialized once in the main activity
         if (!getAlarmSet(context)) {
@@ -258,7 +258,7 @@ public class SettingsActivity extends PreferenceActivity {
                     AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
                     alarmMgr.cancel(alarmIntent);
-                    BootReceiver.disable(context);
+                    //BootReceiver.disable(context);
                 }
 
                 return true;

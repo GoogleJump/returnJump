@@ -25,13 +25,7 @@ public class NotificationAlarm extends BroadcastReceiver {
          */
 
         FridgeDbHelper fridgeDbHelper = new FridgeDbHelper(context);
-        final Calendar rightnow = Calendar.getInstance();
-        String[] column = {DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED};
-        String[] operator =  {"<=", "="};
-        String[] whereValue = {FridgeDbHelper.calendarToString(rightnow, DatabaseContract.FORMAT_DATE), DatabaseContract.BOOL_FALSE_STR};
-        String[] conjunction = {DatabaseContract.AND};
-
-        List<FridgeItem> expiredFridgeItems = fridgeDbHelper.getAll(column, operator, whereValue, conjunction, true);
+        List<FridgeItem> expiredFridgeItems = getExpiredItems(fridgeDbHelper, context);
 
         // Trigger notifications if something is about to expire
         if (expiredFridgeItems.size() > 0) {
@@ -52,5 +46,24 @@ public class NotificationAlarm extends BroadcastReceiver {
             }
         }
 
+    }
+
+    private static List<FridgeItem> getExpiredItems(FridgeDbHelper fridgeDbHelper, Context context) {
+        String[] column = {DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED};
+        String[] operator =  {"<=", "="};
+        String[] whereValue = {FridgeDbHelper.calendarToString(Calendar.getInstance(), DatabaseContract.FORMAT_DATE), DatabaseContract.BOOL_FALSE_STR};
+        String[] conjunction = {DatabaseContract.AND};
+
+        return fridgeDbHelper.getAll(column, operator, whereValue, conjunction, true);
+    }
+
+    // Daily background job to set the expired flag in the database
+    private static List<FridgeItem> setExpiredItems(List<FridgeItem> expiredFridgeItems, FridgeDbHelper fridgeDbHelper) {
+
+        for(FridgeItem item: expiredFridgeItems) {
+            fridgeDbHelper.update(item.getRowId(), null, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, null, null);
+        }
+
+        return expiredFridgeItems;
     }
 }

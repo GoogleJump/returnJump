@@ -315,7 +315,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
 
                 long id = fridgeDbHelper.put(foodName, expiryDate, foodName, DatabaseContract.BOOL_FALSE, null, null);
                 FridgeItem newFridgeItem = new FridgeItem(id, foodName, FridgeDbHelper.calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
-                int index = insertToSortedList(newFridgeItem); //foodItems.add(newFoodItem);
+                int index = insertToSortedList(newFridgeItem);
                 updateListView();
 
                 // UI clean up
