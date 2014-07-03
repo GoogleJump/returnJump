@@ -27,8 +27,7 @@
         android:imeOptions="actionNext"
         android:autoText="true"
         android:scrollHorizontally="true"
-
-        />
+        android:fontFamily="sans-serif-light" />
 
     <ImageButton
         android:id="@+id/submit_new_item_button_dialog"

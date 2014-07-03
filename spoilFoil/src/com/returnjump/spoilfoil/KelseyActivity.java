@@ -53,6 +53,7 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kelsey);
+
         activity = this;
 
         fridgeDbHelper = new FridgeDbHelper(this);
@@ -326,13 +327,15 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
                             long rowId = (Long) child.getTag(R.id.food_item_id);
                             fridgeDbHelper.update(rowId, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
 
-                            String name = adapter.getItem(position).getName();
-                            String date = adapter.getItem(position).getExpiryDate();
-                            final Bundle b = new Bundle();
-                            b.putInt("index", position);
-                            b.putString("name", name);
-                            b.putString("date", date);
-                            new UndoBarController.UndoBar(activity).message("'" + name + "' was removed. Undo?").listener((UndoBarController.UndoListener) activity).token(b).show();
+                            String name = adapter.getItem(position).getName().toString();
+                            Bundle b = new Bundle();
+                            b.putString("foodName", name);
+                            b.putLong("rowId", rowId);
+                            new UndoBarController.UndoBar(activity)
+                                                 .message("Removed " + name) // Need to add an ellipsis to long names
+                                                 .listener((UndoBarController.UndoListener) activity)
+                                                 .token(b)
+                                                 .show();
 
                             adapter.remove(adapter.getItem(position));
                             updateListView();
@@ -425,10 +428,10 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
         }
 
         if (expiredFridgeItems.size() > 0) {
-            Toast.makeText(this, "Expired food has been dismissed.", Toast.LENGTH_SHORT).show();
-
             // there should be a faster way to update the listview immediately after editing an item?
             populateListView();
+
+            Toast.makeText(this, "Expired food has been dismissed.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -439,15 +442,16 @@ public class KelseyActivity extends FragmentActivity implements CalendarDatePick
     @Override
     public void onUndo(Parcelable token) {
         if (token != null) {
-            final String foodName = ((Bundle) token).getString("name");
-            final String expiryDate = ((Bundle) token).getString("date");
-            Calendar c = FridgeDbHelper.stringToCalendar(expiryDate, DatabaseContract.FORMAT_DATE);
-            Toast.makeText(this, "'"+ foodName +"' was re-added to your phridge!", Toast.LENGTH_SHORT).show();
-            long id = fridgeDbHelper.put(foodName, c, foodName, DatabaseContract.BOOL_FALSE, null, null);
-            FridgeItem newFridgeItem = new FridgeItem(id, foodName, expiryDate);
-            int index = insertToSortedList(newFridgeItem);
-            updateListView();
-            fridgeListView.smoothScrollToPosition(index);
+            final String foodName = ((Bundle) token).getString("foodName");
+            final long rowId = ((Bundle) token).getLong("rowId");
+
+            fridgeDbHelper.update(rowId, null, null, null, DatabaseContract.BOOL_FALSE, null, null, null, null, DatabaseContract.BOOL_FALSE, null, null);
+
+            // there should be a faster way to update the listview immediately after editing an item?
+            populateListView();
+
+            // Need to add an ellipsis to long names
+            Toast.makeText(this, "Added back " + foodName, Toast.LENGTH_SHORT).show();
         }
     }
 

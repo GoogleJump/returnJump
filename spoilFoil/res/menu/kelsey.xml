@@ -5,13 +5,7 @@
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/action_settings"/>
-    
-    <item
-        android:id="@+id/action_arturo"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/title_activity_arturo"/>
-    
+
     <item android:id="@+id/action_camera"
           android:title="@string/action_camera"
           android:icon="@drawable/ic_action_camera"

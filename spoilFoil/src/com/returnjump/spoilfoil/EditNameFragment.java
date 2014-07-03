@@ -10,12 +10,15 @@ import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 /**
  * Created by Kelsey on 5/31/2014.
@@ -48,19 +51,22 @@ public class EditNameFragment extends DialogFragment {
         if(!getArguments().getBoolean("isNewItem")){
             editText.setText(getArguments().getString("name"));
         }
-        editText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "fonts/Roboto-Light.otf"));
-                button = (ImageButton) view.findViewById(R.id.submit_new_item_button_dialog);
+        //editText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "fonts/Roboto-Light.otf"));
 
-        //TODO set onKeyListener for enter
+        button = (ImageButton) view.findViewById(R.id.submit_new_item_button_dialog);
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                submitFoodName();
+
+                return true;
+            }
+        });
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if(!editText.getText().equals("")) {
-                    getArguments().putString("name", editText.getText().toString());
-                    editNameButtonClickedListener.onEditNameButtonClicked(getArguments().getBoolean("isNewItem"));
-                }
+                submitFoodName();
             }
         });
         editText.requestFocus();
@@ -68,6 +74,15 @@ public class EditNameFragment extends DialogFragment {
         getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         return view;
 
+    }
+
+    public void submitFoodName() {
+        editText.setText(editText.getText().toString().trim());
+
+        if(!editText.getText().toString().equals("")) {
+            getArguments().putString("name", editText.getText().toString());
+            editNameButtonClickedListener.onEditNameButtonClicked(getArguments().getBoolean("isNewItem"));
+        }
     }
 
     @Override

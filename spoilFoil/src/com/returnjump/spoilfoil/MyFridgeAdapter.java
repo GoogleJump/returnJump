@@ -36,8 +36,7 @@ public class MyFridgeAdapter extends ArrayAdapter<FridgeItem> {
           
           TextView foodItemName = (TextView) itemView.findViewById(R.id.food_item_name);
           foodItemName.setText(currentFood.getName());
-          foodItemName.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Light.otf"));
-
+          //foodItemName.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Light.otf"));
 
           // Set up which linear layout will show since only one of the two should be
           // visible at any given time
@@ -56,11 +55,11 @@ public class MyFridgeAdapter extends ArrayAdapter<FridgeItem> {
 
               TextView expirationNumber = (TextView) itemView.findViewById(R.id.expiration_number);
               expirationNumber.setText(Integer.toString(expirationNum));
-              expirationNumber.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Light.otf"));
+              //expirationNumber.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Light.otf"));
 
               TextView expirationUnit = (TextView) itemView.findViewById(R.id.expiration_unit);
               expirationUnit.setText(currentFood.getExpirationUnit());
-              expirationUnit.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Light.otf"));
+              //expirationUnit.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Light.otf"));
           } else {
               expirationMessage.setLayoutParams(paramShow);
               expirationTime.setLayoutParams(paramHide);
