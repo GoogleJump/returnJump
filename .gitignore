@@ -2,6 +2,19 @@ secret.*
 out/
 jni/
 .DS_Store
+UndoBar/art/
+UndoBar/config/
+UndoBar/example/
+UndoBar/gradle/
+UndoBar/.git
+UndoBar/.travis.yml
+UndoBar/build.gradle
+UndoBar/checkstyle.xml
+UndoBar/gradle.properties
+UndoBar/gradlew
+UndoBar/gradlew.bat
+UndoBar/settings.gradle
+
 
 # Built application files
 *.apk
