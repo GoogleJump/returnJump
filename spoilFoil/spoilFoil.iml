@@ -17,6 +17,7 @@
     <orderEntry type="module" module-name="android-betterpickers" />
     <orderEntry type="module" module-name="tess-two" />
     <orderEntry type="library" name="square-seismic-1.0.0" level="project" />
+    <orderEntry type="module" module-name="undo-bar" />
   </component>
 </module>
 
