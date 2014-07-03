@@ -11,13 +11,13 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/gen" isTestSource="false" generated="true" />
     </content>
-    <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
+    <orderEntry type="jdk" jdkName="Android API 20, L preview Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="libs" level="project" />
     <orderEntry type="module" module-name="android-betterpickers" />
     <orderEntry type="module" module-name="tess-two" />
     <orderEntry type="library" name="square-seismic-1.0.0" level="project" />
-    <orderEntry type="module" module-name="undo-bar" />
+    <orderEntry type="module" module-name="UndoBar" />
   </component>
 </module>
 
