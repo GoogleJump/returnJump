@@ -1,0 +1,3 @@
+[submodule "UndoBar"]
+	path = UndoBar
+	url = https://github.com/soarcn/UndoBar.git
