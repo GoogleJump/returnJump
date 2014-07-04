@@ -2,6 +2,7 @@ secret.*
 out/
 jni/
 .DS_Store
+*.pyc
 
 
 # Built application files
