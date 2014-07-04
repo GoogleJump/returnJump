@@ -35,6 +35,8 @@ public class NotificationAlarm extends BroadcastReceiver {
             boolean pushPref = sharedPreferences.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, SettingsActivity.PREF_CHECKBOX_PUSH_DEFAULT);
             boolean emailPref = sharedPreferences.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, SettingsActivity.PREF_CHECKBOX_EMAIL_DEFAULT);
 
+            setExpiredItems(expiredFridgeItems, fridgeDbHelper, pushPref, emailPref);
+
             if (pushPref) {
                 NotificationSender ns = new NotificationSender(context, expiredFridgeItems);
                 ns.sendNotifications();
@@ -58,10 +60,9 @@ public class NotificationAlarm extends BroadcastReceiver {
     }
 
     // Daily background job to set the expired flag in the database
-    private static List<FridgeItem> setExpiredItems(List<FridgeItem> expiredFridgeItems, FridgeDbHelper fridgeDbHelper) {
-
+    private static List<FridgeItem> setExpiredItems(List<FridgeItem> expiredFridgeItems, FridgeDbHelper fridgeDbHelper, boolean push, boolean email) {
         for(FridgeItem item: expiredFridgeItems) {
-            fridgeDbHelper.update(item.getRowId(), null, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, null, null);
+            fridgeDbHelper.update(item.getRowId(), null, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, push ? DatabaseContract.BOOL_TRUE : null, email ? DatabaseContract.BOOL_TRUE : null);
         }
 
         return expiredFridgeItems;
