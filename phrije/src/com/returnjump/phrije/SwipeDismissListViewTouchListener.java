@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.returnjump.phrige;
+package com.returnjump.phrije;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

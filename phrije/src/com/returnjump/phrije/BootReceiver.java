@@ -1,4 +1,4 @@
-package com.returnjump.phrige;
+package com.returnjump.phrije;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;

@@ -1,4 +1,4 @@
-import json
+import json, re
 
 def jsonFileToDict(file):
     jsonData = open(file)
@@ -114,7 +114,9 @@ for d in data:
     item = {}
     item['full_name'] = d['name']
     name = getFoodName(d['name']) # name here is actually a list, with the first part being the name, and the second part being the description
-    item['name'] = name[0].strip()
+    item['name'] = name[0].strip().replace('/', '').replace('(', '').replace(')', '')
+    item['name'] = re.sub(' +', ' ', item['name']) # Removes duplicate spaces
+    print item['name']
 
     #Here we check if the description contains any of the unwanted tags. May need to add more tags
     if len(name) > 1:

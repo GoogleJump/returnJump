@@ -1,4 +1,4 @@
-package com.returnjump.phrige;
+package com.returnjump.phrije;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -384,10 +384,10 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
             values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED, expired);
         }
         if (editedCart != null) {
-            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_CART, editedCart);
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_CART, editedCart);
         }
         if (editedFridge != null) {
-            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_FRIDGE, editedFridge);
+            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_FRIDGE, editedFridge);
         }
         if (deletedCart != null) {
             values.put(DatabaseContract.FridgeTable.COLUMN_NAME_DELETED_CART, deletedCart);

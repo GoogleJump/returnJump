@@ -1,4 +1,4 @@
-package com.returnjump.phrige;
+package com.returnjump.phrije;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -317,7 +317,6 @@ public class MyParse {
             FridgeItem localFridgeItem = FridgeDbHelper.cursorToFridgeItem(c, false);
 
             ParseObject parseCloudItem = parseCloudFridgeHash.get(localFridgeItem.getHash());
-            boolean updated = false;
 
             if (parseCloudItem == null) { // This is a new item
 

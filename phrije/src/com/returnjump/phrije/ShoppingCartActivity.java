@@ -1,4 +1,4 @@
-package com.returnjump.phrige;
+package com.returnjump.phrije;
 
 
 import android.annotation.TargetApi;
@@ -191,7 +191,7 @@ public class ShoppingCartActivity extends Activity {
     // This area needs work and optimization
     // Should use getFreeSpace() to verify the data will fit in storage
     private static void copyTessDataToStorage() {
-        File tessStorageDir = new File(Environment.getExternalStorageDirectory() + "/phrige/tessdata");
+        File tessStorageDir = new File(Environment.getExternalStorageDirectory() + "/phrije/tessdata");
 
         // Create the storage directory if writable and it does not exist
         if (isExternalStorageWritable() && !tessStorageDir.exists()){
@@ -229,7 +229,7 @@ public class ShoppingCartActivity extends Activity {
     }
 
     private static File getOutputMediaFile(int type){
-        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "phrige");
+        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "phrije");
 
         // Create the storage directory if it does not exist
         if (isExternalStorageWritable() && !mediaStorageDir.exists()){
@@ -507,7 +507,7 @@ public class ShoppingCartActivity extends Activity {
 
             TessBaseAPI baseApi = new TessBaseAPI();
 
-            File dataStorageDir = new File(Environment.getExternalStorageDirectory(), "phrige");
+            File dataStorageDir = new File(Environment.getExternalStorageDirectory(), "phrije");
 
             // Create the storage directory if writable and it does not exist
             if (isExternalStorageWritable() && !dataStorageDir.exists()){

@@ -1,4 +1,4 @@
-package com.returnjump.phrige;
+package com.returnjump.phrije;
 
 import android.app.Application;
 import android.view.View;
@@ -10,7 +10,7 @@ public class MyApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 		
-		// Parse App ID and Client Key can be found in phrige/res/values/secret.xml
+		// Parse App ID and Client Key can be found in phrije/res/values/secret.xml
 	    MyParse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_key));
         MyParse.saveInstallationEventually(this);
 

@@ -1,4 +1,4 @@
-package com.returnjump.phrige;
+package com.returnjump.phrije;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -56,7 +56,7 @@ public class NotificationPush {
             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(context)
                             .setSmallIcon(R.drawable.ic_notification)
-                            .setContentTitle("Phrige")
+                            .setContentTitle("Phrije")
                             .setContentText(generateMessage())
                             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                             .setVibrate(new long[]{ 0, 250, 100, 250 })

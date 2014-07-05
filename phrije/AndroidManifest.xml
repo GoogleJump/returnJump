@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.returnjump.phrige"
+    package="com.returnjump.phrije"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -19,14 +19,14 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
-        android:name="com.returnjump.phrige.MyApplication"
+        android:name="com.returnjump.phrije.MyApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:logo="@drawable/ic_action_menu"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.returnjump.phrige.MainActivity"
+            android:name="com.returnjump.phrije.MainActivity"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustResize"
             android:label="@string/app_name" >
@@ -37,26 +37,26 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.returnjump.phrige.ShoppingCartActivity"
+            android:name="com.returnjump.phrije.ShoppingCartActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_shopping_cart"
-            android:parentActivityName="com.returnjump.phrige.MainActivity" >
+            android:parentActivityName="com.returnjump.phrije.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.returnjump.phrige.MainActivity" />
+                android:value="com.returnjump.phrije.MainActivity" />
         </activity>
         <activity
-            android:name="com.returnjump.phrige.SettingsActivity"
+            android:name="com.returnjump.phrije.SettingsActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="com.returnjump.phrige.MainActivity" >
+            android:parentActivityName="com.returnjump.phrije.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.returnjump.phrige.MainActivity" />
+                android:value="com.returnjump.phrije.MainActivity" />
         </activity>
 
-        <receiver android:name="com.returnjump.phrige.NotificationReceiver"></receiver>
-        <receiver android:name="com.returnjump.phrige.BootReceiver" android:enabled="true">
+        <receiver android:name="com.returnjump.phrije.NotificationReceiver"></receiver>
+        <receiver android:name="com.returnjump.phrije.BootReceiver" android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"></action>
             </intent-filter>

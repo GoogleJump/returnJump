@@ -1,10 +1,12 @@
-package com.returnjump.phrige;
+package com.returnjump.phrije;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
@@ -59,7 +61,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         fridgeDbHelper = new FridgeDbHelper(this);
         fridgeListView = (ListView) findViewById(R.id.foodItemListView);
 
-        initializeDatabase();
+        new InitializeDatabaseTask().execute();
 
         this.initializeSwipeDismissListener();
         fridgeListView.setOnTouchListener(touchListener);
@@ -103,39 +105,48 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         sd.stop();
     }
 
-    private void initializeFoodData(FoodTableHelper foodTableHelper, ExpiryTableHelper expiryTableHelper, JSONArray data) {
-        try {
+    private class InitializeDatabaseTask extends AsyncTask<Void, Void, String> {
 
-            for (int i = 0; i < data.length(); i++) {
-                JSONObject item = data.getJSONObject(i);
-                JSONArray expiry = item.getJSONArray("expiry");
+        protected void onPreExecute() {
+            if (DatabaseContract.getCurrentVersion(getApplicationContext()) <= DatabaseContract.DATABASE_VERSION) {
+                Toast.makeText(getApplicationContext(), "Preparing our database...", Toast.LENGTH_SHORT).show();
+            }
+        }
 
-                long rowId = foodTableHelper.put(item.getString("name"), item.getString("full_name"));
+        private String initializeFoodData(FoodTableHelper foodTableHelper, ExpiryTableHelper expiryTableHelper, JSONArray data) {
+            String message = "";
 
-                for (int j = 0; j < expiry.length(); j++) {
-                    JSONObject exp = expiry.getJSONObject(j);
+            try {
 
-                    expiryTableHelper.put(rowId, exp.getString("type"), exp.getInt("freezer"), exp.getInt("pantry"), exp.getInt("refrigerator"));
+                for (int i = 0; i < data.length(); i++) {
+                    JSONObject item = data.getJSONObject(i);
+                    JSONArray expiry = item.getJSONArray("expiry");
+
+                    long rowId = foodTableHelper.put(item.getString("name"), item.getString("full_name"));
+
+                    for (int j = 0; j < expiry.length(); j++) {
+                        JSONObject exp = expiry.getJSONObject(j);
+
+                        expiryTableHelper.put(rowId, exp.getString("type"), exp.getInt("freezer"), exp.getInt("pantry"), exp.getInt("refrigerator"));
+                    }
+
                 }
 
+                message = "Database has been prepared successfully.";
+
+            } catch (JSONException e) {
+                message = e.getMessage();
             }
 
-        } catch (JSONException e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            return message;
         }
-    }
 
-    // This should be asyncronous
-    private void initializeDatabase() {
+        private String initializeDatabase() {
 
-        // Will only create table if it doesn't exist (table not found error)
-        fridgeDbHelper.onCreate(fridgeDbHelper.getWritableDatabase());
+            String message = "";
 
-        if (DatabaseContract.getCurrentVersion(this) <= DatabaseContract.DATABASE_VERSION) {
-            Toast.makeText(this, "Initializing database.", Toast.LENGTH_LONG).show();
-
-            FoodTableHelper foodTableHelper = new FoodTableHelper(this);
-            ExpiryTableHelper expiryTableHelper = new ExpiryTableHelper(this);
+            FoodTableHelper foodTableHelper = new FoodTableHelper(getApplicationContext());
+            ExpiryTableHelper expiryTableHelper = new ExpiryTableHelper(getApplicationContext());
 
             // Clear database
             foodTableHelper.onUpgrade(foodTableHelper.getWritableDatabase(), -1, -1);
@@ -143,7 +154,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
 
             try {
                 AssetManager assetManager = getAssets();
-                InputStream in = assetManager.open("stilltasty_parsed.json");
+                InputStream in = assetManager.open("parsed.json");
 
                 byte[] buffer = new byte[in.available()];
                 in.read(buffer);
@@ -152,16 +163,37 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
                 String data = new String(buffer, "UTF-8");
                 JSONObject json = new JSONObject(data);
 
-                initializeFoodData(foodTableHelper, expiryTableHelper, json.getJSONArray("data"));
+                message = initializeFoodData(foodTableHelper, expiryTableHelper, json.getJSONArray("data"));
 
                 // Increment the current version so that when the DATABASE_VERSION is updated,
                 // this data will be updated as well
-                DatabaseContract.setCurrentVersion(DatabaseContract.DATABASE_VERSION + 1, this);
+                DatabaseContract.setCurrentVersion(DatabaseContract.DATABASE_VERSION + 1, getApplicationContext());
 
             } catch (IOException e) {
-                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                message = e.getMessage();
             } catch (JSONException e) {
-                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                message = e.getMessage();
+            }
+
+            return message;
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+
+            // Will only create table if it doesn't exist (table not found error)
+            fridgeDbHelper.onCreate(fridgeDbHelper.getWritableDatabase());
+
+            if (DatabaseContract.getCurrentVersion(getApplicationContext()) <= DatabaseContract.DATABASE_VERSION) {
+                return initializeDatabase();
+            }
+
+            return null;
+        }
+
+        protected void onPostExecute(String message) {
+            if (message != null) {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -410,7 +442,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
             // Check if the item is expired or not and update the boolean accordingly
             fridgeDbHelper.update(editNameFragment.getArguments().getLong("rowId"), foodName , expiryDate, null, null, null, null, DatabaseContract.BOOL_TRUE,
                     null, null, null, null);
-            Toast.makeText(getApplicationContext(), "Item edited!", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Item edited.", Toast.LENGTH_LONG).show();
             populateListView();
         }
         editNameFragment = null;
