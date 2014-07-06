@@ -119,7 +119,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
             // Temporary fix for Issue #13
             FridgeItem fridgeItem = getRowById(newRowId, false);
             if (fridgeItem != null) {
-                MyParse.saveFridgeItemEventually(getRowById(newRowId, false), true, context);
+                MyParse.saveFridgeItemEventually(fridgeItem, true, context);
             }
         }
         
