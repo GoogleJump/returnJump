@@ -1,5 +1,6 @@
 from flask import Flask, Response, request
-import json, email
+from google.appengine.api import mail
+import json, phrije_email
 
 app = Flask(__name__)
 app.config.update(dict(
@@ -21,19 +22,37 @@ def configure():
         API_KEY=data['API_KEY']
     ))
 
+def myResponse(body):
+    return Response(json.dumps(body), mimetype='application/json')
+
 @app.route('/')
 def hello():
-    """Return a friendly HTTP greeting."""
+    '''Return a friendly HTTP greeting.'''
     return 'Hello World!'
 
 @app.errorhandler(404)
 def page_not_found(e):
-    """Return a custom 404 error."""
-    return 'Sorry, nothing at this URL.', 404
+    '''Return a custom 404 error.'''
+    return 'Are you lost, bro?', 404
 
 @app.route('/api/email', methods=['POST'])
 def email():
     if request.headers.get('API_KEY') != app.config['API_KEY']:
-        return Response(json.dumps({'error': 'You are not authorized.'}), mimetype=None, content_type="application/json", direct_passthrough=False)
+        return myResponse({'error': 'You are not authorized.'})
 
-    return Response(json.dumps({'success': 'You are authorized'}), mimetype=None, content_type="application/json", direct_passthrough=False)
+    #sendEmail = phrije_email.sendEmail('returnjump@gmail.com', 'Phrije', 'Your food has gone bad.', app.config['EMAIL_PASSWORD'])
+    #return myResponse(sendEmail)
+    message = mail.EmailMessage(sender='Return Jump <returnjump@gmail.com>', subject='Phrije')
+
+    message.to = 'returnjump@gmail.com'
+    message.body = '''
+Your food has gone bad.
+'''
+    message.html = '''
+<html><head></head><body>
+<b>Your food has gone bad.</b>
+</body></html>
+'''
+
+    message.send()
+    return myResponse({'success': 'Email sent.'})    
