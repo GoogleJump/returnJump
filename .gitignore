@@ -3,7 +3,7 @@ out/
 jni/
 .DS_Store
 *.pyc
-
+release/
 
 # Built application files
 *.apk
