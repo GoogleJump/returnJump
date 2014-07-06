@@ -1,6 +1,6 @@
 from flask import Flask, Response, request
 from google.appengine.api import mail
-import json, phrije_email
+import json
 
 app = Flask(__name__)
 app.config.update(dict(
