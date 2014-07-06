@@ -107,8 +107,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_NOTIFIED_EMAIL, DatabaseContract.BOOL_FALSE);
 
         // Insert the new row, returning the primary key value of the new row
-        long newRowId;
-        newRowId = db.insert(
+        long newRowId = db.insert(
                 DatabaseContract.FridgeTable.TABLE_NAME,
                 null,
                 values);
@@ -117,7 +116,11 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.context);
         boolean auto = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_AUTO, true);
         if (auto) {
-            MyParse.saveFridgeItemEventually(getRowById(newRowId, false), true, context);
+            // Temporary fix for Issue #13
+            FridgeItem fridgeItem = getRowById(newRowId, false);
+            if (fridgeItem != null) {
+                MyParse.saveFridgeItemEventually(getRowById(newRowId, false), true, context);
+            }
         }
         
         return newRowId;
@@ -238,9 +241,12 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
                 null,                                     // don't filter by row groups
                 null                                      // The sort order
         );
-        c.moveToFirst();
+        if (c.moveToFirst()) {
+            return cursorToFridgeItem(c, isMinimal);
+        } else {
+            return null;
+        }
 
-        return cursorToFridgeItem(c, isMinimal);
     }
 
     /*
