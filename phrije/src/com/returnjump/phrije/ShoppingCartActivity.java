@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -78,6 +79,13 @@ public class ShoppingCartActivity extends Activity {
         setupActionBar();
 
         context = this;
+
+        // Check if device has a camera, go back if it doesn't
+        PackageManager pm = getPackageManager();
+        if (!pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+            Toast.makeText(this, "This device does not have a camera.", Toast.LENGTH_LONG).show();
+            finish();
+        }
 
         copyTessDataToStorage();
 
