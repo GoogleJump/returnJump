@@ -82,7 +82,7 @@ public class ShoppingCartActivity extends Activity {
 
         // Check if device has a camera, go back if it doesn't
         PackageManager pm = getPackageManager();
-        if (!pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+        if (!pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) && !pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             Toast.makeText(this, "This device does not have a camera.", Toast.LENGTH_LONG).show();
             finish();
         }
