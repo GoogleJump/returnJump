@@ -50,7 +50,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
     private ArrayAdapter<FridgeItem> adapter;
     private ArrayList<FridgeItem> fridgeItems = new ArrayList<FridgeItem>();
     private FridgeDbHelper fridgeDbHelper;
-    private SwipeDismissListViewTouchListener touchListener;
+    private SwipeDismissListViewTouchListener swipeDismiss;
     protected ListView fridgeListView;
     EditNameFragment editNameFragment;
     private String EDIT_FRAG_TAG = "edit_frag_tag";
@@ -70,14 +70,12 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
 
         if (DatabaseContract.getCurrentVersion(getApplicationContext()) <= DatabaseContract.DATABASE_VERSION) {
             new InitializeDatabaseTask().execute();
-
-            // Set email from device account
-            setDeviceEmail();
         }
 
         this.initializeSwipeDismissListener();
-        fridgeListView.setOnTouchListener(touchListener);
-        fridgeListView.setOnScrollListener(touchListener.makeScrollListener());
+        fridgeListView.setOnTouchListener(swipeDismiss);
+        fridgeListView.setOnScrollListener(swipeDismiss.makeScrollListener());
+
         this.initializeLongClickListener();
 
         populateListView();
@@ -94,6 +92,9 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         if (!SettingsActivity.getAlarmSet(this) && SettingsActivity.isUserNotificationEnabled(this)) {
             SettingsActivity.initializeAlarm(this);
         }
+
+        // Set email from device account
+        setDeviceEmail();
 
     }
 
@@ -124,7 +125,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String emailPref = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
 
-        if (emailPref.equals("")) {
+        if (emailPref.equals("") && email != null) {
             sharedPref.edit().putString(SettingsActivity.PREF_EMAIL_ADDRESS, email).commit();
         }
     }
@@ -357,8 +358,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         }
     };
 
-    public void initializeSwipeDismissListener() {
-        touchListener =
+    public void initializeSwipeDismissListener() { swipeDismiss =
                 new SwipeDismissListViewTouchListener(fridgeListView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
                     @Override
                     public boolean canDismiss(int position) {
@@ -378,7 +378,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
                             long rowId = (Long) child.getTag(R.id.food_item_id);
                             fridgeDbHelper.update(rowId, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
 
-                            String name = adapter.getItem(position).getName().toString();
+                            String name = adapter.getItem(position).toString();
                             Bundle b = new Bundle();
                             b.putString("foodName", name);
                             b.putLong("rowId", rowId);
@@ -435,7 +435,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         }
         CalendarDatePickerDialog calendarDatePickerDialog = CalendarDatePickerDialog
                 .newInstance(MainActivity.this, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
-        calendarDatePickerDialog.setYearRange(c.get(Calendar.YEAR), calendarDatePickerDialog.getMaxYear());
+        calendarDatePickerDialog.setYearRange(Calendar.getInstance().get(Calendar.YEAR), calendarDatePickerDialog.getMaxYear());
         calendarDatePickerDialog.show(getSupportFragmentManager(), CAL_PICKER_TAG);
         //onDateSet called next
     }

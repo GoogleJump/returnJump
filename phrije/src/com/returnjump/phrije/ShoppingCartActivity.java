@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
@@ -33,11 +34,14 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.cocosw.undobar.UndoBarController;
+import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
 import com.googlecode.leptonica.android.Binarize;
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.ReadFile;
 import com.googlecode.leptonica.android.WriteFile;
 import com.googlecode.tesseract.android.TessBaseAPI;
+import com.squareup.seismic.ShakeDetector;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -52,7 +56,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-public class ShoppingCartActivity extends Activity {
+public class ShoppingCartActivity extends Activity implements /*CalendarDatePickerDialog.OnDateSetListener, EditNameFragment.OnEditNameButtonClickedListener,*/ UndoBarController.AdvancedUndoListener {
 
     private static Context context;
     private static final int MEDIA_TYPE_IMAGE = 1;
@@ -60,6 +64,8 @@ public class ShoppingCartActivity extends Activity {
     private static String IMAGE_PATH;
     private static final String LANG = "eng";
 
+    private Activity activity;
+    private SwipeDismissListViewTouchListener swipeDismiss;
     private ArrayAdapter<FridgeItem> adapter;
     private FridgeDbHelper dbHelper;
     private List<FridgeItem> shoppingCart = new ArrayList<FridgeItem>();
@@ -78,7 +84,7 @@ public class ShoppingCartActivity extends Activity {
         // Show the Up button in the action bar.
         setupActionBar();
 
-        context = this;
+        activity = this;
 
         // Check if device has a camera, go back if it doesn't
         PackageManager pm = getPackageManager();
@@ -90,30 +96,9 @@ public class ShoppingCartActivity extends Activity {
         copyTessDataToStorage();
 
         cartListView = (ListView) findViewById(R.id.shoppingCart);
-        SwipeDismissListViewTouchListener touchListener =
-                new SwipeDismissListViewTouchListener(cartListView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
-                    @Override
-                    public boolean canDismiss(int position) {
-                        return true;
-                    }
-
-                    @Override
-                    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-                        // reverseSortedPositions always has a length = 1
-                        int position = reverseSortedPositions[0];
-                        FridgeItem item = adapter.getItem(position);
-
-                        // Take the item+image and put it in the deleted cart, then remove it
-                        deletedCart.add(item);
-                        deletedCartImages.add(shoppingCartImages.get(position));
-
-                        adapter.remove(item);
-                        shoppingCartImages.remove(position);
-                        adapter.notifyDataSetChanged();
-                    }
-                });
-        cartListView.setOnTouchListener(touchListener);
-        cartListView.setOnScrollListener(touchListener.makeScrollListener());
+        this.initializeSwipeDismissListener();
+        cartListView.setOnTouchListener(swipeDismiss);
+        cartListView.setOnScrollListener(swipeDismiss.makeScrollListener());
 
         // Setup database and list
         dbHelper = new FridgeDbHelper(this);
@@ -132,6 +117,44 @@ public class ShoppingCartActivity extends Activity {
         intent.putExtra(MediaStore.EXTRA_OUTPUT,  fileUri);
 
         startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+    }
+
+    public void initializeSwipeDismissListener() { swipeDismiss =
+                new SwipeDismissListViewTouchListener(cartListView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                    @Override
+                    public boolean canDismiss(int position) {
+                        return true;
+                    }
+
+                    @Override
+                    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                        // reverseSortedPositions always has a length = 1
+                        int position = reverseSortedPositions[0];
+                        FridgeItem item = adapter.getItem(position);
+
+                        // Take the item+image and put it in the deleted cart, then remove it
+                        deletedCart.add(item);
+                        deletedCartImages.add(shoppingCartImages.get(position));
+
+                        Bundle b = new Bundle();
+                        b.putInt("shoppingCartPosition", position);
+                        b.putInt("deletedCartPosition", deletedCart.size() - 1);
+                        b.putString("name", item.getName());
+                        b.putString("rawName", item.getRawName());
+                        b.putString("expiryDate", item.getExpiryDate());
+                        b.putByteArray("image", shoppingCartImages.get(position));
+                        new UndoBarController.UndoBar(activity)
+                                .message("Removed " + item.getName())
+                                .listener((UndoBarController.UndoListener) activity)
+                                .token(b)
+                                .show();
+
+                        adapter.remove(item);
+                        shoppingCartImages.remove(position);
+                        adapter.notifyDataSetChanged();
+
+                    }
+                });
     }
 
     /**
@@ -335,7 +358,7 @@ public class ShoppingCartActivity extends Activity {
             for (int i = 0; i < n; ++i) {
                 FridgeItem item = shoppingCart.get(i);
 
-                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, shoppingCartImages.get(i), shoppingCartImages.get(i));
+                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, null, null /*shoppingCartImages.get(i), shoppingCartImages.get(i)*/);
                 dbHelper.update(id, null, null, null, null, null, null, null, null, null, null, null);
             }
 
@@ -343,7 +366,7 @@ public class ShoppingCartActivity extends Activity {
             for (int j = 0; j < m; ++j) {
                 FridgeItem item = deletedCart.get(j);
 
-                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, deletedCartImages.get(j), deletedCartImages.get(j));
+                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, null, null /*deletedCartImages.get(j), deletedCartImages.get(j)*/);
                 dbHelper.update(id, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
             }
 
@@ -568,6 +591,41 @@ public class ShoppingCartActivity extends Activity {
                 checkoutButton.setVisibility(View.VISIBLE);
             }
         }
+    }
+
+    @Override
+    public void onUndo(Parcelable token) {
+        if (token != null) {
+            final int shoppingCartPosition = ((Bundle) token).getInt("shoppingCartPosition");
+            final int deletedCartPosition = ((Bundle) token).getInt("deletedCartPosition");
+            final String name = ((Bundle) token).getString("name");
+            final String rawName = ((Bundle) token).getString("rawName");
+            final String expiryDate = ((Bundle) token).getString("expiryDate");
+            final byte[] image = ((Bundle) token).getByteArray("image");
+
+            FridgeItem item = new FridgeItem(-1, name, rawName, expiryDate);
+
+            // Remove the item+image from deleted and put it back in the shopping cart
+            deletedCart.remove(deletedCartPosition);
+            deletedCartImages.remove(deletedCartPosition);
+
+            shoppingCart.add(shoppingCartPosition, item);
+            shoppingCartImages.add(shoppingCartPosition, image);
+            adapter.notifyDataSetChanged();
+
+            // Need to add an ellipsis to long names
+            Toast.makeText(this, "Added back " + name, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onHide(Parcelable token) {
+
+    }
+
+    @Override
+    public void onClear() {
+
     }
 
 }
