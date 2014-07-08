@@ -15,6 +15,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
+import android.util.Patterns;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -187,13 +188,9 @@ public class SettingsActivity extends PreferenceActivity {
         }
 
         private static boolean isValidEmail(String email) {
-            final String EMAIL_REGEX =
-                    "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+            Pattern pattern = Patterns.EMAIL_ADDRESS;
 
-            Pattern pattern = Pattern.compile(EMAIL_REGEX);
-            Matcher matcher = pattern.matcher(email);
-
-            return matcher.matches();
+            return pattern.matcher(email).matches();
         }
 
         public Preference.OnPreferenceChangeListener emailAddressPrefChangeListener = new Preference.OnPreferenceChangeListener() {
@@ -207,7 +204,7 @@ public class SettingsActivity extends PreferenceActivity {
                     String email = value.toString().trim();
 
                     // Validate email
-                    if (isValidEmail(email) || email.equals("")) {
+                    if (isValidEmail(email)) {
                         // Set the preference to the trimmed email
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
                         sharedPreferences.edit().putString(PREF_EMAIL_ADDRESS, email).commit();

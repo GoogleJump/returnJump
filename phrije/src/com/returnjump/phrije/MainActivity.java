@@ -1,7 +1,10 @@
 package com.returnjump.phrije;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -9,8 +12,11 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class MainActivity extends FragmentActivity implements CalendarDatePickerDialog.OnDateSetListener, EditNameFragment.OnEditNameButtonClickedListener, ShakeDetector.Listener, UndoBarController.AdvancedUndoListener {
 
@@ -61,7 +68,12 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         fridgeDbHelper = new FridgeDbHelper(this);
         fridgeListView = (ListView) findViewById(R.id.foodItemListView);
 
-        new InitializeDatabaseTask().execute();
+        if (DatabaseContract.getCurrentVersion(getApplicationContext()) <= DatabaseContract.DATABASE_VERSION) {
+            new InitializeDatabaseTask().execute();
+
+            // Set email from device account
+            setDeviceEmail();
+        }
 
         this.initializeSwipeDismissListener();
         fridgeListView.setOnTouchListener(touchListener);
@@ -105,12 +117,22 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         sd.stop();
     }
 
+    private void setDeviceEmail() {
+        Account[] accounts = AccountManager.get(getApplicationContext()).getAccountsByType("com.google");
+        String email = accounts.length > 0 ? accounts[0].name : null;
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String emailPref = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
+
+        if (emailPref.equals("")) {
+            sharedPref.edit().putString(SettingsActivity.PREF_EMAIL_ADDRESS, email).commit();
+        }
+    }
+
     private class InitializeDatabaseTask extends AsyncTask<Void, Void, String> {
 
         protected void onPreExecute() {
-            if (DatabaseContract.getCurrentVersion(getApplicationContext()) <= DatabaseContract.DATABASE_VERSION) {
-                Toast.makeText(getApplicationContext(), "Preparing our database...", Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(getApplicationContext(), "Preparing our database...", Toast.LENGTH_SHORT).show();
         }
 
         private String initializeFoodData(FoodTableHelper foodTableHelper, ExpiryTableHelper expiryTableHelper, JSONArray data) {
@@ -184,17 +206,11 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
             // Will only create table if it doesn't exist (table not found error)
             fridgeDbHelper.onCreate(fridgeDbHelper.getWritableDatabase());
 
-            if (DatabaseContract.getCurrentVersion(getApplicationContext()) <= DatabaseContract.DATABASE_VERSION) {
-                return initializeDatabase();
-            }
-
-            return null;
+            return initializeDatabase();
         }
 
         protected void onPostExecute(String message) {
-            if (message != null) {
-                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
         }
     }
 
