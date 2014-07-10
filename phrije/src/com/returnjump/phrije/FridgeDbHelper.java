@@ -119,7 +119,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
             // Temporary fix for Issue #13
             FridgeItem fridgeItem = getRowById(newRowId, false);
             if (fridgeItem != null) {
-                MyParse.saveFridgeItemEventually(fridgeItem, true, context);
+                MyParse.saveFridgeItemEventually(fridgeItem, true, context, false);
             }
         }
         
@@ -424,7 +424,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.context);
         boolean auto = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_AUTO, true);
         if (auto) {
-            MyParse.saveFridgeItemEventually(getRowById(rowId, false), false, context);
+            MyParse.saveFridgeItemEventually(getRowById(rowId, false), false, context, false);
         }
 
     }

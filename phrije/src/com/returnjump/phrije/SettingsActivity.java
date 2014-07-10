@@ -152,7 +152,7 @@ public class SettingsActivity extends PreferenceActivity {
             super.onDestroy();
 
             initNotifyEmailValue();
-            MyParse.savePreferenceToCloud(getActivity());
+            MyParse.savePreferenceToCloud(getActivity(), false);
         }
 
         @Override
@@ -264,7 +264,7 @@ public class SettingsActivity extends PreferenceActivity {
             public boolean onPreferenceClick(Preference preference) {
             Context context = preference.getContext();
 
-            MyParse.saveFridgeToCloud(context);
+            MyParse.saveFridgeToCloud(context, true);
 
             return true;
             }

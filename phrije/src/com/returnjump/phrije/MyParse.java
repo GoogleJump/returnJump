@@ -27,8 +27,8 @@ public class MyParse {
 
     public static interface MyCallbackInterface {
 
-        public void success(Object result);
-        public void error(); // Too many duplicates, make a default method for this
+        public void success();
+        public void error();
         public void fallback(String message);
 
     }
@@ -41,17 +41,19 @@ public class MyParse {
 
          See http://developer.android.com/reference/android/net/ConnectivityManager.html for others
      */
-    public static int networkConnectionType(Context context) {
+    public static int networkConnectionType(Context context, boolean displayToast) {
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
         if (networkInfo != null && networkInfo.isConnected()) {
             return networkInfo.getType();
-        } else {
-            Toast.makeText(context, "Connect to the internet and try again.", Toast.LENGTH_SHORT).show();
-
-            return -1;
         }
+
+        if (displayToast) {
+            Toast.makeText(context, "Connect to the internet and try again.", Toast.LENGTH_SHORT).show();
+        }
+
+        return -1;
     }
 
     public static void initialize(Context context, String appId, String clientKey) {
@@ -66,70 +68,84 @@ public class MyParse {
         return getInstallation().getInstallationId();
     }
 
-    public static String getUserParseClass() {
-        return "User_" + getInstallation().getObjectId();
+    public static String getInstallationObjectId() {
+        return getInstallation().getObjectId();
     }
 
-    public static void saveInstallationEventually(Context context) {
-        ParseInstallation.getCurrentInstallation().saveEventually();
+    public static void saveInstallationEventually(final Context context) {
+        ParseInstallation.getCurrentInstallation().saveEventually(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+                    String emailAddress = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
+                    boolean notifyPush = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, true);
+                    boolean notifyEmail = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, false);
+
+                    ParseObject user = new ParseObject("Users");
+                    
+                    user.put("installationObject", getInstallation());
+                    user.put("installationObjectId", getInstallationObjectId());
+                    user.put("email", emailAddress);
+                    user.put("notifyPush", notifyPush);
+                    user.put("notifyEmail", notifyEmail);
+
+                    user.saveEventually();
+                } else {
+                    Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
-    public static void savePreferenceToCloud(final Context context) {
+    public static void savePreferenceToCloud(final Context context, boolean displayToast) {
 
-        isUserClassSet(new MyCallbackInterface() {
+        isUserSet(new MyCallbackInterface() {
 
             @Override
-            public void success(Object result) {
-                ParseObject user = (ParseObject) result;
-                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-                String emailAddress = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
-                boolean notifyPush = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, true);
-                boolean notifyEmail = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, false);
-
-                user.put("email", emailAddress);
-                user.put("notifyPush", notifyPush);
-                user.put("notifyEmail", notifyEmail);
-
-                user.saveEventually(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
+            public void success() {
+                ParseQuery<ParseObject> query = ParseQuery.getQuery("Users");
+                query.whereEqualTo("installationObjectId", getInstallationObjectId());
+                query.getFirstInBackground(new GetCallback<ParseObject>() {
+                    public void done(ParseObject user, ParseException e) {
                         if (e == null) {
-                            fallback("Preferences saved to cloud.");
+                            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+                            String emailAddress = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
+                            boolean notifyPush = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, true);
+                            boolean notifyEmail = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, false);
+
+                            user.put("email", emailAddress);
+                            user.put("notifyPush", notifyPush);
+                            user.put("notifyEmail", notifyEmail);
+
+                            user.saveEventually(new SaveCallback() {
+                                @Override
+                                public void done(ParseException e) {
+                                    if (e == null) {
+                                        fallback("Preferences saved to cloud.");
+                                    } else {
+                                        fallback(e.getMessage());
+                                    }
+                                }
+                            });
                         } else {
                             fallback(e.getMessage());
                         }
                     }
                 });
+
             }
 
             @Override
             public void error() {
-
-                ParseObject userClass = new ParseObject(getUserParseClass());
-
-                userClass.saveEventually(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        if (e == null) {
-                            ParseObject user = new ParseObject("Users");
-
-                            user.put("installationObjectId", getInstallation().getObjectId());
-                            user.put("installationId", getInstallationId());
-
-                            success(user);
-                        } else {
-                            fallback(e.getMessage());
-                        }
-                    }
-                });
-
+                success();
             }
 
             @Override
             public void fallback(String message) {
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
-        }, context);
+        }, context, displayToast);
 
     }
 
@@ -196,7 +212,7 @@ public class MyParse {
     }
 
     private static void saveNewFridgeItemEventually(FridgeItem fridgeItem) {
-        ParseObject parseObject = new ParseObject(getUserParseClass());
+        ParseObject parseObject = new ParseObject("Fridge");
 
         // This data should never be modified
         parseObject.put("rowId", fridgeItem.getRowId());
@@ -238,19 +254,23 @@ public class MyParse {
         parseObject.put("notifiedPush", fridgeItem.isNotifiedPush());
         parseObject.put("notifiedEmail", fridgeItem.isNotifiedEmail());
 
+        // User data
+        parseObject.put("installationObjectId", getInstallationObjectId());
+        parseObject.put("installationObject", getInstallation());
+
         parseObject.saveEventually();
 
     }
 
-    public static void saveFridgeItemEventually(final FridgeItem fridgeItem, final boolean isNew, final Context context) {
-        MyParse.isUserClassSet(new MyParse.MyCallbackInterface() {
+    public static void saveFridgeItemEventually(final FridgeItem fridgeItem, final boolean isNew, final Context context, boolean displayToast) {
+        MyParse.isUserSet(new MyParse.MyCallbackInterface() {
             @Override
-            public void success(Object result) {
+            public void success() {
 
                 if (isNew) {
                     saveNewFridgeItemEventually(fridgeItem);
                 } else {
-                    ParseQuery<ParseObject> query = ParseQuery.getQuery(MyParse.getUserParseClass());
+                    ParseQuery<ParseObject> query = ParseQuery.getQuery("Fridge");
                     query.whereEqualTo("hash", fridgeItem.getHash());
                     query.getFirstInBackground(new GetCallback<ParseObject>() {
                         @Override
@@ -268,42 +288,14 @@ public class MyParse {
 
             @Override
             public void error() {
-
-                ParseObject userClass = new ParseObject(getUserParseClass());
-
-                userClass.saveEventually(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        if (e == null) {
-                            ParseObject user = new ParseObject("Users");
-
-                            user.put("installationObjectId", getInstallation().getObjectId());
-                            user.put("installationId", getInstallationId());
-
-                            user.saveEventually(new SaveCallback() {
-                                @Override
-                                public void done(ParseException e) {
-                                    if (e == null) {
-                                        success(null);
-                                    } else {
-                                        fallback(e.getMessage());
-                                    }
-                                }
-                            });
-
-                        } else {
-                            fallback(e.getMessage());
-                        }
-                    }
-                });
-
+                success();
             }
 
             @Override
             public void fallback(String message) {
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
-        }, context);
+        }, context, displayToast);
     }
 
     // TODO: Still need a callback on the last item to display completion
@@ -333,15 +325,15 @@ public class MyParse {
 
     }
 
-    public static void saveFridgeToCloud(final Context context) {
+    public static void saveFridgeToCloud(final Context context, boolean displayToast) {
 
-        isUserClassSet(new MyCallbackInterface() {
+        isUserSet(new MyCallbackInterface() {
             @Override
-            public void success(Object result) {
-
+            public void success() {
                 fallback("Syncing...");
 
-                ParseQuery<ParseObject> query = ParseQuery.getQuery(getUserParseClass());
+                ParseQuery<ParseObject> query = ParseQuery.getQuery("Users");
+                query.whereEqualTo("installationObject", getInstallation());
                 query.findInBackground(new FindCallback<ParseObject>() {
                     public void done(List<ParseObject> fridgeList, ParseException e) {
                         if (e == null) {
@@ -356,57 +348,30 @@ public class MyParse {
 
             @Override
             public void error() {
-
-                ParseObject userClass = new ParseObject(getUserParseClass());
-
-                userClass.saveEventually(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        if (e == null) {
-                            ParseObject user = new ParseObject("Users");
-
-                            user.put("installationObjectId", getInstallation().getObjectId());
-                            user.put("installationId", getInstallationId());
-
-                            user.saveEventually(new SaveCallback() {
-                                @Override
-                                public void done(ParseException e) {
-                                    if (e == null) {
-                                        success(null);
-                                    } else {
-                                        fallback(e.getMessage());
-                                    }
-                                }
-                            });
-
-                        } else {
-                            fallback(e.getMessage());
-                        }
-                    }
-                });
-
+                success();
             }
 
             @Override
             public void fallback(String message) {
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
-        }, context);
+        }, context, displayToast);
 
     }
 
-    public static void isUserClassSet(final MyCallbackInterface myCallback, Context context) {
-        final String installationId = getInstallationId();
-
-        if (networkConnectionType(context) != -1) {
+    public static void isUserSet(final MyCallbackInterface myCallback, final Context context, boolean displayToast) {
+        if (networkConnectionType(context, displayToast) != -1) {
             ParseQuery query = ParseQuery.getQuery("Users");
-            query.whereEqualTo("installationId", installationId);
+            query.whereEqualTo("installationObjectId", getInstallationObjectId());
             query.getFirstInBackground(new GetCallback() {
                 @Override
                 public void done(ParseObject user, ParseException e) {
-                    if (e == null) { // User class has been set
-                        myCallback.success(user);
-                    } else if (e.getCode() == PE_ObjectNotFound) { // User class has not been set
+                    if (e == null) { // User object has been set
+                        myCallback.success();
+                    } else if (e.getCode() == PE_ObjectNotFound) { // User object has not been set
+                        // Try saving again (this error shouldn't occur)
+                        saveInstallationEventually(context);
+
                         myCallback.error();
                     } else {
                         myCallback.fallback(e.getMessage());
