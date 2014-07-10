@@ -1,0 +1,14 @@
+{
+    "applications": {
+        "SpoilFoil": {
+            "applicationId": "insert id here", 
+            "masterKey": "insert master key here"
+        }, 
+        "_default": {
+            "link": "SpoilFoil"
+        }
+    }, 
+    "global": {
+        "parseVersion": "1.2.18"
+    }
+}
