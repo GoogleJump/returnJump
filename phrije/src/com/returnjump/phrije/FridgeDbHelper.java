@@ -54,36 +54,13 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return dateFormat.format(cal.getTime());
     }
 
-    private static String getMD5Hash(String message) {
-        String hash = "";
-
-        try {
-            // Create MD5 hash
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] messageDigest = md.digest(message.getBytes("UTF-8"));
-
-            // Create hex string
-            StringBuffer hexString = new StringBuffer();
-            int n = messageDigest.length;
-            for (int i = 0; i < n; i++) {
-                hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
-            }
-
-            hash = hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-        } catch (UnsupportedEncodingException e) {
-        }
-
-        return hash;
-    }
-    
     public long put(String foodItem, Calendar expiryDate, String rawFoodItem, int isFromImage, String image, String imageBinarized) {
         SQLiteDatabase db = this.getWritableDatabase();
         
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
         String calNow = calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME);
-        String hash = getMD5Hash(foodItem + calNow);
+        String hash = FridgeItem.getMD5Hash(foodItem + calNow);
 
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_HASH, hash);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);

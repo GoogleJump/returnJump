@@ -174,7 +174,6 @@ public class SettingsActivity extends PreferenceActivity {
         private void initNotifyEmailValue() {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String emailAddress = sharedPreferences.getString(PREF_EMAIL_ADDRESS, PREF_EMAIL_ADDRESS_DEFAULT).trim();
-            Preference notifyEmail = findPreference(PREF_CHECKBOX_EMAIL);
 
             if (emailAddress.equals(PREF_EMAIL_ADDRESS_DEFAULT)) {
                 sharedPreferences.edit().putBoolean(PREF_CHECKBOX_EMAIL, false).commit();

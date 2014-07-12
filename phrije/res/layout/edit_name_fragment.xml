@@ -21,7 +21,6 @@
         android:layout_marginLeft="0dp"
         android:textSize="@dimen/large"
         android:padding="@dimen/separator_padding"
-        android:inputType="textCapWords"
         android:singleLine="true"
         android:background="@drawable/rounded_edit_text"
         android:imeOptions="actionNext"

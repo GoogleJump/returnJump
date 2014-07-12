@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.parse.FindCallback;
@@ -226,7 +227,7 @@ public class MyParse {
     }
 
     private static void saveNewFridgeItemEventually(FridgeItem fridgeItem) {
-        ParseObject parseObject = new ParseObject("Fridge");
+        final ParseObject parseObject = new ParseObject("Fridge");
 
         // User data
         parseObject.put("installationObjectId", getInstallationObjectId());
@@ -241,15 +242,33 @@ public class MyParse {
 
         byte[] image = fridgeItem.getImageByteArray();
         if (image != null) {
-            ParseFile pfImage = new ParseFile("image.jpg", image);
-            pfImage.saveInBackground(); // Need a save eventually
-            parseObject.put("image", pfImage);
+            final ParseFile pfImage = new ParseFile("image.jpg", image);
+
+            // Reference to image must be put to parseObject after it's saved
+            pfImage.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (e == null) {
+                        parseObject.put("image", pfImage);
+                        parseObject.saveEventually();
+                    }
+                }
+            });
         }
         byte[] imageBinarized = fridgeItem.getImageBinarizedByteArray();
         if (imageBinarized != null) {
-            ParseFile pfImageBinarized = new ParseFile("imageBinarized.jpg", imageBinarized);
-            pfImageBinarized.saveInBackground();
-            parseObject.put("imageBinarized", pfImageBinarized);
+            final ParseFile pfImageBinarized = new ParseFile("imageBinarized.jpg", imageBinarized);
+
+            // Reference to image must be put to parseObject after it's saved
+            pfImageBinarized.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (e == null) {
+                        parseObject.put("imageBinarized", pfImageBinarized);
+                        parseObject.saveEventually();
+                    }
+                }
+            });
         }
 
         saveUpdatedFridgeItemEventually(fridgeItem, parseObject);
@@ -292,7 +311,7 @@ public class MyParse {
                             if (e == null) {
                                 saveUpdatedFridgeItemEventually(fridgeItem, parseObject);
                             } else {
-                                fallback(e.getMessage());
+                                fallback(e.getMessage()); // "no query found for results"
                             }
                         }
                     });

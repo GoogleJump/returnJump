@@ -5,6 +5,9 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -97,6 +100,29 @@ public class FridgeItem {
 
     private static boolean intToBoolean(int n) {
         return n != 0;
+    }
+
+    public static String getMD5Hash(String message) {
+        String hash = "";
+
+        try {
+            // Create MD5 hash
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(message.getBytes("UTF-8"));
+
+            // Create hex string
+            StringBuffer hexString = new StringBuffer();
+            int n = messageDigest.length;
+            for (int i = 0; i < n; i++) {
+                hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+            }
+
+            hash = hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+        } catch (UnsupportedEncodingException e) {
+        }
+
+        return hash;
     }
 
 
@@ -217,20 +243,27 @@ public class FridgeItem {
         return this.fromImage;
     }
 
+    private byte[] getByteArray(String path) {
+        if(path.equals("")) { // There was an error when the image was saving (no image saved)
+            return null;
+        }
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 4; // Reduces the image resolution by 4
+
+        Bitmap bitmap = BitmapFactory.decodeFile(path, options);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+        return stream.toByteArray();
+    }
+
     public String getImagePath() {
         return this.image;
     }
 
     public byte[] getImageByteArray() {
-        Log.wtf("IMAGE", getImagePath());
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 2; // Reduces the image resolution to half
-
-        Bitmap bitmap = BitmapFactory.decodeFile(getImagePath(), options);
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-
-        return stream.toByteArray();
+        return getByteArray(getImagePath());
     }
 
     public String getImageBinarizedPath() {
@@ -238,13 +271,7 @@ public class FridgeItem {
     }
 
     public byte[] getImageBinarizedByteArray() {
-        return null;
-
-        /*Bitmap bitmap = BitmapFactory.decodeFile(getImageBinarizedPath());
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-
-        return stream.toByteArray();*/
+        return getByteArray(getImageBinarizedPath());
     }
 
     public boolean isDismissed() {

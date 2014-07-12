@@ -45,6 +45,7 @@ import com.squareup.seismic.ShakeDetector;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -344,6 +345,7 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
         }
     }
 
+    // Async task this!
     private OnClickListener addToFridge = new OnClickListener() {
 
         @Override
@@ -356,7 +358,6 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
                 FridgeItem item = shoppingCart.get(i);
 
                 long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
-                dbHelper.update(id, null, null, null, null, null, null, null, null, null, null);
             }
 
             // Add the deleted cart to the database, setting deleted_cart to True
@@ -518,10 +519,42 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
             return splittedBitmap;
         }
 
+        // Name should be set to the fridgeItem's hash later
+        private String saveBitmapToFileSystem(Bitmap bitmap) {
+            File dataStorageDir = new File(Environment.getExternalStorageDirectory(), "phrije");
+
+            // Create the storage directory if writable and it does not exist
+            if (isExternalStorageWritable() && !dataStorageDir.exists()){
+                if (!dataStorageDir.mkdirs()){
+                    Toast.makeText(context, "Failed to create directory.", Toast.LENGTH_LONG).show();
+                    return "";
+                }
+            }
+
+            String name = FridgeItem.getMD5Hash(bitmap.toString()) + ".jpg";
+            File image = new File(dataStorageDir, name);
+            try {
+                FileOutputStream out = new FileOutputStream(image);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                out.flush();
+                out.close();
+            } catch (FileNotFoundException e) {
+                Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+                return "";
+            } catch (IOException e) {
+                Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+                return "";
+            }
+
+            return dataStorageDir.getPath() + "/" + name;
+        }
+
         protected Bitmap doInBackground(Bitmap... bitmaps) {
             Bitmap[] splittedBitmap = splitBitmap(bitmaps[0]);
             Bitmap bitmap = splittedBitmap[0];
             Bitmap restBitmap = splittedBitmap[1];
+
+            String fileName = saveBitmapToFileSystem(bitmap);
 
             // Convert to ARGB_8888, required by tess
             bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
@@ -533,40 +566,42 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
             // Create the storage directory if writable and it does not exist
             if (isExternalStorageWritable() && !dataStorageDir.exists()){
                 if (!dataStorageDir.mkdirs()){
-                    //Toast.makeText(context, "Failed to create directory.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, "Failed to create directory.", Toast.LENGTH_LONG).show();
                 }
             }
 
             String DATA_PATH = dataStorageDir.getPath();
             baseApi.init(DATA_PATH, LANG);
             baseApi.setImage(bitmap);
-            String recognizedText = baseApi.getUTF8Text().trim();
+            String[] recognizedTexts = baseApi.getUTF8Text().trim().split("\n");
             baseApi.end();
 
-            // Start at the first letter
-            int firstLetterPos = getPositionOfFirstLetter(recognizedText);
-            String recognizedTextFromFirstLetter = recognizedText.substring(firstLetterPos);
+            for (String recognizedText : recognizedTexts) {
+                // Start at the first letter
+                int firstLetterPos = getPositionOfFirstLetter(recognizedText);
+                String recognizedTextFromFirstLetter = recognizedText.substring(firstLetterPos);
 
-            if (!recognizedTextFromFirstLetter.equals("")) {
-                String matchedText = findMatchInDatabase(recognizedTextFromFirstLetter);
-                long rowId = foodTableHelper.getRowIdByName(matchedText);
-                int days = getDaysUntilExpiry(rowId);
+                if (!recognizedTextFromFirstLetter.equals("")) {
+                    String matchedText = findMatchInDatabase(recognizedTextFromFirstLetter);
+                    long rowId = foodTableHelper.getRowIdByName(matchedText);
+                    int days = getDaysUntilExpiry(rowId);
 
-                Log.wtf("ORIGINAL", recognizedText);
-                Log.wtf("MATCH", matchedText);
+                    Log.wtf("ORIGINAL", recognizedText);
+                    Log.wtf("MATCH", matchedText);
 
-                // Add item to list
-                Calendar c = GregorianCalendar.getInstance();
-                c.add(Calendar.DATE, days);
-                FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, recognizedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE), IMAGE_PATH, "PATH_TO_IMAGE_BINARIZED");
-                shoppingCart.add(newFridgeItem);
+                    // Add item to list
+                    Calendar c = GregorianCalendar.getInstance();
+                    c.add(Calendar.DATE, days);
+                    FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, recognizedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE), IMAGE_PATH, fileName);
+                    shoppingCart.add(newFridgeItem);
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.notifyDataSetChanged();
-                    }
-                });
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            adapter.notifyDataSetChanged();
+                        }
+                    });
+                }
             }
 
             return restBitmap;
