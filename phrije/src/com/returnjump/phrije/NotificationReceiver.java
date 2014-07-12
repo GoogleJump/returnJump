@@ -59,7 +59,7 @@ public class NotificationReceiver extends BroadcastReceiver {
     // Daily background job to set the expired flag in the database
     private static List<FridgeItem> setExpiredItems(List<FridgeItem> expiredFridgeItems, FridgeDbHelper fridgeDbHelper, boolean push, boolean email) {
         for(FridgeItem item: expiredFridgeItems) {
-            fridgeDbHelper.update(item.getRowId(), null, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, push ? DatabaseContract.BOOL_TRUE : null, email ? DatabaseContract.BOOL_TRUE : null);
+            fridgeDbHelper.update(item.getRowId(), null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, push ? DatabaseContract.BOOL_TRUE : null, email ? DatabaseContract.BOOL_TRUE : null);
         }
 
         return expiredFridgeItems;

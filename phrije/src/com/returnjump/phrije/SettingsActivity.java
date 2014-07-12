@@ -38,6 +38,7 @@ public class SettingsActivity extends PreferenceActivity {
     final public static String PREF_TIME_DEFAULT = "08:00";
     final public static boolean PREF_CHECKBOX_PUSH_DEFAULT = true;
     final public static boolean PREF_CHECKBOX_EMAIL_DEFAULT = false;
+    final public static String PREF_EMAIL_ADDRESS_DEFAULT = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,10 +173,10 @@ public class SettingsActivity extends PreferenceActivity {
 
         private void initNotifyEmailValue() {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String emailAddress = sharedPreferences.getString(PREF_EMAIL_ADDRESS, "").trim();
+            String emailAddress = sharedPreferences.getString(PREF_EMAIL_ADDRESS, PREF_EMAIL_ADDRESS_DEFAULT).trim();
             Preference notifyEmail = findPreference(PREF_CHECKBOX_EMAIL);
 
-            if (emailAddress.equals("")) {
+            if (emailAddress.equals(PREF_EMAIL_ADDRESS_DEFAULT)) {
                 sharedPreferences.edit().putBoolean(PREF_CHECKBOX_EMAIL, false).commit();
             }
         }
@@ -183,7 +184,7 @@ public class SettingsActivity extends PreferenceActivity {
         private void bindPreferenceToSummary() {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-            findPreference(PREF_EMAIL_ADDRESS).setSummary(sharedPref.getString(PREF_EMAIL_ADDRESS, ""));
+            findPreference(PREF_EMAIL_ADDRESS).setSummary(sharedPref.getString(PREF_EMAIL_ADDRESS, PREF_EMAIL_ADDRESS_DEFAULT));
             findPreference(PREF_TIME).setSummary(prefTimePrettyPrint(sharedPref.getString(PREF_TIME, PREF_TIME_DEFAULT)));
         }
 

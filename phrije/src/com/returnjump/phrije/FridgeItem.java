@@ -1,5 +1,10 @@
 package com.returnjump.phrije;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
+
+import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -14,8 +19,8 @@ public class FridgeItem {
     private String updatedDate = null;
     private String updatedBy = "DEVICE";
     private boolean fromImage= false;
-    private byte[] image = null;
-    private byte[] imageBinarized = null;
+    private String image = null;
+    private String imageBinarized = null;
     private boolean dismissed = false;
     private boolean expired = false;
     private boolean editedCart = false;
@@ -28,7 +33,7 @@ public class FridgeItem {
     // General constructor (Parse)
     public FridgeItem(long rowId, String hash, String name, String rawName, String expiryDate,
                       String createdDate, String updatedDate, String updatedBy, boolean fromImage,
-                      byte[] image, byte[] imageBinarized, boolean dismissed, boolean expired, boolean editedCart, boolean editedFridge,
+                      String image, String imageBinarized, boolean dismissed, boolean expired, boolean editedCart, boolean editedFridge,
                       boolean deletedCart, boolean deletedFridge, boolean notifiedPush, boolean notifiedEmail) {
 
         this.rowId = rowId;
@@ -56,7 +61,7 @@ public class FridgeItem {
     // SQLite constructor
     public FridgeItem(long rowId, String hash, String name, String rawName, String expiryDate,
                       String createdDate, String updatedDate, String updatedBy, int fromImage,
-                      byte[] image, byte[] imageBinarized, int dismissed, int expired, int editedCart, int editedFridge,
+                      String image, String imageBinarized, int dismissed, int expired, int editedCart, int editedFridge,
                       int deletedCart, int deletedFridge, int notifiedPush, int notifiedEmail) {
 
         this(rowId, hash, name, rawName, expiryDate, createdDate, updatedDate, updatedBy,
@@ -66,13 +71,16 @@ public class FridgeItem {
 
     }
 
-    // Camera constructor
-    public FridgeItem(long rowId, String name, String rawName, String expiryDate) {
+    // ShoppingCart constructor
+    public FridgeItem(long rowId, String name, String rawName, String expiryDate, String image, String imageBinarized) {
 
         this.rowId = rowId;
         this.name = name;
-        this.rawName = name;
+        this.rawName = rawName;
         this.expiryDate = expiryDate;
+        this.fromImage = true; // This has to be from an image since it's from the ShoppingCart
+        this.image = image;
+        this.imageBinarized = imageBinarized;
 
     }
 
@@ -209,12 +217,34 @@ public class FridgeItem {
         return this.fromImage;
     }
 
-    public byte[] getImage() {
+    public String getImagePath() {
         return this.image;
     }
 
-    public byte[] getImageBinarized() {
+    public byte[] getImageByteArray() {
+        Log.wtf("IMAGE", getImagePath());
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 2; // Reduces the image resolution to half
+
+        Bitmap bitmap = BitmapFactory.decodeFile(getImagePath(), options);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+        return stream.toByteArray();
+    }
+
+    public String getImageBinarizedPath() {
         return this.imageBinarized;
+    }
+
+    public byte[] getImageBinarizedByteArray() {
+        return null;
+
+        /*Bitmap bitmap = BitmapFactory.decodeFile(getImageBinarizedPath());
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+        return stream.toByteArray();*/
     }
 
     public boolean isDismissed() {

@@ -77,7 +77,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return hash;
     }
     
-    public long put(String foodItem, Calendar expiryDate, String rawFoodItem, int isFromImage, byte[] image, byte[] imageBinarized) {
+    public long put(String foodItem, Calendar expiryDate, String rawFoodItem, int isFromImage, String image, String imageBinarized) {
         SQLiteDatabase db = this.getWritableDatabase();
         
         // Create a new map of values, where column names are the keys
@@ -94,9 +94,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY, "DEVICE");
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE, isFromImage);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE, image);
-        //values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED, imageBinarized);
-        //values.putNull(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED, DatabaseContract.BOOL_FALSE);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRED, DatabaseContract.BOOL_FALSE);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EDITED_CART, DatabaseContract.BOOL_FALSE);
@@ -141,11 +139,9 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
     public static FridgeItem cursorToFridgeItem(Cursor c, Boolean isMinimal) {
 
         long rowId;
-        String hash, foodItem, rawFoodItem, expiryDate, createdDate, updatedDate, updatedBy;
+        String hash, foodItem, rawFoodItem, expiryDate, createdDate, updatedDate, updatedBy, image, imageBinarized;
         int fromImage, dismissed, expired, editedCart, editedFridge, deletedCart, deletedFridge,
                 notifiedPush, notifiedEmail;
-        byte[] image, imageBinarized;
-
 
         rowId = c.getLong(
                 c.getColumnIndexOrThrow(DatabaseContract.FridgeTable._ID)
@@ -176,10 +172,10 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
             fromImage = c.getInt(
                     c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE)
             );
-            image = c.getBlob(
+            image = c.getString(
                     c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE)
             );
-            imageBinarized = c.getBlob(
+            imageBinarized = c.getString(
                     c.getColumnIndexOrThrow(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE_BINARIZED)
             );
             dismissed = c.getInt(
@@ -367,7 +363,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         return c;
     }
 
-    public void update(long rowId, String foodItem, Calendar expiryDate, Integer fromImage, Integer dismissed, Integer expired, Integer editedCart, Integer editedFridge,
+    public void update(long rowId, String foodItem, Calendar expiryDate, Integer dismissed, Integer expired, Integer editedCart, Integer editedFridge,
                        Integer deletedCart, Integer deletedFridge, Integer notifiedPush, Integer notifiedEmail) {
         SQLiteDatabase db = this.getReadableDatabase();
         
@@ -379,9 +375,6 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         }
         if (expiryDate != null) {
             values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
-        }
-        if (fromImage != null) {
-            values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE, fromImage);
         }
         if (dismissed != null) {
             values.put(DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED, dismissed);

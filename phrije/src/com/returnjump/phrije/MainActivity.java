@@ -376,9 +376,9 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
                         // Set visible to false in the database for the item that was swiped
                         if (child != null) {
                             long rowId = (Long) child.getTag(R.id.food_item_id);
-                            fridgeDbHelper.update(rowId, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
+                            fridgeDbHelper.update(rowId, null, null, DatabaseContract.BOOL_TRUE, null, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
 
-                            String name = adapter.getItem(position).toString();
+                            String name = adapter.getItem(position).getName();
                             Bundle b = new Bundle();
                             b.putString("foodName", name);
                             b.putLong("rowId", rowId);
@@ -456,7 +456,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
             fridgeListView.smoothScrollToPosition(index);
         }else {
             // Check if the item is expired or not and update the boolean accordingly
-            fridgeDbHelper.update(editNameFragment.getArguments().getLong("rowId"), foodName , expiryDate, null, null, null, null, DatabaseContract.BOOL_TRUE,
+            fridgeDbHelper.update(editNameFragment.getArguments().getLong("rowId"), foodName , expiryDate, null, null, null, DatabaseContract.BOOL_TRUE,
                     null, null, null, null);
             Toast.makeText(getApplicationContext(), "Item edited.", Toast.LENGTH_LONG).show();
             populateListView();
@@ -477,7 +477,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         for (int i = 0; i < expiredFridgeItems.size(); i++) {
             FridgeItem fridgeItem = expiredFridgeItems.get(i);
 
-            fridgeDbHelper.update(fridgeItem.getRowId(), null, null, null, DatabaseContract.BOOL_TRUE, DatabaseContract.BOOL_TRUE, null, null, null, null, null, null);
+            fridgeDbHelper.update(fridgeItem.getRowId(), null, null, DatabaseContract.BOOL_TRUE, DatabaseContract.BOOL_TRUE, null, null, null, null, null, null);
         }
 
         if (expiredFridgeItems.size() > 0) {
@@ -498,7 +498,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
             final String foodName = ((Bundle) token).getString("foodName");
             final long rowId = ((Bundle) token).getLong("rowId");
 
-            fridgeDbHelper.update(rowId, null, null, null, DatabaseContract.BOOL_FALSE, null, null, null, null, DatabaseContract.BOOL_FALSE, null, null);
+            fridgeDbHelper.update(rowId, null, null, DatabaseContract.BOOL_FALSE, null, null, null, null, DatabaseContract.BOOL_FALSE, null, null);
 
             // there should be a faster way to update the listview immediately after editing an item?
             populateListView();

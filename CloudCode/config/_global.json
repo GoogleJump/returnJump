@@ -1,11 +1,11 @@
 {
     "applications": {
-        "SpoilFoil": {
+        "phrije": {
             "applicationId": "insert id here", 
             "masterKey": "insert master key here"
         }, 
         "_default": {
-            "link": "SpoilFoil"
+            "link": "phrije"
         }
     }, 
     "global": {

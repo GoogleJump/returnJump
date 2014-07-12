@@ -4,6 +4,7 @@ jni/
 .DS_Store
 *.pyc
 release/
+CloudCode/config/global.json
 
 # Built application files
 *.apk

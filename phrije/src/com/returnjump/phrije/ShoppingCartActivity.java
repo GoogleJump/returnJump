@@ -70,8 +70,6 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
     private FridgeDbHelper dbHelper;
     private List<FridgeItem> shoppingCart = new ArrayList<FridgeItem>();
     private List<FridgeItem> deletedCart = new ArrayList<FridgeItem>();
-    private List<byte[]> shoppingCartImages = new ArrayList<byte[]>();
-    private List<byte[]> deletedCartImages = new ArrayList<byte[]>();
     private FoodTableHelper foodTableHelper;
     private ExpiryTableHelper expiryTableHelper;
 
@@ -134,7 +132,6 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
 
                         // Take the item+image and put it in the deleted cart, then remove it
                         deletedCart.add(item);
-                        deletedCartImages.add(shoppingCartImages.get(position));
 
                         Bundle b = new Bundle();
                         b.putInt("shoppingCartPosition", position);
@@ -142,7 +139,8 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
                         b.putString("name", item.getName());
                         b.putString("rawName", item.getRawName());
                         b.putString("expiryDate", item.getExpiryDate());
-                        b.putByteArray("image", shoppingCartImages.get(position));
+                        b.putString("image", item.getImagePath());
+                        b.putString("imageBinarized", item.getImageBinarizedPath());
                         new UndoBarController.UndoBar(activity)
                                 .message("Removed " + item.getName())
                                 .listener((UndoBarController.UndoListener) activity)
@@ -150,7 +148,6 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
                                 .show();
 
                         adapter.remove(item);
-                        shoppingCartImages.remove(position);
                         adapter.notifyDataSetChanged();
 
                     }
@@ -358,16 +355,16 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
             for (int i = 0; i < n; ++i) {
                 FridgeItem item = shoppingCart.get(i);
 
-                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, null, null /*shoppingCartImages.get(i), shoppingCartImages.get(i)*/);
-                dbHelper.update(id, null, null, null, null, null, null, null, null, null, null, null);
+                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
+                dbHelper.update(id, null, null, null, null, null, null, null, null, null, null);
             }
 
             // Add the deleted cart to the database, setting deleted_cart to True
             for (int j = 0; j < m; ++j) {
                 FridgeItem item = deletedCart.get(j);
 
-                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, null, null /*deletedCartImages.get(j), deletedCartImages.get(j)*/);
-                dbHelper.update(id, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
+                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
+                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
             }
 
             finish();
@@ -521,13 +518,6 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
             return splittedBitmap;
         }
 
-        private byte[] bitmapToByteArray(Bitmap bitmap) {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-
-            return stream.toByteArray();
-        }
-
         protected Bitmap doInBackground(Bitmap... bitmaps) {
             Bitmap[] splittedBitmap = splitBitmap(bitmaps[0]);
             Bitmap bitmap = splittedBitmap[0];
@@ -568,9 +558,8 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
                 // Add item to list
                 Calendar c = GregorianCalendar.getInstance();
                 c.add(Calendar.DATE, days);
-                FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, recognizedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE));
+                FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, recognizedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE), IMAGE_PATH, "PATH_TO_IMAGE_BINARIZED");
                 shoppingCart.add(newFridgeItem);
-                shoppingCartImages.add(bitmapToByteArray(bitmap));
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -601,16 +590,15 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
             final String name = ((Bundle) token).getString("name");
             final String rawName = ((Bundle) token).getString("rawName");
             final String expiryDate = ((Bundle) token).getString("expiryDate");
-            final byte[] image = ((Bundle) token).getByteArray("image");
+            final String image = ((Bundle) token).getString("image");
+            final String imageBinarized = ((Bundle) token).getString("imageBinarized");
 
-            FridgeItem item = new FridgeItem(-1, name, rawName, expiryDate);
+            FridgeItem item = new FridgeItem(-1, name, rawName, expiryDate, image, imageBinarized);
 
-            // Remove the item+image from deleted and put it back in the shopping cart
+            // Remove the item from deleted and put it back in the shopping cart
             deletedCart.remove(deletedCartPosition);
-            deletedCartImages.remove(deletedCartPosition);
 
             shoppingCart.add(shoppingCartPosition, item);
-            shoppingCartImages.add(shoppingCartPosition, image);
             adapter.notifyDataSetChanged();
 
             // Need to add an ellipsis to long names

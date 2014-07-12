@@ -77,20 +77,32 @@ public class MyParse {
             @Override
             public void done(ParseException e) {
                 if (e == null) {
-                    SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-                    String emailAddress = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
-                    boolean notifyPush = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, true);
-                    boolean notifyEmail = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, false);
+                    // Create user object only if it hasn't been made
+                    ParseQuery<ParseObject> query = ParseQuery.getQuery("Users");
+                    query.whereEqualTo("installationObjectId", getInstallationObjectId());
+                    query.getFirstInBackground(new GetCallback<ParseObject>() {
+                        public void done(ParseObject user, ParseException e) {
+                            if (e != null && e.getCode() == PE_ObjectNotFound) {
+                                // TODO This should go together with the savePrefToCloud
+                                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+                                String emailAddress = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
+                                boolean notifyPush = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, SettingsActivity.PREF_CHECKBOX_PUSH_DEFAULT);
+                                boolean notifyEmail = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, SettingsActivity.PREF_CHECKBOX_EMAIL_DEFAULT);
+                                String notifyTime = sharedPref.getString(SettingsActivity.PREF_TIME, SettingsActivity.PREF_TIME_DEFAULT);
 
-                    ParseObject user = new ParseObject("Users");
-                    
-                    user.put("installationObject", getInstallation());
-                    user.put("installationObjectId", getInstallationObjectId());
-                    user.put("email", emailAddress);
-                    user.put("notifyPush", notifyPush);
-                    user.put("notifyEmail", notifyEmail);
+                                user = new ParseObject("Users");
 
-                    user.saveEventually();
+                                user.put("installationObject", getInstallation());
+                                user.put("installationObjectId", getInstallationObjectId());
+                                user.put("email", emailAddress);
+                                user.put("notifyPush", notifyPush);
+                                user.put("notifyEmail", notifyEmail);
+                                user.put("notifyTime", notifyTime);
+
+                                user.saveEventually();
+                            }
+                        }
+                    });
                 } else {
                     Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
@@ -111,12 +123,14 @@ public class MyParse {
                         if (e == null) {
                             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
                             String emailAddress = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
-                            boolean notifyPush = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, true);
-                            boolean notifyEmail = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, false);
+                            boolean notifyPush = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, SettingsActivity.PREF_CHECKBOX_PUSH_DEFAULT);
+                            boolean notifyEmail = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, SettingsActivity.PREF_CHECKBOX_EMAIL_DEFAULT);
+                            String notifyTime = sharedPref.getString(SettingsActivity.PREF_TIME, SettingsActivity.PREF_TIME_DEFAULT);
 
                             user.put("email", emailAddress);
                             user.put("notifyPush", notifyPush);
                             user.put("notifyEmail", notifyEmail);
+                            user.put("notifyTime", notifyTime);
 
                             user.saveEventually(new SaveCallback() {
                                 @Override
@@ -214,6 +228,10 @@ public class MyParse {
     private static void saveNewFridgeItemEventually(FridgeItem fridgeItem) {
         ParseObject parseObject = new ParseObject("Fridge");
 
+        // User data
+        parseObject.put("installationObjectId", getInstallationObjectId());
+        parseObject.put("installationObject", getInstallation());
+
         // This data should never be modified
         parseObject.put("rowId", fridgeItem.getRowId());
         parseObject.put("hash", fridgeItem.getHash());
@@ -221,13 +239,13 @@ public class MyParse {
         parseObject.put("createdDate", fridgeItem.getCreatedDate());
         parseObject.put("fromImage", fridgeItem.isFromImage());
 
-        byte[] image = fridgeItem.getImage();
-        byte[] imageBinarized = fridgeItem.getImageBinarized();
+        byte[] image = fridgeItem.getImageByteArray();
         if (image != null) {
             ParseFile pfImage = new ParseFile("image.jpg", image);
             pfImage.saveInBackground(); // Need a save eventually
             parseObject.put("image", pfImage);
         }
+        byte[] imageBinarized = fridgeItem.getImageBinarizedByteArray();
         if (imageBinarized != null) {
             ParseFile pfImageBinarized = new ParseFile("imageBinarized.jpg", imageBinarized);
             pfImageBinarized.saveInBackground();
@@ -253,10 +271,6 @@ public class MyParse {
         parseObject.put("deletedFridge", fridgeItem.isDeletedFridge());
         parseObject.put("notifiedPush", fridgeItem.isNotifiedPush());
         parseObject.put("notifiedEmail", fridgeItem.isNotifiedEmail());
-
-        // User data
-        parseObject.put("installationObjectId", getInstallationObjectId());
-        parseObject.put("installationObject", getInstallation());
 
         parseObject.saveEventually();
 

@@ -104,7 +104,7 @@ Parse.Cloud.define("getExpired", function(request, response) {
 
 Parse.Cloud.define("sendemails", function(request, response) {
     var Mandrill = require('mandrill');
-    Mandrill.initialize('Insert your key here');
+    Mandrill.initialize(applications.phrije.applicationId);
     var expiringItems = request.params.Expiring;
     var verb = null;
     if (expiringItems.split(" ").length > 1) {
@@ -116,12 +116,12 @@ Parse.Cloud.define("sendemails", function(request, response) {
     Mandrill.sendEmail({
         message: {
             text: "Hello Dear User: The following item: " + expiringItems + verb + "about to expire",
-            subject: "SpoilFoil Notifications",
-            from_email: "parse@cloudcode.com",
-            from_name: "Cloud Code",
+            subject: "Phrije Notifications",
+            from_email: "returnjump@gmail.com",
+            from_name: "Phrije",
             to: [{
                 email: request.params.address,
-                name: "Arturo"
+                name: ""
             }]
         },
         async: true

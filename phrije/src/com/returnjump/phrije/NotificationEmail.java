@@ -10,6 +10,7 @@ import com.parse.ParseCloud;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by arturomenacruz on 2014-06-28.
@@ -31,7 +32,7 @@ public class NotificationEmail {
          * "Hello Dear User: The following item: milk is about to expire"
          */
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-        String email = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, "");
+        String email = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, SettingsActivity.PREF_EMAIL_ADDRESS_DEFAULT);
         HashMap<String, Object> params = new HashMap<String, Object>();
         String items_expiring = "";
         for (FridgeItem el : foodExpiring){
