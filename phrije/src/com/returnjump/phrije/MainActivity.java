@@ -52,9 +52,9 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
     private FridgeDbHelper fridgeDbHelper;
     private SwipeDismissListViewTouchListener swipeDismiss;
     protected ListView fridgeListView;
-    EditNameFragment editNameFragment;
-    private String EDIT_FRAG_TAG = "edit_frag_tag";
-    private String CAL_PICKER_TAG = "cal_frag_tag";
+    protected EditNameFragment editNameFragment;
+    protected String EDIT_FRAG_TAG = "edit_frag_tag";
+    protected String CAL_PICKER_TAG = "cal_frag_tag";
     private SensorManager sensorManager;
     private ShakeDetector sd;
     private Activity activity;
