@@ -10,12 +10,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,29 +21,18 @@ import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.cocosw.undobar.UndoBarController;
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
-import com.googlecode.leptonica.android.Binarize;
-import com.googlecode.leptonica.android.Pix;
-import com.googlecode.leptonica.android.ReadFile;
-import com.googlecode.leptonica.android.WriteFile;
-import com.googlecode.tesseract.android.TessBaseAPI;
-import com.squareup.seismic.ShakeDetector;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -62,26 +48,21 @@ import java.util.List;
 public class ShoppingCartActivity extends FragmentActivity implements CalendarDatePickerDialog.OnDateSetListener, EditNameFragment.OnEditNameButtonClickedListener, UndoBarController.AdvancedUndoListener {
 
     private static Context context;
-    protected static final int MEDIA_TYPE_IMAGE = 1;
-    protected static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
-    protected static String IMAGE_PATH;
-    protected static final String LANG = "eng";
+    private static final int MEDIA_TYPE_IMAGE = 1;
+    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+    public static String IMAGE_PATH;
+    public static final String LANG = "eng";
 
-    protected Activity activity;
-    protected SwipeDismissListViewTouchListener swipeDismiss;
-    protected ArrayAdapter<FridgeItem> adapter;
-    protected FridgeDbHelper dbHelper;
-    protected List<FridgeItem> shoppingCart = new ArrayList<FridgeItem>();
-    protected List<FridgeItem> deletedCart = new ArrayList<FridgeItem>();
-    protected List<byte[]> shoppingCartImages = new ArrayList<byte[]>();
-    protected List<byte[]> deletedCartImages = new ArrayList<byte[]>();
-    protected FoodTableHelper foodTableHelper;
-    protected ExpiryTableHelper expiryTableHelper;
-    protected EditNameFragment editNameFragment;
-    protected String EDIT_FRAG_TAG = "edit_frag_tag";
-    protected String CAL_PICKER_TAG = "cal_frag_tag";
-
-    ListView cartListView;
+    private Activity activity;
+    private SwipeDismissListViewTouchListener swipeDismiss;
+    public ArrayAdapter<FridgeItem> adapter;
+    private ListView cartListView;
+    private FridgeDbHelper dbHelper;
+    public List<FridgeItem> shoppingCart = new ArrayList<FridgeItem>();
+    private List<FridgeItem> deletedCart = new ArrayList<FridgeItem>();
+    private EditNameFragment editNameFragment;
+    private String EDIT_FRAG_TAG = "edit_frag_tag";
+    private String CAL_PICKER_TAG = "cal_frag_tag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,9 +92,6 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
         adapter = new MyFridgeAdapter(this, R.layout.list_fooditems, shoppingCart);
         cartListView.setAdapter(adapter);
 
-        foodTableHelper = new FoodTableHelper(this);
-        expiryTableHelper = new ExpiryTableHelper(this);
-
         findViewById(R.id.checkoutButton).setOnClickListener(addToFridge);
 
         // Open existing camera app, calls onActivityResult() when intent is finished
@@ -142,7 +120,6 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
 
                         // Take the item+image and put it in the deleted cart, then remove it
                         deletedCart.add(item);
-                        deletedCartImages.add(shoppingCartImages.get(position));
 
                         Bundle b = new Bundle();
                         b.putInt("shoppingCartPosition", position);
@@ -150,7 +127,8 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
                         b.putString("name", item.getName());
                         b.putString("rawName", item.getRawName());
                         b.putString("expiryDate", item.getExpiryDate());
-                        b.putByteArray("image", shoppingCartImages.get(position));
+                        b.putString("image", item.getImagePath());
+                        b.putString("imageBinarized", item.getImageBinarizedPath());
                         new UndoBarController.UndoBar(activity)
                                 .message("Removed " + item.getName())
                                 .listener((UndoBarController.UndoListener) activity)
@@ -158,7 +136,6 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
                                 .show();
 
                         adapter.remove(item);
-                        shoppingCartImages.remove(position);
                         adapter.notifyDataSetChanged();
 
                     }
@@ -180,13 +157,12 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
     }
 
     public void editItemSequence(View view, Boolean isNewItem) {
-        FridgeItem fridgeItem = adapter.getItem(editNameFragment.getArguments().getInt("positiom"));
+        FridgeItem fridgeItem = adapter.getItem(editNameFragment.getArguments().getInt("position"));
         String itemName = fridgeItem.getName();
         String itemDate = fridgeItem.getExpiryDate();
         Bundle args = editNameFragment.getArguments();
         args.putString("name", itemName);
-        args.putString("date", itemDate);;
-        args.putBoolean("isNewItem", isNewItem);
+        args.putString("date", itemDate);
         editNameFragment.setArguments(args);
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add(editNameFragment, EDIT_FRAG_TAG);
@@ -209,11 +185,10 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
 
         Calendar expiryDate = new GregorianCalendar(year, monthOfYear, dayOfMonth);
         String foodName = editNameFragment.getArguments().getString("name");
-        shoppingCart.remove(editNameFragment.getArguments().getInt("position"));
-        //will be overridden with real rowID when adding
-        Long tempToken = (long)0;
-        FridgeItem editedItem = new FridgeItem(tempToken, foodName, FridgeDbHelper.calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
-        shoppingCart.add(editedItem);
+
+        FridgeItem fridgeItem = shoppingCart.get(editNameFragment.getArguments().getInt("position"));
+        fridgeItem.setName(foodName);
+        fridgeItem.setExpiryDate(FridgeDbHelper.calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
         adapter.notifyDataSetChanged();
         editNameFragment=null;
     }
@@ -227,12 +202,6 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
         calendarDatePickerDialog.show(getSupportFragmentManager(), CAL_PICKER_TAG);
         //onDateSet called next
     }
-
-    private void populateListView() {
-        adapter = new MyFridgeAdapter(this, R.layout.list_fooditems, shoppingCart);
-        cartListView.setAdapter(adapter);
-    }
-
 
     /**
      * Set up the {@link android.app.ActionBar}, if the API is available.
@@ -363,7 +332,7 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
     }
 
     // Correct orientation of image
-    static Bitmap fixImageOrientation(Bitmap image, final String PATH) {
+    public static Bitmap fixImageOrientation(Bitmap image, final String PATH) {
         try {
             ExifInterface exif = new ExifInterface(PATH);
             int exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
@@ -408,7 +377,7 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
             if (resultCode == RESULT_OK) {
                 // Process image in an AsyncTask
 
-                new BinarizeImageTask().execute(IMAGE_PATH);
+                new BinarizeImageTask(getApplicationContext(), ShoppingCartActivity.this).execute(IMAGE_PATH);
 
                 // Delete the file after processed using file.delete()
                 // or we can save them to the cloud for later use
@@ -424,6 +393,7 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
         }
     }
 
+    // Async task this!
     private OnClickListener addToFridge = new OnClickListener() {
 
         @Override
@@ -435,16 +405,15 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
             for (int i = 0; i < n; ++i) {
                 FridgeItem item = shoppingCart.get(i);
 
-                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, null, null /*shoppingCartImages.get(i), shoppingCartImages.get(i)*/);
-                dbHelper.update(id, null, null, null, null, null, null, null, null, null, null);
+                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
             }
 
             // Add the deleted cart to the database, setting deleted_cart to True
             for (int j = 0; j < m; ++j) {
                 FridgeItem item = deletedCart.get(j);
 
-                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, null, null /*deletedCartImages.get(j), deletedCartImages.get(j)*/);
-                dbHelper.update(id, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null);
+                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
+                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
             }
 
             finish();
@@ -452,244 +421,23 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
 
     };
 
-    private static int getPositionOfFirstLetter(String text) {
-        text = text.toLowerCase();
-
-        for (int i = 0; i < text.length(); i++) {
-            int c = (int) text.charAt(i); // ascii value of character
-
-            if (c >= 'a' && c <= 'z') {
-                return i;
-            }
-        }
-
-        return text.length();
-    }
-
-    private String findMatchInDatabase(String text) {
-        // Later we can get the database to pass the name and row id so we don't need to do a second lookup
-        // (also prevents error where matchedText isnt in db when getting rowId
-        String matchedText = RecieptToDBHelper.minimumEditDistance(foodTableHelper.getAllByLetter(text.substring(0,1)), text);
-
-        return matchedText;
-    }
-
-    // Chooses a random type for now
-    private int getDaysUntilExpiry(long rowId) {
-        List<FoodExpiry> foodExpiryList = expiryTableHelper.getAllByFoodId(rowId);
-        int random = (int) (Math.random() * foodExpiryList.size());
-        FoodExpiry foodExpiry = foodExpiryList.get(random);
-        int days = -1;
-
-        // Since we aren't asking the user where they'll store the food,
-        // we will give preference based on the order below
-        // (Food is more likely to be put in the refrigerator than a freezer)
-        if (foodExpiry.getRefrigeratorDays() != -1) {
-            days = foodExpiry.getRefrigeratorDays();
-        } else if (foodExpiry.getPantryDays() != -1) {
-            days = foodExpiry.getPantryDays();
-        } else {
-            days = foodExpiry.getFreezerDays();
-        }
-
-        return days;
-    }
-
-
-    private class BinarizeImageTask extends AsyncTask<String, Void, Bitmap> {
-
-        protected void onPreExecute () {
-            Toast.makeText(getApplicationContext(), "Binarizing image.", Toast.LENGTH_SHORT).show();
-        }
-
-        protected Bitmap doInBackground(String... PATH) {
-            // Scale image to reduce memory consumption
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 2; // Reduces the image resolution to half
-
-            Bitmap bitmap = BitmapFactory.decodeFile(PATH[0], options);
-
-            bitmap = fixImageOrientation(bitmap, PATH[0]);
-
-            // Leptonica binarization
-            Pix pix = ReadFile.readBitmap(bitmap);
-            pix = Binarize.otsuAdaptiveThreshold(pix, 32, 32, 2, 2, 0.9F);
-            //pix = Binarize.otsuAdaptiveThreshold(pix);
-            bitmap = WriteFile.writeBitmap(pix);
-
-            return bitmap;
-        }
-
-        protected void onPostExecute(Bitmap bitmap) {
-            // Display the binarized image in an alert dialog
-            ImageView binaryImageView = new ImageView(getApplicationContext());
-            binaryImageView.setImageBitmap(bitmap);
-
-            new AlertDialog.Builder(ShoppingCartActivity.this)
-                    .setTitle("Binarized Image:")
-                    .setView(binaryImageView)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            dialogInterface.dismiss();
-                        }
-                    })
-                    .show();
-
-            new OcrImageTask(true).execute(bitmap);
-        }
-    }
-
-    private class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
-        private ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_ocr);
-        private Button checkoutButton = (Button) findViewById(R.id.checkoutButton);
-        private boolean isFirstCall;
-
-        // Override constructor to pass additional param
-        private OcrImageTask(boolean isFirstCall) {
-            this.isFirstCall = isFirstCall;
-        }
-
-        protected void onPreExecute () {
-            if (isFirstCall) {
-                Toast.makeText(getApplicationContext(), "OCR'ing image.", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        private Bitmap[] splitBitmap(Bitmap bitmap) {
-            int threshold = 32;
-            int width = bitmap.getWidth();
-            int height = bitmap.getHeight();
-            int pixel;
-            boolean started = false;
-            boolean isBlankRow = true;
-
-            // Default if height below threshold or no blank row found
-            Bitmap first = Bitmap.createBitmap(bitmap, 0, 0, width, height);
-            Bitmap rest = null;
-
-            if (height > threshold) {
-
-                for (int y = 0; y < height; ++y) {
-                    isBlankRow = true;
-
-                    for (int x = 0; x < width; ++x) {
-                        pixel = bitmap.getPixel(x, y);
-
-                        if (pixel == Color.BLACK) {
-                            started = true;
-                            isBlankRow = false;
-                            break;
-                        }
-                    }
-
-                    if (started && isBlankRow) {
-                        first = Bitmap.createBitmap(bitmap, 0, 0, width, y+1);
-                        rest = Bitmap.createBitmap(bitmap, 0, y+1, width, height - y-1);
-
-                        break;
-                    }
-                }
-
-            }
-
-            Bitmap[] splittedBitmap = {first, rest};
-
-            return splittedBitmap;
-        }
-
-        private byte[] bitmapToByteArray(Bitmap bitmap) {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-
-            return stream.toByteArray();
-        }
-
-        protected Bitmap doInBackground(Bitmap... bitmaps) {
-            Bitmap[] splittedBitmap = splitBitmap(bitmaps[0]);
-            Bitmap bitmap = splittedBitmap[0];
-            Bitmap restBitmap = splittedBitmap[1];
-
-            // Convert to ARGB_8888, required by tess
-            bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-
-            TessBaseAPI baseApi = new TessBaseAPI();
-
-            File dataStorageDir = new File(Environment.getExternalStorageDirectory(), "phrije");
-
-            // Create the storage directory if writable and it does not exist
-            if (isExternalStorageWritable() && !dataStorageDir.exists()){
-                if (!dataStorageDir.mkdirs()){
-                    //Toast.makeText(context, "Failed to create directory.", Toast.LENGTH_LONG).show();
-                }
-            }
-
-            String DATA_PATH = dataStorageDir.getPath();
-            baseApi.init(DATA_PATH, LANG);
-            baseApi.setImage(bitmap);
-            String recognizedText = baseApi.getUTF8Text().trim();
-            baseApi.end();
-
-            // Start at the first letter
-            int firstLetterPos = getPositionOfFirstLetter(recognizedText);
-            String recognizedTextFromFirstLetter = recognizedText.substring(firstLetterPos);
-
-            if (!recognizedTextFromFirstLetter.equals("")) {
-                String matchedText = findMatchInDatabase(recognizedTextFromFirstLetter);
-                long rowId = foodTableHelper.getRowIdByName(matchedText);
-                int days = getDaysUntilExpiry(rowId);
-
-                Log.wtf("ORIGINAL", recognizedText);
-                Log.wtf("MATCH", matchedText);
-
-                // Add item to list
-                Calendar c = GregorianCalendar.getInstance();
-                c.add(Calendar.DATE, days);
-                //recognizedText removed as param to match new constructor
-                FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE));
-                shoppingCart.add(newFridgeItem);
-                shoppingCartImages.add(bitmapToByteArray(bitmap));
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.notifyDataSetChanged();
-                    }
-                });
-            }
-
-            return restBitmap;
-        }
-
-        protected void onPostExecute(Bitmap bitmap) {
-            if (bitmap != null) {
-                new OcrImageTask(false).execute(bitmap);
-            } else {
-                progressBar.setVisibility(View.GONE);
-                checkoutButton.setVisibility(View.VISIBLE);
-            }
-        }
-    }
-
     @Override
     public void onUndo(Parcelable token) {
         if (token != null) {
             final int shoppingCartPosition = ((Bundle) token).getInt("shoppingCartPosition");
             final int deletedCartPosition = ((Bundle) token).getInt("deletedCartPosition");
             final String name = ((Bundle) token).getString("name");
-            //final String rawName = ((Bundle) token).getString("rawName");
+            final String rawName = ((Bundle) token).getString("rawName");
             final String expiryDate = ((Bundle) token).getString("expiryDate");
-            final byte[] image = ((Bundle) token).getByteArray("image");
+            final String image = ((Bundle) token).getString("image");
+            final String imageBinarized = ((Bundle) token).getString("imageBinarized");
 
-            FridgeItem item = new FridgeItem(-1, name, expiryDate);
+            FridgeItem item = new FridgeItem(-1, name, rawName, expiryDate, image, imageBinarized);
 
-            // Remove the item+image from deleted and put it back in the shopping cart
+            // Remove the item from deleted and put it back in the shopping cart
             deletedCart.remove(deletedCartPosition);
-            deletedCartImages.remove(deletedCartPosition);
 
             shoppingCart.add(shoppingCartPosition, item);
-            shoppingCartImages.add(shoppingCartPosition, image);
             adapter.notifyDataSetChanged();
 
             // Need to add an ellipsis to long names

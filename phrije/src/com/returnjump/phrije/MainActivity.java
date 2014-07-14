@@ -51,10 +51,10 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
     private ArrayList<FridgeItem> fridgeItems = new ArrayList<FridgeItem>();
     private FridgeDbHelper fridgeDbHelper;
     private SwipeDismissListViewTouchListener swipeDismiss;
-    protected ListView fridgeListView;
-    protected EditNameFragment editNameFragment;
-    protected String EDIT_FRAG_TAG = "edit_frag_tag";
-    protected String CAL_PICKER_TAG = "cal_frag_tag";
+    private ListView fridgeListView;
+    private EditNameFragment editNameFragment;
+    private String EDIT_FRAG_TAG = "edit_frag_tag";
+    private String CAL_PICKER_TAG = "cal_frag_tag";
     private SensorManager sensorManager;
     private ShakeDetector sd;
     private Activity activity;
@@ -403,7 +403,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
     public void editItemSequence(View view, Boolean isNewItem) {
         String itemName = "";
         String itemDate = "";
-        long rowId = (long)0;
+        long rowId = (long) -1;
         if(!isNewItem){
             rowId = (Long) view.getTag(R.id.food_item_id);
             FridgeItem fridgeItem = fridgeDbHelper.getRowById(rowId, true);
@@ -449,7 +449,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         String foodName = editNameFragment.getArguments().getString("name");
 
         if(editNameFragment.getArguments().getBoolean("isNewItem")){
-            long id = fridgeDbHelper.put(foodName, expiryDate, foodName, DatabaseContract.BOOL_FALSE, null, null);
+            long id = fridgeDbHelper.put(foodName, expiryDate, foodName, DatabaseContract.BOOL_FALSE, "", "");
             FridgeItem newFridgeItem = new FridgeItem(id, foodName, FridgeDbHelper.calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
             int index = insertToSortedList(newFridgeItem);
             updateListView();
@@ -469,10 +469,10 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
 
         String[] column = {DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, DatabaseContract.FridgeTable.COLUMN_NAME_DISMISSED};
         String[] operator =  {"<=", "="};
-        String[] wherevalue = {FridgeDbHelper.calendarToString(Calendar.getInstance(), DatabaseContract.FORMAT_DATE), DatabaseContract.BOOL_FALSE_STR};
+        String[] whereValue = {FridgeDbHelper.calendarToString(Calendar.getInstance(), DatabaseContract.FORMAT_DATE), DatabaseContract.BOOL_FALSE_STR};
         String[] conjunction = {DatabaseContract.AND};
 
-        List<FridgeItem> expiredFridgeItems = fridgeDbHelper.getAll(column, operator, wherevalue, conjunction, true);
+        List<FridgeItem> expiredFridgeItems = fridgeDbHelper.getAll(column, operator, whereValue, conjunction, true);
 
         for (int i = 0; i < expiredFridgeItems.size(); i++) {
             FridgeItem fridgeItem = expiredFridgeItems.get(i);
