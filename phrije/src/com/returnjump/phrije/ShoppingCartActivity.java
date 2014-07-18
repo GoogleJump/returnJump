@@ -10,35 +10,30 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.cocosw.undobar.UndoBarController;
+import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +45,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-public class ShoppingCartActivity extends Activity implements /*CalendarDatePickerDialog.OnDateSetListener, EditNameFragment.OnEditNameButtonClickedListener,*/ UndoBarController.AdvancedUndoListener {
+public class ShoppingCartActivity extends FragmentActivity implements CalendarDatePickerDialog.OnDateSetListener, EditNameFragment.OnEditNameButtonClickedListener, UndoBarController.AdvancedUndoListener {
 
     private static Context context;
     private static final int MEDIA_TYPE_IMAGE = 1;
@@ -61,11 +56,13 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
     private Activity activity;
     private SwipeDismissListViewTouchListener swipeDismiss;
     public ArrayAdapter<FridgeItem> adapter;
+    private ListView cartListView;
     private FridgeDbHelper dbHelper;
     public List<FridgeItem> shoppingCart = new ArrayList<FridgeItem>();
     private List<FridgeItem> deletedCart = new ArrayList<FridgeItem>();
-
-    ListView cartListView;
+    private EditNameFragment editNameFragment;
+    private String EDIT_FRAG_TAG = "edit_frag_tag";
+    private String CAL_PICKER_TAG = "cal_frag_tag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +101,8 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
         intent.putExtra(MediaStore.EXTRA_OUTPUT,  fileUri);
 
         startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+
+        initializeLongClickListener();
     }
 
     public void initializeSwipeDismissListener() { swipeDismiss =
@@ -141,6 +140,67 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
 
                     }
                 });
+    }
+
+    public void initializeLongClickListener() {
+        cartListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Bundle args = new Bundle();
+                args.putInt("position", position);
+                editNameFragment = new EditNameFragment();
+                editNameFragment.setArguments(args);
+                editItemSequence(view, false);
+                return true;
+            }
+        });
+    }
+
+    public void editItemSequence(View view, Boolean isNewItem) {
+        FridgeItem fridgeItem = adapter.getItem(editNameFragment.getArguments().getInt("position"));
+        String itemName = fridgeItem.getName();
+        String itemDate = fridgeItem.getExpiryDate();
+        Bundle args = editNameFragment.getArguments();
+        args.putString("name", itemName);
+        args.putString("date", itemDate);
+        editNameFragment.setArguments(args);
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.add(editNameFragment, EDIT_FRAG_TAG);
+        fragmentTransaction.addToBackStack(EDIT_FRAG_TAG);
+        fragmentTransaction.commit();
+        //onEditNameButtonClicked implemented in MainActivity called next
+    }
+
+    /**
+     * @param dialog      The view associated with this listener.
+     * @param year        The year that was set.
+     * @param monthOfYear The month that was set (0-11) for compatibility with {@link java.util.Calendar}.
+     * @param dayOfMonth  The day of the month that was set.
+     */
+    @Override
+    public void onDateSet(CalendarDatePickerDialog dialog, int year, int monthOfYear, int dayOfMonth) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.remove(getSupportFragmentManager().findFragmentByTag(EDIT_FRAG_TAG));
+        ft.commit();
+
+        Calendar expiryDate = new GregorianCalendar(year, monthOfYear, dayOfMonth);
+        String foodName = editNameFragment.getArguments().getString("name");
+
+        FridgeItem fridgeItem = shoppingCart.get(editNameFragment.getArguments().getInt("position"));
+        fridgeItem.setName(foodName);
+        fridgeItem.setExpiryDate(FridgeDbHelper.calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
+        adapter.notifyDataSetChanged();
+        editNameFragment=null;
+    }
+
+    @Override
+    public void onEditNameButtonClicked(Boolean isNewItem) {
+        Calendar c = FridgeDbHelper.stringToCalendar(editNameFragment.getArguments().getString("date"), DatabaseContract.FORMAT_DATE);
+        CalendarDatePickerDialog calendarDatePickerDialog = CalendarDatePickerDialog
+                .newInstance(ShoppingCartActivity.this, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+        calendarDatePickerDialog.setYearRange(Calendar.getInstance().get(Calendar.YEAR), calendarDatePickerDialog.getMaxYear());
+        calendarDatePickerDialog.show(getSupportFragmentManager(), CAL_PICKER_TAG);
+        //onDateSet called next
     }
 
     /**
@@ -360,11 +420,6 @@ public class ShoppingCartActivity extends Activity implements /*CalendarDatePick
         }
 
     };
-
-    // Only used for OcrImageTask.java
-    public void addFrigeItemToShoppingCart(FridgeItem item) {
-        shoppingCart.add(item);
-    }
 
     @Override
     public void onUndo(Parcelable token) {

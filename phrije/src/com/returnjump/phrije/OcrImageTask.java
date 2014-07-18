@@ -214,7 +214,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ((ShoppingCartActivity) activity ).adapter.notifyDataSetChanged();
+                        ((ShoppingCartActivity) activity).adapter.notifyDataSetChanged();
                     }
                 });
             }

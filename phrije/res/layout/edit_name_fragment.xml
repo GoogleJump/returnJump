@@ -20,7 +20,6 @@
         android:layout_marginTop="0dp"
         android:layout_marginLeft="0dp"
         android:textSize="@dimen/large"
-        android:padding="@dimen/separator_padding"
         android:singleLine="true"
         android:background="@drawable/rounded_edit_text"
         android:imeOptions="actionNext"

@@ -138,7 +138,7 @@ public class FridgeItem {
     public String getName() {
         return this.name;
     }
-    public void setFoodItem(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 

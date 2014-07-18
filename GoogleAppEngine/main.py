@@ -8,9 +8,6 @@ app.config.update(dict(
     JSONIFY_PRETTYPRINT_REGULAR=True
 ))
 
-# Note: We don't need to call run() since our application is embedded within
-# the App Engine WSGI application server.
-
 @app.before_first_request
 def configure():
     jsonData = open('modules/secret.json')
@@ -35,24 +32,47 @@ def page_not_found(e):
     '''Return a custom 404 error.'''
     return 'Are you lost, bro?', 404
 
+def generateBody(expiredFridgeItems):
+    plain = ''.join(map(lambda x: x + '\n', expiredFridgeItems))
+    html = ''.join(map(lambda x: '<li>' + x + '</li>\n            ', expiredFridgeItems))
+
+    return plain, html
+
+def sendEmail(email, expiredFridgeItems):
+    message = mail.EmailMessage(sender='Return Jump <returnjump@gmail.com>', subject='Phrije')
+
+    plain, html = generateBody(expiredFridgeItems)
+    header = 'The following items in your fridge have expired:' if len(expiredFridgeItems) > 1 else 'The following item in your fridge has expired:'
+
+    message.to = email
+    message.bcc = 'returnjump@gmail.com'
+    message.body = '''
+Hey,
+
+%s
+%s
+''' % plain
+    message.html = '''
+<html>
+    <head></head>
+    <body>
+        Hey,
+        <br>
+        <br>
+        %s
+        <ul>
+            %s
+        </ul>
+    </body>
+</html>
+''' % html
+
+    message.send()
+    return myResponse({'success': 'Email sent.', 'email': email, 'exp': expiredFridgeItems})
+
 @app.route('/api/email', methods=['POST'])
 def email():
     if request.headers.get('API_KEY') != app.config['API_KEY']:
         return myResponse({'error': 'You are not authorized.'})
-
-    #sendEmail = phrije_email.sendEmail('returnjump@gmail.com', 'Phrije', 'Your food has gone bad.', app.config['EMAIL_PASSWORD'])
-    #return myResponse(sendEmail)
-    message = mail.EmailMessage(sender='Return Jump <returnjump@gmail.com>', subject='Phrije')
-
-    message.to = 'returnjump@gmail.com'
-    message.body = '''
-Your food has gone bad.
-'''
-    message.html = '''
-<html><head></head><body>
-<b>Your food has gone bad.</b>
-</body></html>
-'''
-
-    message.send()
-    return myResponse({'success': 'Email sent.'})    
+  
+    return sendEmail(request.json['email'], request.json['expiredFridgeItems'])
