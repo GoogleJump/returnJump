@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.util.Calendar;
 import java.util.List;
@@ -37,7 +38,7 @@ public class NotificationReceiver extends BroadcastReceiver {
                 ns.sendNotifications();
             }
 
-            if (emailPref) {
+            if (emailPref && isEmailNotSentForAtLeastOne(expiredFridgeItems)) {
                 NotificationEmail emailSender = new NotificationEmail(context, expiredFridgeItems);
                 emailSender.cloudEmailSender();
             }

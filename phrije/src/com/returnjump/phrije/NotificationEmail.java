@@ -3,11 +3,15 @@ package com.returnjump.phrije;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.parse.FunctionCallback;
 import com.parse.ParseCloud;
 
+import org.json.JSONArray;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -17,11 +21,11 @@ import java.util.Set;
  */
 public class NotificationEmail {
     Context context;
-    List<FridgeItem> foodExpiring;
+    List<FridgeItem> expiredFridgeItems;
 
-    public NotificationEmail(Context context, List<FridgeItem> foodExpiring){
+    public NotificationEmail(Context context, List<FridgeItem> expiredFridgeItems){
         this.context = context;
-        this.foodExpiring = foodExpiring;
+        this.expiredFridgeItems = expiredFridgeItems;
     }
     public void cloudEmailSender(){
         /** Notifies through email that that fooditem is going to expire. If it fails to send
@@ -34,25 +38,27 @@ public class NotificationEmail {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         String email = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, SettingsActivity.PREF_EMAIL_ADDRESS_DEFAULT);
         HashMap<String, Object> params = new HashMap<String, Object>();
-        String items_expiring = "";
-        for (FridgeItem el : foodExpiring){
-            // Temporary fix
-            if (!el.isNotifiedEmail()) {
-                items_expiring += el.getName() + " ";
-            }
-        }
-        params.put("address", email);
-        params.put("Expiring", items_expiring);
-        ParseCloud.callFunctionInBackground("emailsender", params, new FunctionCallback<String>() {
+
+        params.put("email", email);
+        params.put("expiredFridgeItems", new JSONArray(getNameArray(expiredFridgeItems)));
+        ParseCloud.callFunctionInBackground("sendEmail", params, new FunctionCallback<String>() {
             @Override
             public void done(String message, com.parse.ParseException e) {
-                if (e == null) {
-                    Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-                } else {
+                if (e != null) {
                     Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             }
         });
+    }
+
+    private List<String> getNameArray(List<FridgeItem> fridgeItems) {
+        List<String> names = new ArrayList<String>();
+
+        for (FridgeItem item : fridgeItems) {
+            names.add(item.getName());
+        }
+
+        return names;
     }
 
 }

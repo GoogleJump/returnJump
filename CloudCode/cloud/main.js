@@ -104,7 +104,7 @@ Parse.Cloud.define("getExpired", function(request, response) {
 
 Parse.Cloud.define("sendemails", function(request, response) {
     var Mandrill = require('mandrill');
-    Mandrill.initialize(applications.phrije.applicationId);
+    Mandrill.initialize(Parse.applicationId);
     var expiringItems = request.params.Expiring;
     var verb = null;
     if (expiringItems.split(" ").length > 1) {
@@ -133,4 +133,39 @@ Parse.Cloud.define("sendemails", function(request, response) {
             response.error("Uh oh, something went wrong");
         }
     });
-})
+});
+
+// v2
+Parse.Cloud.define('sendEmail', function(request, response) {
+    var query = new Parse.Query('Configuration');
+    query.equalTo('key', 'phrije_api_key');
+    query.first({
+      success: function(config) {
+        Parse.Cloud.httpRequest({
+            method: 'POST',
+            url: 'http://phrije-app.appspot.com/api/email',
+            headers: {
+                'Content-Type': 'application/json',
+                'API_KEY': config.get('value')
+            },
+            body: {
+                email: request.params.email,
+                expiredFridgeItems: request.params.expiredFridgeItems
+            },
+            success: function(httpResponse) {
+                console.log(httpResponse.text);
+                response.success(httpResponse.text);
+            },
+            error: function(httpResponse) {
+                console.error('Request failed with response code ' + httpResponse.status);
+                response.error('Request failed with response code ' + httpResponse.status);
+            }
+        });
+      },
+      error: function(error) {
+        console.error('Error: ' + error.code + ' ' + error.message);
+        response.error('Error: ' + error.code + ' ' + error.message);
+      }
+    });
+
+});
