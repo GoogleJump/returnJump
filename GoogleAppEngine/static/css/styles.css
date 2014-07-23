@@ -1,0 +1,290 @@
+/*
+ * Globals
+ */
+
+/* Links */
+a,
+a:focus,
+a:hover {
+  color: #fff;
+}
+
+/* Custom default button */
+.btn-default,
+.btn-default:hover,
+.btn-default:focus {
+  color: #333;
+  text-shadow: none; /* Prevent inheritence from `body` */
+  background-color: #fff;
+  border: 1px solid #fff;
+}
+
+
+/*
+ * Base structure
+ */
+
+html,
+body {
+  height: 100%;
+background: rgb(67,62,70); /* Old browsers */
+background: -moz-linear-gradient(left,  rgba(67,62,70,1) 0%, rgba(49,43,53,1) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(67,62,70,1)), color-stop(100%,rgba(49,43,53,1))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(left,  rgba(67,62,70,1) 0%,rgba(49,43,53,1) 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(left,  rgba(67,62,70,1) 0%,rgba(49,43,53,1) 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(left,  rgba(67,62,70,1) 0%,rgba(49,43,53,1) 100%); /* IE10+ */
+background: linear-gradient(to right,  rgba(67,62,70,1) 0%,rgba(49,43,53,1) 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#433e46', endColorstr='#312b35',GradientType=1 ); /* IE6-9 */
+
+}
+body {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.5);
+  font-family: 'Open Sans', sans-serif;
+}
+
+
+.header {
+ width: 100%;
+ background-color: ##001100;
+ display: inline-block;
+ text-align: left;
+ font-size:large;
+ box-shadow: 5px 5px 5px ##001100;
+}
+
+/* Extra markup and styles for table-esque vertical and horizontal centering */
+.site-wrapper {
+  display: table;
+  width: 100%;
+  height: 100%; /* For at least Firefox */
+  min-height: 100%;
+   background: url("/static/images/coverimage.png") no-repeat scroll 0px 100% / cover transparent;
+  -webkit-box-shadow: inset 0 0 100px rgba(0,0,0,.5);
+          box-shadow: inset 0 0 100px rgba(0,0,0,.5)
+  
+}
+
+.site-wrapper-inner {
+ text-align: center;
+}
+
+.inner-cover {
+text-shadow: 2px 2px 2px #000;
+display: inline-block;
+word-wrap: break-word;
+text-align: center;
+font-size: large;
+}
+
+.android {
+text-align: left;
+display: inline-block;
+padding-right: 10%;'
+position: relative; 
+}
+
+.title-text{
+display: inline-block;
+}
+
+.frije{
+ opacity: 0.97;
+ display: inline-block;
+}
+
+.googleplay{
+ display: inline-block;
+# box-shadow: 0px 0px 1px;
+-webkit-box-shadow: 2px 2px 5px 0px rgba(0, 0, 0, 1);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0, 0, 0, 1);
+    box-shadow: 2px 2px 5px 0px rgba(0, 0, 0, 1);
+}
+
+.learn-more{
+text-align: center;
+text-shadow: 1px 1px 1px #000;
+}
+
+.simple4everyone{
+text-shadow: 2px 2px 2px #000;
+padding-top: 3%;
+padding-bottom:5%;
+text-align:center;
+font-size: large;
+}
+
+.container {
+ background-color: ##001100;
+ text-align:center;
+ position: relative;
+}
+
+hr {
+    display: inlineblock;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+}
+
+.circle{
+	width:50px;
+	height:50px;
+	border-radius:50px;
+	font-size:40px;
+	color:#fff;
+	line-height:50px;
+	text-align:center;
+	background:#99CC00;
+	display: inline-block;
+	box-shadow: 0px 0px 5px;
+}
+
+.first{
+display:block;
+text-align: center;
+word-wrap: break-word;
+}
+
+.second{
+display: inline-block;
+text-align: center;
+word-wrap: break-word;
+}
+
+.step-header{
+text-shadow: 2px 2px 2px #000;
+font-size: large;
+display: inline-block;
+}
+
+.description-left{
+float:left;
+text-align:right;
+text-shadow: 1px 1px 1px #000;
+}
+
+.screenshot-right{
+display: inline-block;
+-moz-box-shadow: 0 0 5px #fff;
+-webkit-box-shadow: 0 0 5px #fff;
+box-shadow: 0px 0px 5px #fff;
+margin-left:-5%;
+}
+
+.screenshot-left{
+float:left;
+display: inline-block;
+-moz-box-shadow: 0 0 5px #fff;
+-webkit-box-shadow: 0 0 5px #fff;
+box-shadow: 0px 0px 5px #fff;
+}
+
+.description-right{
+float:right;
+text-align:left;
+text-shadow: 1px 1px 1px #000;
+padding-left:2%;
+}
+
+.footer{
+text-align: center;
+background-color:#C0C0C0;
+padding-top:1%;
+padding-bottom:1%;
+}
+
+/* Padding for spacing */
+.inner {
+  padding: 30px;
+}
+
+/*
+ * Cover
+ */
+
+.cover .btn-lg {
+  padding: 10px 20px;
+  font-weight: bold;
+}
+
+
+/*
+ * Footer
+ */
+
+.mastfoot {
+  color: #999; /* IE8 proofing */
+  color: rgba(255,255,255,.5);
+}
+
+
+/*
+ *For mobile devices
+ */
+@media only screen and (max-device-width: 480px) {
+	.android{
+	text-align:center;
+	}
+
+	.frije{
+	text-align: center;
+	}
+	
+	.container{
+	text-align: center;
+	}
+}
+
+.icon{
+display:inline-block;
+}
+
+#bouncer   {
+  -webkit-animation: bounce 2s infinite ;
+}
+
+.bouncer a {
+text-decoration: none !important
+}
+
+@-webkit-keyframes bounce {
+    0% { -webkit-transform: translate3d(0,   0px,0); 
+         -webkit-animation-timing-function: ease-out; }
+   50% { -webkit-transform: translate3d(0,-7px,0); 
+         -webkit-animation-timing-function: ease-in; }
+  100% { -webkit-transform: translate3d(0,   0px,0); }
+} 
+
+
+
+/*
+ * Affix and center
+ */
+
+@media (min-width: 768px) {
+  /* Pull out the header and footer */
+  .masthead {
+    position: fixed;
+    top: 0;
+  }
+  .mastfoot {
+    position: fixed;
+    bottom: 0;
+  }
+  /* Start the vertical centering */
+  .site-wrapper-inner {
+    vertical-align: middle;
+  }
+  /* Handle the widths */
+  .masthead,
+  .mastfoot,
+  .cover-container {
+    width: 100%; /* Must be percentage or pixels for horizontal alignment */
+  }
+}
+
+#bouncer   {
+  -webkit-animation: bounce 2s infinite ;
+}

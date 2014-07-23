@@ -199,24 +199,27 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
             if (!recognizedTextFromFirstLetter.equals("")) {
                 String matchedText = findMatchInDatabase(recognizedTextFromFirstLetter);
-                long rowId = foodTableHelper.getRowIdByName(matchedText);
-                int days = getDaysUntilExpiry(rowId);
+                //if a match less than RecieptTODBHelper.MAX_EDIT_DISTANCE_THRESHOLD was found
+                if (matchedText != null) {
+                    long rowId = foodTableHelper.getRowIdByName(matchedText);
+                    int days = getDaysUntilExpiry(rowId);
 
-                Log.wtf("ORIGINAL", recognizedText);
-                Log.wtf("MATCH", matchedText);
+                    Log.wtf("ORIGINAL", recognizedText);
+                    Log.wtf("MATCH", matchedText);
 
-                // Add item to list
-                Calendar c = GregorianCalendar.getInstance();
-                c.add(Calendar.DATE, days);
-                FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, recognizedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE), ShoppingCartActivity.IMAGE_PATH, fileName);
-                ((ShoppingCartActivity) activity).shoppingCart.add(newFridgeItem);
+                    // Add item to list
+                    Calendar c = GregorianCalendar.getInstance();
+                    c.add(Calendar.DATE, days);
+                    FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, recognizedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE), ShoppingCartActivity.IMAGE_PATH, fileName);
+                    ((ShoppingCartActivity) activity).shoppingCart.add(newFridgeItem);
 
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ((ShoppingCartActivity) activity).adapter.notifyDataSetChanged();
-                    }
-                });
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ((ShoppingCartActivity) activity).adapter.notifyDataSetChanged();
+                        }
+                    });
+                }
             }
         }
 
