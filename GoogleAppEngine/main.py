@@ -25,7 +25,7 @@ def myResponse(body):
 @app.route('/')
 def hello():
     '''Return a friendly HTTP greeting.'''
-    return 'Hello World!'
+    return render_template('index.html')
 
 @app.errorhandler(404)
 def page_not_found(e):
