@@ -59,7 +59,7 @@ body {
   width: 100%;
   height: 100%; /* For at least Firefox */
   min-height: 100%;
-   background: url("../coverimage.png") no-repeat scroll 0px 100% / cover transparent;
+   background: url("/static/images/coverimage.png") no-repeat scroll 0px 100% / cover transparent;
   -webkit-box-shadow: inset 0 0 100px rgba(0,0,0,.5);
           box-shadow: inset 0 0 100px rgba(0,0,0,.5)
   
