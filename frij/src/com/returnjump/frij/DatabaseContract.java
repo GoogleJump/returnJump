@@ -46,6 +46,7 @@ public final class DatabaseContract {
         public static final String COLUMN_NAME_EXPIRY_DATE = "expiry_date";
         public static final String COLUMN_NAME_CREATED_DATE = "created_date";
         public static final String COLUMN_NAME_UPDATED_DATE = "updated_date";
+        public static final String COLUMN_NAME_EMAIL = "email";
         public static final String COLUMN_NAME_UPDATED_BY = "update_by";
         public static final String COLUMN_NAME_FROM_IMAGE = "from_image";
         public static final String COLUMN_NAME_IMAGE = "image";
@@ -60,27 +61,28 @@ public final class DatabaseContract {
         public static final String COLUMN_NAME_NOTIFIED_EMAIL = "notified_email";
         
         public static final String SQL_CREATE_TABLE =
-            "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" +
-            FridgeTable._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_HASH + TEXT_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_FOOD_ITEM + TEXT_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM + TEXT_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_EXPIRY_DATE + TEXT_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_CREATED_DATE + TEXT_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_UPDATED_DATE + TEXT_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_UPDATED_BY + TEXT_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_FROM_IMAGE + INTEGER_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_IMAGE + TEXT_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_IMAGE_BINARIZED + TEXT_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_DISMISSED + INTEGER_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_EXPIRED + INTEGER_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_EDITED_CART + INTEGER_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_EDITED_FRIDGE + INTEGER_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_DELETED_CART + INTEGER_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_DELETED_FRIDGE + INTEGER_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_NOTIFIED_PUSH + INTEGER_TYPE + COMMA_SEP +
-            FridgeTable.COLUMN_NAME_NOTIFIED_EMAIL + INTEGER_TYPE +
-            " )";
+                "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" +
+                    FridgeTable._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_HASH + TEXT_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_FOOD_ITEM + TEXT_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_RAW_FOOD_ITEM + TEXT_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_EXPIRY_DATE + TEXT_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_CREATED_DATE + TEXT_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_UPDATED_DATE + TEXT_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_EMAIL + TEXT_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_UPDATED_BY + TEXT_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_FROM_IMAGE + INTEGER_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_IMAGE + TEXT_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_IMAGE_BINARIZED + TEXT_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_DISMISSED + INTEGER_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_EXPIRED + INTEGER_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_EDITED_CART + INTEGER_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_EDITED_FRIDGE + INTEGER_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_DELETED_CART + INTEGER_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_DELETED_FRIDGE + INTEGER_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_NOTIFIED_PUSH + INTEGER_TYPE + COMMA_SEP +
+                    FridgeTable.COLUMN_NAME_NOTIFIED_EMAIL + INTEGER_TYPE +
+                " )";
 
         public static final String SQL_DELETE_TABLE =
             "DROP TABLE IF EXISTS " + FridgeTable.TABLE_NAME;
@@ -94,11 +96,11 @@ public final class DatabaseContract {
 
         public static final String SQL_CREATE_TABLE =
                 "CREATE TABLE " + TABLE_NAME + " (" +
-                        FoodTable._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
-                        FoodTable.COLUMN_NAME_NAME + TEXT_TYPE + COMMA_SEP +
-                        FoodTable.COLUMN_NAME_FULL_NAME + TEXT_TYPE + COMMA_SEP +
-                        FoodTable.COLUMN_NAME_FIRST_LETTER + TEXT_TYPE +
-                        " )";
+                    FoodTable._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
+                    FoodTable.COLUMN_NAME_NAME + TEXT_TYPE + COMMA_SEP +
+                    FoodTable.COLUMN_NAME_FULL_NAME + TEXT_TYPE + COMMA_SEP +
+                    FoodTable.COLUMN_NAME_FIRST_LETTER + TEXT_TYPE +
+                " )";
 
         public static final String SQL_DELETE_TABLE =
                 "DROP TABLE IF EXISTS " + FoodTable.TABLE_NAME;
@@ -114,14 +116,14 @@ public final class DatabaseContract {
 
         public static final String SQL_CREATE_TABLE =
                 "CREATE TABLE " + TABLE_NAME + " (" +
-                        ExpiryTable._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
-                        ExpiryTable.COLUMN_NAME_FOOD_ID + INTEGER_TYPE + COMMA_SEP +
-                        ExpiryTable.COLUMN_NAME_TYPE + TEXT_TYPE + COMMA_SEP +
-                        ExpiryTable.COLUMN_NAME_FREEZER + INTEGER_TYPE + COMMA_SEP +
-                        ExpiryTable.COLUMN_NAME_PANTRY + INTEGER_TYPE + COMMA_SEP +
-                        ExpiryTable.COLUMN_NAME_REFRIGERATOR + INTEGER_TYPE + COMMA_SEP +
-                        "FOREIGN KEY (" + ExpiryTable.COLUMN_NAME_FOOD_ID + ") REFERENCES " + FoodTable.TABLE_NAME + "(" + FoodTable._ID + ")" +
-                        " )";
+                    ExpiryTable._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
+                    ExpiryTable.COLUMN_NAME_FOOD_ID + INTEGER_TYPE + COMMA_SEP +
+                    ExpiryTable.COLUMN_NAME_TYPE + TEXT_TYPE + COMMA_SEP +
+                    ExpiryTable.COLUMN_NAME_FREEZER + INTEGER_TYPE + COMMA_SEP +
+                    ExpiryTable.COLUMN_NAME_PANTRY + INTEGER_TYPE + COMMA_SEP +
+                    ExpiryTable.COLUMN_NAME_REFRIGERATOR + INTEGER_TYPE + COMMA_SEP +
+                    "FOREIGN KEY (" + ExpiryTable.COLUMN_NAME_FOOD_ID + ") REFERENCES " + FoodTable.TABLE_NAME + "(" + FoodTable._ID + ")" +
+                " )";
 
         public static final String SQL_DELETE_TABLE =
                 "DROP TABLE IF EXISTS " + ExpiryTable.TABLE_NAME;

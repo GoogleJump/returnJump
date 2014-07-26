@@ -458,7 +458,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
             // Check if the item is expired or not and update the boolean accordingly
             fridgeDbHelper.update(editNameFragment.getArguments().getLong("rowId"), foodName , expiryDate, null, null, null, DatabaseContract.BOOL_TRUE,
                     null, null, null, null);
-            Toast.makeText(getApplicationContext(), "Item edited.", Toast.LENGTH_LONG).show();
+
             populateListView();
         }
         editNameFragment = null;
@@ -502,9 +502,6 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
 
             // there should be a faster way to update the listview immediately after editing an item?
             populateListView();
-
-            // Need to add an ellipsis to long names
-            Toast.makeText(this, "Added back " + foodName, Toast.LENGTH_SHORT).show();
         }
     }
 

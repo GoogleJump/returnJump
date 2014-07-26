@@ -169,7 +169,6 @@ public class SettingsActivity extends PreferenceActivity {
         public void onDestroy() {
             super.onDestroy();
 
-            initNotifyEmailValue();
             MyParse.savePreferenceToCloud(getActivity(), false);
         }
 
@@ -222,15 +221,13 @@ public class SettingsActivity extends PreferenceActivity {
                     emailListPreference.setSummary(PREF_EMAIL_ADDRESS_DEFAULT);
                     checkBoxPreferenceEmail.setEnabled(false); // Disable due to dependency
                 } else {
-                    Log.wtf("ENTRY", emailListPreference.getEntry().toString());
-                    Log.wtf("VALUE", emailListPreference.getValue().toString());
-
                     emailListPreference.setSummary(emailListPreference.getValue());
                 }
 
             }
         }
 
+        // Delete later
         private void initNotifyEmailValue() {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String emailAddress = sharedPreferences.getString(PREF_EMAIL_ADDRESS, PREF_EMAIL_ADDRESS_DEFAULT).trim();

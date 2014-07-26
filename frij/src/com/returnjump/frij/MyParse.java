@@ -310,8 +310,9 @@ public class MyParse {
                         public void done(ParseObject parseObject, ParseException e) {
                             if (e == null) {
                                 saveUpdatedFridgeItemEventually(fridgeItem, parseObject);
-                            } else {
-                                fallback(e.getMessage()); // "no query found for results"
+                            } else { // Item not found, wasn't saved properly when originally added
+                                saveNewFridgeItemEventually(fridgeItem);
+                                //fallback(e.getMessage()); // "no query found for results"
                             }
                         }
                     });

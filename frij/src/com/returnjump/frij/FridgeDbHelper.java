@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Set;
 
 public class FridgeDbHelper extends SQLiteOpenHelper {
 
@@ -61,6 +62,8 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         String calNow = calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME);
         String hash = FridgeItem.getMD5Hash(foodItem + calNow);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String email = sharedPreferences.getString(SettingsActivity.PREF_EMAIL_ADDRESS, SettingsActivity.PREF_EMAIL_ADDRESS_DEFAULT);
 
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_HASH, hash);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);
@@ -68,6 +71,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE, calendarToString(expiryDate, DatabaseContract.FORMAT_DATE));
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_CREATED_DATE, calNow);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE, calNow);
+        values.put(DatabaseContract.FridgeTable.COLUMN_NAME_EMAIL, email); // If someone adds items with no email, then later adds an email, the previous items won't belong to them
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY, "DEVICE");
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE, isFromImage);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE, image);
@@ -261,6 +265,8 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         List<FridgeItem> fridgeItems = new ArrayList<FridgeItem>();
 
         while (!c.isAfterLast()) {
+            // When syncing by email, only add if the item's email matches the email
+
             fridgeItems.add(cursorToFridgeItem(c, isMinimal));
             c.moveToNext();
         }
@@ -287,6 +293,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
                 DatabaseContract.FridgeTable.COLUMN_NAME_EXPIRY_DATE,
                 DatabaseContract.FridgeTable.COLUMN_NAME_CREATED_DATE,
                 DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_DATE,
+                DatabaseContract.FridgeTable.COLUMN_NAME_EMAIL,
                 DatabaseContract.FridgeTable.COLUMN_NAME_UPDATED_BY,
                 DatabaseContract.FridgeTable.COLUMN_NAME_FROM_IMAGE,
                 DatabaseContract.FridgeTable.COLUMN_NAME_IMAGE,
