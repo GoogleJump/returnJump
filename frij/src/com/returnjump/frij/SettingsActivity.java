@@ -149,6 +149,30 @@ public class SettingsActivity extends PreferenceActivity {
         return String.format("%d:%02d %s", hour, minute, amPm);
     }
 
+    /*
+        Email Addresses are saved in the shared preferences in the format:
+            email@address.com com.reverse.domain.name
+
+        This is to prevent the ListPreference from defaulting to the last value
+        when two keys have the same value.
+
+        Example:
+            You have two accounts - Google:   email@address.com
+                                    Facebook: email@address.com
+
+            In the ListPreference, if you choose the Google account, that go back to
+            choose, the Facebook account will be selected because they have the same value.
+     */
+    public static String getEmailAddress(String emailAccount) {
+        if (emailAccount.equals(PREF_EMAIL_ADDRESS_DEFAULT)) { // Skip default
+            return emailAccount;
+        }
+
+        int pos = emailAccount.indexOf(" ");
+
+        return (pos == -1) ? emailAccount : emailAccount.substring(0, pos);
+    }
+
     public static class SettingsFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -187,6 +211,24 @@ public class SettingsActivity extends PreferenceActivity {
             findPreference(PREF_TIME).setOnPreferenceClickListener(timePrefClickListener);
         }
 
+        // Example: com.google -> Google, com.facebook.auth.login -> Facebook Auth Login
+        private static String reverseDomainNameToReadable(String reverseDomainName) {
+            if (!reverseDomainName.substring(0, 4).equals("com.")) {
+                return reverseDomainName;
+            }
+
+            reverseDomainName = reverseDomainName.substring(4); // Remove "com."
+            String[] names = reverseDomainName.split("\\.");
+            String newName = "";
+
+            for (String name : names) {
+                // Capitalize first letter
+                newName += name.substring(0, 1).toUpperCase() + name.substring(1) + " ";
+            }
+
+            return newName.trim();
+        }
+
         // This should really be called whenever an account is removed from the android accounts
         private void populateEmailListPreference() {
             Account[] accounts = AccountManager.get(getActivity()).getAccounts();
@@ -196,10 +238,9 @@ public class SettingsActivity extends PreferenceActivity {
             int i = 0;
 
             for (Account account : accounts) {
-                Log.wtf("ACCOUNT", account.name + " (" + account.type + ")");
                 if (isValidEmail(account.name)) {
-                    entries.add(account.name + " (" + account.type + ")");
-                    entryValues.add(account.name);
+                    entries.add(account.name + " (" + reverseDomainNameToReadable(account.type) + ")");
+                    entryValues.add(account.name + " " + account.type);
 
                     i++;
                 }
@@ -221,19 +262,9 @@ public class SettingsActivity extends PreferenceActivity {
                     emailListPreference.setSummary(PREF_EMAIL_ADDRESS_DEFAULT);
                     checkBoxPreferenceEmail.setEnabled(false); // Disable due to dependency
                 } else {
-                    emailListPreference.setSummary(emailListPreference.getValue());
+                    emailListPreference.setSummary(getEmailAddress(emailListPreference.getValue()));
                 }
 
-            }
-        }
-
-        // Delete later
-        private void initNotifyEmailValue() {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String emailAddress = sharedPreferences.getString(PREF_EMAIL_ADDRESS, PREF_EMAIL_ADDRESS_DEFAULT).trim();
-
-            if (emailAddress.equals(PREF_EMAIL_ADDRESS_DEFAULT)) {
-                sharedPreferences.edit().putBoolean(PREF_CHECKBOX_EMAIL, false).commit();
             }
         }
 
@@ -257,20 +288,14 @@ public class SettingsActivity extends PreferenceActivity {
                 String key = preference.getKey();
 
                 if (key.equals(PREF_EMAIL_ADDRESS)) {
-                    String email = value.toString().trim();
-
-                    // Set the preference to the email
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-                    sharedPreferences.edit().putString(PREF_EMAIL_ADDRESS, email).commit();
+                    String email = getEmailAddress(value.toString().trim());
                     preference.setSummary(email);
 
                     CheckBoxPreference checkBoxPreferenceEmail = (CheckBoxPreference) findPreference(PREF_CHECKBOX_EMAIL);
                     checkBoxPreferenceEmail.setEnabled(true); // Enable due to dependency
-
-                    return false;
-                } else {
-                    return true;
                 }
+
+                return true;
 
             }
 

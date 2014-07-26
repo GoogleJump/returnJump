@@ -92,10 +92,6 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         if (!SettingsActivity.getAlarmSet(this) && SettingsActivity.isUserNotificationEnabled(this)) {
             SettingsActivity.initializeAlarm(this);
         }
-
-        // Set email from device account
-        //setDeviceEmail();
-
     }
 
     @Override
@@ -116,18 +112,6 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         super.onPause();
         UndoBarController.clear(this);
         sd.stop();
-    }
-
-    private void setDeviceEmail() {
-        Account[] accounts = AccountManager.get(getApplicationContext()).getAccountsByType("com.google");
-        String email = accounts.length > 0 ? accounts[0].name : null;
-
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        String emailPref = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, SettingsActivity.PREF_EMAIL_ADDRESS_DEFAULT);
-
-        if (emailPref.equals("") && email != null) {
-            sharedPref.edit().putString(SettingsActivity.PREF_EMAIL_ADDRESS, email).commit();
-        }
     }
 
     private class InitializeDatabaseTask extends AsyncTask<Void, Void, String> {
