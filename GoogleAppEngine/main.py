@@ -39,7 +39,7 @@ def generateBody(expiredFridgeItems):
     return plain, html
 
 def sendEmail(email, expiredFridgeItems):
-    message = mail.EmailMessage(sender='Return Jump <returnjump@gmail.com>', subject='Phrije')
+    message = mail.EmailMessage(sender='Return Jump <returnjump@gmail.com>', subject='Frij')
 
     plain, html = generateBody(expiredFridgeItems)
     header = 'The following items in your fridge have expired:' if len(expiredFridgeItems) > 1 else 'The following item in your fridge has expired:'

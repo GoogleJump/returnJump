@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/header_notifications">
+
+        <Preference
+            android:key="preference_time"
+            android:title="@string/notification_time"
+            android:defaultValue="08:00" />
+
+        <CheckBoxPreference
+            android:key="checkbox_push"
+            android:title="@string/notification_push"
+            android:summary="@string/notification_push_summary"
+            android:defaultValue="true" />
+
+        <ListPreference
+            android:key="email_address"
+            android:title="@string/email_address"
+            android:dialogTitle="@string/email_address"
+            android:defaultValue="" />
+
+        <CheckBoxPreference
+            android:key="checkbox_email"
+            android:dependency="email_address"
+            android:layout="?android:attr/preferenceLayoutChild"
+            android:title="@string/notification_email"
+            android:summary="@string/notification_email_summary"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/header_cloud">
+
+        <CheckBoxPreference
+            android:key="checkbox_auto"
+            android:title="@string/auto_sync"
+            android:summary="@string/auto_sync_summary"
+            android:defaultValue="true"
+            android:enabled="false" />
+
+        <Preference
+            android:key="preference_sync"
+            android:title="@string/sync_now"
+            android:summary="@string/sync_now_summary" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>
