@@ -36,7 +36,7 @@ public class NotificationEmail {
          * "Hello Dear User: The following item: milk is about to expire"
          */
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-        String email = SettingsActivity.getEmailAddress(sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, SettingsActivity.PREF_EMAIL_ADDRESS_DEFAULT));
+        String email = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, SettingsActivity.PREF_EMAIL_ADDRESS_DEFAULT);
         HashMap<String, Object> params = new HashMap<String, Object>();
 
         params.put("email", email);

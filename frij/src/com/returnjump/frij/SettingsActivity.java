@@ -148,30 +148,6 @@ public class SettingsActivity extends PreferenceActivity {
         return String.format("%d:%02d %s", hour, minute, amPm);
     }
 
-    /*
-        Email Addresses are saved in the shared preferences in the format:
-            email@address.com com.reverse.domain.name
-
-        This is to prevent the ListPreference from defaulting to the last value
-        when two keys have the same value.
-
-        Example:
-            You have two accounts - Google:   email@address.com
-                                    Facebook: email@address.com
-
-            In the ListPreference, if you choose the Google account, that go back to
-            choose, the Facebook account will be selected because they have the same value.
-     */
-    public static String getEmailAddress(String emailAccount) {
-        if (emailAccount.equals(PREF_EMAIL_ADDRESS_DEFAULT)) { // Skip default
-            return emailAccount;
-        }
-
-        int pos = emailAccount.indexOf(" ");
-
-        return (pos == -1) ? emailAccount : emailAccount.substring(0, pos);
-    }
-
     public static class SettingsFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -229,7 +205,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         // This should really be called whenever an account is removed from the android accounts
         private void populateEmailListPreference() {
-            Account[] accounts = AccountManager.get(getActivity()).getAccounts();
+            Account[] accounts = AccountManager.get(getActivity()).getAccountsByType("com.google");
             ListPreference emailListPreference = (ListPreference) findPreference(PREF_EMAIL_ADDRESS);
             List<CharSequence> entries = new ArrayList<CharSequence>();
             List<CharSequence> entryValues = new ArrayList<CharSequence>();
@@ -237,8 +213,8 @@ public class SettingsActivity extends PreferenceActivity {
 
             for (Account account : accounts) {
                 if (isValidEmail(account.name)) {
-                    entries.add(account.name + " (" + reverseDomainNameToReadable(account.type) + ")");
-                    entryValues.add(account.name + " " + account.type);
+                    entries.add(account.name);
+                    entryValues.add(account.name);
 
                     i++;
                 }
@@ -246,7 +222,7 @@ public class SettingsActivity extends PreferenceActivity {
 
             if (i == 0) { // No email accounts have been setup
                 emailListPreference.getPreferenceManager().getSharedPreferences().edit().putString(PREF_EMAIL_ADDRESS, PREF_EMAIL_ADDRESS_DEFAULT).commit();
-                emailListPreference.setSummary("You need to add an email account in your Android settings");
+                emailListPreference.setSummary("You need to add a Google account in your Android settings to use this feature");
                 emailListPreference.setEnabled(false); // This will also disable any dependencies
             } else {
                 emailListPreference.setEntries(entries.toArray(new CharSequence[i]));
@@ -260,7 +236,7 @@ public class SettingsActivity extends PreferenceActivity {
                     emailListPreference.setSummary(PREF_EMAIL_ADDRESS_DEFAULT);
                     checkBoxPreferenceEmail.setEnabled(false); // Disable due to dependency
                 } else {
-                    emailListPreference.setSummary(getEmailAddress(emailListPreference.getValue()));
+                    emailListPreference.setSummary(emailListPreference.getValue());
                 }
 
             }
@@ -286,7 +262,7 @@ public class SettingsActivity extends PreferenceActivity {
                 String key = preference.getKey();
 
                 if (key.equals(PREF_EMAIL_ADDRESS)) {
-                    String email = getEmailAddress(value.toString().trim());
+                    String email = value.toString().trim();
                     preference.setSummary(email);
 
                     CheckBoxPreference checkBoxPreferenceEmail = (CheckBoxPreference) findPreference(PREF_CHECKBOX_EMAIL);

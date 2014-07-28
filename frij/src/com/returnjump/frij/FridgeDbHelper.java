@@ -63,7 +63,7 @@ public class FridgeDbHelper extends SQLiteOpenHelper {
         String calNow = calendarToString(GregorianCalendar.getInstance(), DatabaseContract.FORMAT_DATETIME);
         String hash = FridgeItem.getMD5Hash(foodItem + calNow);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String email = SettingsActivity.getEmailAddress(sharedPreferences.getString(SettingsActivity.PREF_EMAIL_ADDRESS, SettingsActivity.PREF_EMAIL_ADDRESS_DEFAULT));
+        String email = sharedPreferences.getString(SettingsActivity.PREF_EMAIL_ADDRESS, SettingsActivity.PREF_EMAIL_ADDRESS_DEFAULT);
 
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_HASH, hash);
         values.put(DatabaseContract.FridgeTable.COLUMN_NAME_FOOD_ITEM, foodItem);

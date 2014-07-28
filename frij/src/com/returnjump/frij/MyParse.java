@@ -86,7 +86,7 @@ public class MyParse {
                             if (e != null && e.getCode() == PE_ObjectNotFound) {
                                 // TODO This should go together with the savePrefToCloud
                                 SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-                                String emailAddress = SettingsActivity.getEmailAddress(sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, SettingsActivity.PREF_EMAIL_ADDRESS_DEFAULT));
+                                String emailAddress = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, SettingsActivity.PREF_EMAIL_ADDRESS_DEFAULT);
                                 boolean notifyPush = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, SettingsActivity.PREF_CHECKBOX_PUSH_DEFAULT);
                                 boolean notifyEmail = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, SettingsActivity.PREF_CHECKBOX_EMAIL_DEFAULT);
                                 String notifyTime = sharedPref.getString(SettingsActivity.PREF_TIME, SettingsActivity.PREF_TIME_DEFAULT);
@@ -123,7 +123,7 @@ public class MyParse {
                     public void done(ParseObject user, ParseException e) {
                         if (e == null) {
                             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-                            String emailAddress = SettingsActivity.getEmailAddress(sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, SettingsActivity.PREF_EMAIL_ADDRESS_DEFAULT));
+                            String emailAddress = sharedPref.getString(SettingsActivity.PREF_EMAIL_ADDRESS, SettingsActivity.PREF_EMAIL_ADDRESS_DEFAULT);
                             boolean notifyPush = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_PUSH, SettingsActivity.PREF_CHECKBOX_PUSH_DEFAULT);
                             boolean notifyEmail = sharedPref.getBoolean(SettingsActivity.PREF_CHECKBOX_EMAIL, SettingsActivity.PREF_CHECKBOX_EMAIL_DEFAULT);
                             String notifyTime = sharedPref.getString(SettingsActivity.PREF_TIME, SettingsActivity.PREF_TIME_DEFAULT);
