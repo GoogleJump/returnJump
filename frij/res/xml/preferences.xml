@@ -41,11 +41,6 @@
             android:defaultValue="true"
             android:enabled="false" />
 
-        <Preference
-            android:key="preference_sync"
-            android:title="@string/sync_now"
-            android:summary="@string/sync_now_summary" />
-
     </PreferenceCategory>
 
 

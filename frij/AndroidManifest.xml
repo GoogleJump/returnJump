@@ -31,7 +31,6 @@
         <activity
             android:name="com.returnjump.frij.SignInActivity"
             android:configChanges="orientation|screenSize"
-            android:label="@string/title_activity_sign_in"
             android:theme="@android:style/Theme.Holo.NoActionBar"
             android:noHistory="true" >
             <intent-filter android:label="@string/app_name">

@@ -244,6 +244,10 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
             startActivity(intent);
 
             return true;
+        } else if (itemId == R.id.action_sync) {
+            MyParse.saveFridgeToCloud(this, true);
+
+            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -367,9 +371,9 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
                 return;
             }
 
-            if (firstVisibleItem > mLastFirstVisibleItem) {
+            if (firstVisibleItem > mLastFirstVisibleItem) { // Down
                 fabAdd.hideFab();
-            } else if (firstVisibleItem < mLastFirstVisibleItem) {
+            } else if (firstVisibleItem < mLastFirstVisibleItem) { // Up
                 fabAdd.showFab();
             }
 

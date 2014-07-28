@@ -1,14 +1,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
+    <item android:id="@+id/action_camera"
+        android:title="@string/action_camera"
+        android:icon="@drawable/ic_action_camera"
+        android:showAsAction="collapseActionView|ifRoom" />
+
+    <item
+        android:id="@+id/action_sync"
+        android:showAsAction="never"
+        android:title="@string/action_sync" />
+
     <item
         android:id="@+id/action_settings"
-        android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/title_activity_settings" />
-
-    <item android:id="@+id/action_camera"
-          android:title="@string/action_camera"
-          android:icon="@drawable/ic_action_camera"
-          android:showAsAction="collapseActionView|ifRoom" />
 
 </menu>

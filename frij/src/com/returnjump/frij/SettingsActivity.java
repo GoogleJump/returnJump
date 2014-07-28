@@ -38,7 +38,6 @@ public class SettingsActivity extends PreferenceActivity {
     final public static String PREF_CHECKBOX_EMAIL = "checkbox_email";
     final public static String PREF_EMAIL_ADDRESS = "email_address";
     final public static String PREF_CHECKBOX_AUTO = "checkbox_auto";
-    final public static String PREF_SYNC = "preference_sync";
     final public static String PREF_DONT_SHOW_SIGN_IN = "dont_show_sign_in";
 
     final public static int DB_VERSION_DEFAULT = 1;
@@ -207,7 +206,6 @@ public class SettingsActivity extends PreferenceActivity {
             findPreference(PREF_CHECKBOX_PUSH).setOnPreferenceChangeListener(notificationPrefChangeListener);
             findPreference(PREF_CHECKBOX_EMAIL).setOnPreferenceChangeListener(notificationPrefChangeListener);
             findPreference(PREF_EMAIL_ADDRESS).setOnPreferenceChangeListener(emailAddressPrefChangeListener);
-            findPreference(PREF_SYNC).setOnPreferenceClickListener(syncPrefClickListener);
             findPreference(PREF_TIME).setOnPreferenceClickListener(timePrefClickListener);
         }
 
@@ -334,17 +332,6 @@ public class SettingsActivity extends PreferenceActivity {
 
             }
 
-        };
-
-        public Preference.OnPreferenceClickListener syncPrefClickListener = new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-            Context context = preference.getContext();
-
-            MyParse.saveFridgeToCloud(context, true);
-
-            return true;
-            }
         };
 
         public Preference.OnPreferenceClickListener timePrefClickListener = new Preference.OnPreferenceClickListener() {
