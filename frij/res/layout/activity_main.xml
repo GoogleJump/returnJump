@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="vertical"
-    android:background="@color/light_gray_bg">
+    android:background="@color/white" >
     
     <ListView
         android:id="@+id/foodItemListView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_margin="15dp"
-        android:background="@drawable/bg_card" />
+        android:layout_height="match_parent" />
 
     <TextView
         android:id="@+id/empty_fridge"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:gravity="center"
         android:text="@string/empty_fridge"
         android:visibility="gone"
@@ -27,23 +22,29 @@
         android:textSize="@dimen/large"
         android:fontFamily="sans-serif-light" />
 
-    <LinearLayout
-        android:id="@+id/addNewItemButtonBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight=".05"
-        android:background="@drawable/button"
-        android:gravity="center">
+    <!--Button
+        android:id="@+id/fab_add"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="+"
+        android:textSize="40sp"
+        android:textColor="@color/white"
+        android:background="@drawable/fab"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:paddingBottom="16dp"
+        android:fontFamily="sans-serif-light"
+        android:layout_alignParentEnd="true" /-->
 
-        <ImageButton
-            android:id="@+id/addNewItemButton"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_action_add"
-            android:contentDescription="@string/add"
-            android:background="@drawable/button" />
+    <com.faizmalkani.floatingactionbutton.Fab
+        android:id="@+id/fab"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp" />
 
-    </LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>

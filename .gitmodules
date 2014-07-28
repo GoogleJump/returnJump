@@ -1,3 +1,6 @@
 [submodule "UndoBar"]
 	path = UndoBar
 	url = https://github.com/soarcn/UndoBar
+[submodule "FloatingActionButton"]
+	path = FloatingActionButton
+	url = https://github.com/FaizMalkani/FloatingActionButton.git

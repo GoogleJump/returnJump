@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.GradientDrawable;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,10 +20,14 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewTreeObserver;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -31,6 +36,7 @@ import android.widget.Toast;
 
 import com.cocosw.undobar.UndoBarController;
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
+import com.faizmalkani.floatingactionbutton.Fab;
 import com.squareup.seismic.ShakeDetector;
 
 import org.json.JSONArray;
@@ -45,6 +51,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static android.view.ViewTreeObserver.*;
+
 public class MainActivity extends FragmentActivity implements CalendarDatePickerDialog.OnDateSetListener, EditNameFragment.OnEditNameButtonClickedListener, ShakeDetector.Listener, UndoBarController.AdvancedUndoListener {
 
     private ArrayAdapter<FridgeItem> adapter;
@@ -58,6 +66,10 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
     private SensorManager sensorManager;
     private ShakeDetector sd;
     private Activity activity;
+
+    private Fab fabAdd;
+    private int mLastFirstVisibleItem = 0;
+    private boolean isUndoBarVisible = false;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,15 +87,20 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         this.initializeSwipeDismissListener();
         fridgeListView.setOnTouchListener(swipeDismiss);
         fridgeListView.setOnScrollListener(swipeDismiss.makeScrollListener());
+        fridgeListView.setOnScrollListener(onScrollListener);
 
         this.initializeLongClickListener();
 
         populateListView();
 
-        LinearLayout addButtonBar = (LinearLayout) findViewById(R.id.addNewItemButtonBar);
-        ImageButton addButton = (ImageButton) findViewById(R.id.addNewItemButton);
-        addButtonBar.setOnClickListener(addNewItemOnClickListener);
-        addButton.setOnClickListener(addNewItemOnClickListener);
+        fabAdd = (Fab) findViewById(R.id.fab);
+        fabAdd.setFabColor(getResources().getColor(R.color.theme));
+        fabAdd.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_add));
+        fabAdd.setOnClickListener(addNewItemOnClickListener);
+
+        //Button fab = (Button) findViewById(R.id.fab_add);
+        //fab.setOnClickListener(addNewItemOnClickListener);
+
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sd = new ShakeDetector(this);
         sd.start(sensorManager);
@@ -342,6 +359,27 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         }
     };
 
+    // Used to detect scroll direction (up/down)
+    private AbsListView.OnScrollListener onScrollListener = new AbsListView.OnScrollListener() {
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            // Prevents fab from appearing if scrolling while undobar is visible
+            if (isUndoBarVisible) {
+                return;
+            }
+
+            if (firstVisibleItem > mLastFirstVisibleItem) {
+                fabAdd.hideFab();
+            } else if (firstVisibleItem < mLastFirstVisibleItem) {
+                fabAdd.showFab();
+            }
+
+            mLastFirstVisibleItem = firstVisibleItem;
+        }
+
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+        }
+    };
+
     public void initializeSwipeDismissListener() { swipeDismiss =
                 new SwipeDismissListViewTouchListener(fridgeListView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
                     @Override
@@ -366,6 +404,9 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
                             Bundle b = new Bundle();
                             b.putString("foodName", name);
                             b.putLong("rowId", rowId);
+
+                            isUndoBarVisible = true;
+                            fabAdd.hideFab();
                             new UndoBarController.UndoBar(activity)
                                                  .message("Removed " + name)
                                                  .listener((UndoBarController.UndoListener) activity)
@@ -478,6 +519,9 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
      */
     @Override
     public void onUndo(Parcelable token) {
+        isUndoBarVisible = false;
+        fabAdd.showFab();
+
         if (token != null) {
             final String foodName = ((Bundle) token).getString("foodName");
             final long rowId = ((Bundle) token).getLong("rowId");
@@ -495,7 +539,8 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
      */
     @Override
     public void onHide(Parcelable token) {
-
+        isUndoBarVisible = false;
+        fabAdd.showFab();
     }
 
     @Override

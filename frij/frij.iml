@@ -17,6 +17,7 @@
     <orderEntry type="module" module-name="android-betterpickers" />
     <orderEntry type="module" module-name="UndoBar" />
     <orderEntry type="module" module-name="tess-two" />
+    <orderEntry type="module" module-name="FloatingActionButton" />
   </component>
 </module>
 
