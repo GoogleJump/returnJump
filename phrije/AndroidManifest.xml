@@ -20,7 +20,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
 
@@ -62,6 +61,16 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.returnjump.phrije.MainActivity" />
         </activity>
+        <activity
+            android:name=".LoginPage"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:label = "@string/title_activity_login"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="com.returnjump.phrije.MainActivity" />
+        </activity>
+
 
         <receiver android:name="com.returnjump.phrije.NotificationReceiver"></receiver>
         <receiver android:name="com.returnjump.phrije.BootReceiver" android:enabled="true">

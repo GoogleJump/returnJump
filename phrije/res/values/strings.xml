@@ -20,6 +20,7 @@
     <string name="auto_sync_summary">Any changes to your fridge will automatically be saved</string>
 
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_login">Login Page</string>
     <string name="processing_image">Your image is being processed&#8230;</string>
     <string name="captured_image">Captured Image</string>
     <string name="calendar">Calendar</string>

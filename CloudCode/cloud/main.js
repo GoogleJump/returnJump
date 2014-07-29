@@ -4,20 +4,20 @@ Parse.Cloud.job("emailTask", function(request, response) {
     query.find({
         success: function(results) {
             for (var i = 0; i < results.length; i++) {
-                console.log(i)
+                console.log(i);
                 var all_items = null;
                 //getting the information required to call the email sender function
                 users_email = results[i].get("email");
                 if ((results[i].get("notifyEmail") === true) && !(users_email === undefined || users_email === "")) {
-                    console.log("in if statement")
-                    console.log(users_email)
+                    console.log("in if statement");
+                    console.log(users_email);
                     //acquiring the email adress
                     //acquiring the items that are about to expire
                     user_install_id = results[i].get("installationObjectId");
                     Parse.Cloud.run("execute", {
                         ObjectId: user_install_id,
                         email: users_email
-                    }); 
+                    });
                     if (i== results.length -1){
                         response.success("Done");
                     }
@@ -41,7 +41,7 @@ Parse.Cloud.define('execute', function(request, response) {
         user_param: request.params.ObjectId
     }).then(function(expiredItems) {
         console.log("in the promise");
-        if (!(expiredItems === "")) {
+        if (!(expiredItems === "" || expiredItems === undefined)) {
             Parse.Cloud.run("sendemails", {
                 address: request.params.email,
                 Expiring: expiredItems
@@ -77,13 +77,15 @@ Parse.Cloud.define("getExpired", function(request, response) {
     var date_string = curr_year + "-" + curr_month + "-" + curr_date;
 
     //query for items expiring on the specified date
-    var User_Data = Parse.Object.extend("User_" + request.params.user_param);
-    var query = new Parse.Query(User_Data);
+    var Fridge = Parse.Object.extend("Fridge");
+    var query = new Parse.Query(Fridge);
+    query.equalTo("installationObjectId", request.params.user_param);
     query.equalTo("expiryDate", date_string);
     query.find({
         success: function(results) {
             var namesOfExpiringItems = "";
             for (i = 0; i < results.length; i++) {
+                console.log(results[i].get("fooditem"));
                 // get the names of the items that are expiring
                 namesOfExpiringItems += results[i].get("foodItem") + " ";
                 // update the item to notified.
@@ -104,7 +106,7 @@ Parse.Cloud.define("getExpired", function(request, response) {
 
 Parse.Cloud.define("sendemails", function(request, response) {
     var Mandrill = require('mandrill');
-    Mandrill.initialize(Parse.applicationId);
+    Mandrill.initialize('KSGH_ZmlRFcrIAiHpKt5Hg');
     var expiringItems = request.params.Expiring;
     var verb = null;
     if (expiringItems.split(" ").length > 1) {
@@ -113,15 +115,17 @@ Parse.Cloud.define("sendemails", function(request, response) {
         verb = "is ";
     };
 
+    console.log("sendingemails");
+
     Mandrill.sendEmail({
         message: {
             text: "Hello Dear User: The following item: " + expiringItems + verb + "about to expire",
-            subject: "Phrije Notifications",
-            from_email: "returnjump@gmail.com",
-            from_name: "Phrije",
+            subject: "SpoilFoil Notifications",
+            from_email: "parse@cloudcode.com",
+            from_name: "Cloud Code",
             to: [{
                 email: request.params.address,
-                name: ""
+                name: "Arturo"
             }]
         },
         async: true
@@ -133,7 +137,7 @@ Parse.Cloud.define("sendemails", function(request, response) {
             response.error("Uh oh, something went wrong");
         }
     });
-});
+})
 
 // v2
 Parse.Cloud.define('sendEmail', function(request, response) {

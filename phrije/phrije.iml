@@ -16,6 +16,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="google-play-services_lib" />
+    <orderEntry type="library" name="google-play-services" level="project" />
     <orderEntry type="module" module-name="android-betterpickers" />
     <orderEntry type="module" module-name="tess-two" />
     <orderEntry type="library" name="square-seismic-1.0.0" level="project" />
