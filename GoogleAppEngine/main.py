@@ -1,4 +1,4 @@
-from flask import Flask, Response, request, render_template
+from flask import Flask, Response, request, render_template, url_for
 from google.appengine.api import mail
 import json
 
@@ -24,8 +24,12 @@ def myResponse(body):
 
 @app.route('/')
 def hello():
-    '''Return a friendly HTTP greeting.'''
     return render_template('index.html')
+
+@app.route('/material/')
+def material():
+    #return app.send_static_file('material.html')
+    return render_template('material.html')
 
 @app.errorhandler(404)
 def page_not_found(e):
