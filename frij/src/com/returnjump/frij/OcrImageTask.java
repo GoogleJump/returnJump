@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.faizmalkani.floatingactionbutton.Fab;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import java.io.File;
@@ -24,7 +25,7 @@ import java.util.List;
 
 public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
     private ProgressBar progressBar;
-    private Button checkoutButton;
+    private Fab fabCheckoutButton;
     private boolean isFirstCall;
     private Context context;
     private Activity activity;
@@ -38,7 +39,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
         this.context = context;
         this.activity = activity;
         this.progressBar = (ProgressBar) this.activity.findViewById(R.id.progress_ocr);
-        this.checkoutButton = (Button) this.activity.findViewById(R.id.checkoutButton);
+        this.fabCheckoutButton = (Fab) this.activity.findViewById(R.id.fab);
 
         foodTableHelper = new FoodTableHelper(this.activity);
         expiryTableHelper = new ExpiryTableHelper(this.activity);
@@ -231,7 +232,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
             new OcrImageTask(false, context, activity).execute(bitmap);
         } else {
             progressBar.setVisibility(View.GONE);
-            checkoutButton.setVisibility(View.VISIBLE);
+            fabCheckoutButton.setVisibility(View.VISIBLE);
         }
     }
 }
