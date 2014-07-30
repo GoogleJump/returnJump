@@ -1,138 +1,23 @@
-
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="bootstrap/frijeicon.png">
-	
-    <title>Frij</title>
-
-  <!-- Bootstrap core CSS -->
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/old/css/styles.css" rel="stylesheet">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css'>
-	
-  </head>
-
-  <body>
-    <div class="site-wrapper">
-      <div class="site-wrapper-inner">		    
-		    <div class="inner-cover">
-				<div class="android"> 
-					<img src="/static/old/images/androidmain.png" alt="android"> 
-				</div>	
-				<div class="title-text">
-						<div class="header-frije-text">
-						<br>
-						<b>Take control of your</b>	
-						</div>
-						<br>
-						<div class="frije">
-							<img src="/static/old/images/frije.png" alt="frije">  
-							<img alt="icon"src="/static/old/images/frijeicon.png" /></a>  
-						</div> 	
-						<br>
-						<div class="subtitle-text"><b>Effortlessly manage items in your kitchen. 
-						<br>Get notifed when it's time to toss.</b>
-						</div>
-						<br>
-						<div class="googleplay">
-							<a href="https://play.google.com/store/apps/details?id=com.returnjump.frij">
-							<img alt="Android app on Google Play"src="/static/old/images/googleplaybutton.png" /></a>
-						</div>	
-				</div>					
-			</div>
-	   </div>	   
-		<div class="learn-more">
-	   		<a href="#container">
-			<font size="5">Learn more</font>
-			 <div id="bouncer">
-				<i class="glyphicon glyphicon-chevron-down"></i>
-			 </div>
-			 </a>
-        </div>
-		</div>	  
-    </div>
-	
-	<div id="container" class="container">
-		<div class="simple4everyone">
-			<font size="50"><b>Simple, for everyone.</b></font>
-			<div class="separator"></div> <hr />
-		</div>
-		<br>
-	    <div class="first">
-			<div class="description-left">
-				<div class="step-header">
-					<font size="30"><div class="circle"><center>1</center></div> Take a pic</font>
-				</div>
-				<b><p>Give FRiJE a snapshot of your receipt after you're done shopping, 
-				<br>and your items are matched with an average shelf life. 
-				<br>Other apps ask you to log each item individually, who has time for that?</b>
-				</p>
-			</div>			
-			<div class="screenshot-right">
-			<img src="/static/old/images/notifiedscreenshot.png" alt="edititem"> 
-			</div>
-	    </div>
-		<br>
-		<div class="separator"></div> <hr />
-		<br>
-		<div class="second">
-		<div class="description-right">
-				<div class="step-header">
-					<font size="30"><div class="circle"><center>2</center></div> Check out your FRiJE</font>
-				</div>
-				<!-- add glow to screenshot -->
-				<b><p>Add, edit, or toss your items. 
-				<br>Give your device a shake, and your expired items are gone. 
-				<br>FRiJE's simple user interface makes managing your food a piece of cake!
-				<br>
-				<br><small>(And managing pieces of cake... a piece of cake) </small> </p></b>
-			</div>
-			<div class="screenshot-left"> 
-				<img src="/static/old/images/edititem.png" alt="edititem"> 
-			</div>
-			
-	    </div>
-		<br>
-		<div class="separator"></div> <hr />
-	    <div class="third">
-			<div class="description-left">
-				<div class="step-header">
-					<font size="30"><div class="circle"><center>3</center></div> Get Notified</font>
-				</div>
-				<p><b>40% of all food in America is <a href="http://www.nrdc.org/food/wasted-food.asp"><u>wasted</u></a>.
-				<br>
-				<br>FRiJE makes getting the most out of your groceries <b>effortless</b>.
-				<br>Save money, buy healthy foods with the confidence you'll remember to eat them!
-				<br>Get informed about when it's time to toss expired items, never touch rotten food again.</p></b>
-			</div>
-			<div class="screenshot-right">
-				<img src="/static/old/images/notifiedscreenshot.png" alt="edititem"> 
-			</div>
-	    </div>
-	</div>
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>	
-
+<!doctype html>
+<html ng-app="app">
+<head>
+<title>frij</title>
+<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+<link rel="stylesheet" href="/static/vendor/css/material-design.css">
+<link rel="stylesheet" href="/static/css/style.css">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.14/angular.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.14/angular-animate.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.14/angular-route.js"></script>
+<script src="/static/vendor/js/angular-animate-sequence.js"></script>
+<script src="/static/vendor/js/angular-animate-stylers.js"></script>
+<script src="/static/vendor/js/material-design.js"></script>
+<script src="/static/js/app.js"></script>
+<script src="/static/js/controller.js"></script>
+</head>
+<body>
+  <ng-include src="'/static/template/header.tmpl.html'"></ng-include>
+  <ng-view></ng-view>
+  <ng-include src="'/static/template/footer.tmpl.html'"></ng-include>
   </body>
-  
-  <footer>
-        <div class="footer">              
-			<div class="github">
-				<a href="https://github.com/GoogleJump/returnJump">
-				<img src="/static/old/images/github.png" alt="github">
-			</div>	
-			<br><font color="black">© 2014 returnJump</font></a>
-        </div>
-    </footer>
-  
 </html>
