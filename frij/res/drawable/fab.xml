@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <!-- Shadow -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#ccc"/>
+            <size android:width="60dp" android:height="60dp" />
+            <!--gradient
+                android:startColor="#ccc"
+                android:centerColor="#ccc"
+                android:endColor="#00000000"
+                android:angle="270"
+                android:gradientRadius="82%"
+                android:type="radial" /-->
+        </shape>
+    </item>
+
+    <!-- Button -->
+    <item android:left="2dp" android:right="2dp" android:bottom="2dp" android:top="2dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/theme" />
+            <size android:width="56dp" android:height="56dp" />
+        </shape>
+    </item>
+
+</layer-list>

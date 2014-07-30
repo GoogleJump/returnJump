@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="@color/white" >
+    
+    <ListView
+        android:id="@+id/foodItemListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/empty_fridge"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/empty_fridge"
+        android:visibility="gone"
+        android:focusable="true" 
+        android:focusableInTouchMode="true"
+        android:textSize="@dimen/large"
+        android:fontFamily="sans-serif-light" />
+
+    <!--Button
+        android:id="@+id/fab_add"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="+"
+        android:textSize="40sp"
+        android:textColor="@color/white"
+        android:background="@drawable/fab"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:paddingBottom="16dp"
+        android:fontFamily="sans-serif-light"
+        android:layout_alignParentEnd="true" /-->
+
+    <com.faizmalkani.floatingactionbutton.Fab
+        android:id="@+id/fab"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp" />
+
+</RelativeLayout>

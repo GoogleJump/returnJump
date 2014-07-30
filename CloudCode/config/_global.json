@@ -1,11 +1,11 @@
 {
     "applications": {
-        "phrije": {
+        "frij": {
             "applicationId": "insert id here", 
             "masterKey": "insert master key here"
         }, 
         "_default": {
-            "link": "phrije"
+            "link": "frij"
         }
     }, 
     "global": {

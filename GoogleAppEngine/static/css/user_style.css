@@ -3,13 +3,31 @@ html {
     margin: auto;
     text-align: center;
     font-family: 'Lato', sans-serif;
-    background: #2980b9;
+    background: #2c3e50;
 }
-.login{
-	
+.header {
+    position: relative;
+    top: 0;
+    height: 60px;
+}
+#logo {
+    position: absolute;
+    left: 0;
+    height: auto;
+    width: auto;
+    max-width: 60;
+    max-height: 60;
+    border: 1px solid #;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    border-radius: 20px;
+}
+.login {
+    float: right;
 }
 input {
-    width: 200px;
+    top: 20px;
+    width: 175px;
     height: 20px;
     padding: 10px;
     margin: 0 0 20px 0;
@@ -63,4 +81,4 @@ input.button, button.button {
     -ms-border-radius: 3px;
     -o-border-radius: 3px;
     border-radius: 3px;
-}	
+}

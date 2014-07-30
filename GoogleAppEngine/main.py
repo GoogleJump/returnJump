@@ -1,4 +1,4 @@
-from flask import Flask, Response, request, render_template
+from flask import Flask, Response, request, render_template, url_for
 from google.appengine.api import mail
 import json
 
@@ -24,8 +24,16 @@ def myResponse(body):
 
 @app.route('/')
 def hello():
-    '''Return a friendly HTTP greeting.'''
     return render_template('index.html')
+
+@app.route('/material/')
+def material():
+    #return app.send_static_file('material.html')
+    return render_template('material.html')
+
+@app.route("/user/")
+def  user_render():
+    return render_template("users.html")
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -39,7 +47,7 @@ def generateBody(expiredFridgeItems):
     return plain, html
 
 def sendEmail(email, expiredFridgeItems):
-    message = mail.EmailMessage(sender='Return Jump <returnjump@gmail.com>', subject='Phrije')
+    message = mail.EmailMessage(sender='Return Jump <returnjump@gmail.com>', subject='Frij')
 
     plain, html = generateBody(expiredFridgeItems)
     header = 'The following items in your fridge have expired:' if len(expiredFridgeItems) > 1 else 'The following item in your fridge has expired:'
