@@ -211,14 +211,19 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
                     Calendar c = GregorianCalendar.getInstance();
                     c.add(Calendar.DATE, days);
                     FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, recognizedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE), ShoppingCartActivity.IMAGE_PATH, fileName);
-                    ((ShoppingCartActivity) activity).shoppingCart.add(newFridgeItem);
 
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ((ShoppingCartActivity) activity).adapter.notifyDataSetChanged();
-                        }
-                    });
+                    //check if the item is in the list, if not, do nothing as we don't need to add you again
+
+                    if(!((ShoppingCartActivity) activity).shoppingCart.contains(newFridgeItem)) {
+                        ((ShoppingCartActivity) activity).shoppingCart.add(newFridgeItem);
+
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((ShoppingCartActivity) activity).adapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
                 }
             }
         }
