@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 
 import com.cocosw.undobar.UndoBarController;
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
+import com.faizmalkani.floatingactionbutton.Fab;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -61,6 +63,9 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
     private EditNameFragment editNameFragment;
     private String EDIT_FRAG_TAG = "edit_frag_tag";
     private String CAL_PICKER_TAG = "cal_frag_tag";
+    private Fab fabAdd;
+    private int mLastFirstVisibleItem = 0;
+    private boolean isUndoBarVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +75,8 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
         setupActionBar();
 
         activity = this;
+        context = this;
+
 
         // Check if device has a camera, go back if it doesn't
         PackageManager pm = getPackageManager();
@@ -84,13 +91,17 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
         this.initializeSwipeDismissListener();
         cartListView.setOnTouchListener(swipeDismiss);
         cartListView.setOnScrollListener(swipeDismiss.makeScrollListener());
+        cartListView.setOnScrollListener(onScrollListener);
 
         // Setup database and list
         dbHelper = new FridgeDbHelper(this);
         adapter = new MyFridgeAdapter(this, R.layout.list_fooditems, shoppingCart);
         cartListView.setAdapter(adapter);
 
-        findViewById(R.id.checkoutButton).setOnClickListener(addToFridge);
+        fabAdd = (Fab) findViewById(R.id.fab);
+        fabAdd.setFabColor(context.getResources().getColor(R.color.theme));
+        fabAdd.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_checkout));
+        fabAdd.setOnClickListener(addToFridge);
 
         // Open existing camera app, calls onActivityResult() when intent is finished
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -133,6 +144,7 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
                                 .token(b)
                                 .show();
 
+                        isUndoBarVisible = true;
                         adapter.remove(item);
                         adapter.notifyDataSetChanged();
 
@@ -193,11 +205,12 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
 
     @Override
     public void onEditNameButtonClicked(Boolean isNewItem) {
-        Calendar c = FridgeDbHelper.stringToCalendar(editNameFragment.getArguments().getString("date"), DatabaseContract.FORMAT_DATE);
+        String date = editNameFragment.getArguments().getString("date");
+        Calendar c = FridgeDbHelper.stringToCalendar(date, DatabaseContract.FORMAT_DATE);
         CalendarDatePickerDialog calendarDatePickerDialog = CalendarDatePickerDialog
-                .newInstance(ShoppingCartActivity.this, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
-        calendarDatePickerDialog.setYearRange(Calendar.getInstance().get(Calendar.YEAR), calendarDatePickerDialog.getMaxYear());
-        calendarDatePickerDialog.show(getSupportFragmentManager(), CAL_PICKER_TAG);
+            .newInstance(ShoppingCartActivity.this, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+    calendarDatePickerDialog.setYearRange(Calendar.getInstance().get(Calendar.YEAR), calendarDatePickerDialog.getMaxYear());
+    calendarDatePickerDialog.show(getSupportFragmentManager(), CAL_PICKER_TAG);
         //onDateSet called next
     }
 
@@ -432,6 +445,8 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
 
             FridgeItem item = new FridgeItem(-1, name, rawName, expiryDate, image, imageBinarized);
 
+            isUndoBarVisible = false;
+
             // Remove the item from deleted and put it back in the shopping cart
             deletedCart.remove(deletedCartPosition);
 
@@ -452,5 +467,25 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
     public void onClear() {
 
     }
+
+    private AbsListView.OnScrollListener onScrollListener = new AbsListView.OnScrollListener() {
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            // Prevents fab from appearing if scrolling while undobar is visible
+            if (isUndoBarVisible) {
+                return;
+            }
+
+            if (firstVisibleItem > mLastFirstVisibleItem) { // Down
+                fabAdd.hideFab();
+            } else if (firstVisibleItem < mLastFirstVisibleItem) { // Up
+                fabAdd.showFab();
+            }
+
+            mLastFirstVisibleItem = firstVisibleItem;
+        }
+
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+        }
+    };
 
 }

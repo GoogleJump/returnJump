@@ -23,13 +23,12 @@ def myResponse(body):
     return Response(json.dumps(body), mimetype='application/json')
 
 @app.route('/')
-def hello():
+def main():
     return render_template('index.html')
 
-@app.route('/material/')
-def material():
-    #return app.send_static_file('material.html')
-    return render_template('material.html')
+@app.route('/old/')
+def old():
+    return render_template('old.html')
 
 @app.route("/user/")
 def  user_render():
