@@ -330,4 +330,9 @@ public class FridgeItem {
         this.notifiedEmail = notifiedEmail;
     }
 
+    //Overriding the equals method so that two fridge items are the same if they have the same name
+    public boolean equals(Object o) {
+        return name.equals(((FridgeItem) o).name);
+    }
+
 }
