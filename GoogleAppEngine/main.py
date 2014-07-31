@@ -30,6 +30,10 @@ def main():
 def old():
     return render_template('old.html')
 
+@app.route("/user/")
+def  user_render():
+    return render_template("users.html")
+
 @app.errorhandler(404)
 def page_not_found(e):
     '''Return a custom 404 error.'''
