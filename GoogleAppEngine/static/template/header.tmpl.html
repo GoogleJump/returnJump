@@ -1,3 +1,16 @@
-<material-tabs>
-  <material-tab class="material-theme-frij"  style="height: 60px; text-align: left; font-size: 36px;">frij</material-tab>
-</material-tabs>
+<div ng-controller="GooglePlusCtrl">
+  
+  <material-tabs>
+    <material-tab class="material-theme-frij" style="text-align: left; height: 60px;">
+      <span frij-logo size="46" />
+    </material-tab>
+  </material-tabs>
+
+  <button ng-hide="signedIn" class="material-button material-button-raised material-button-colored" id="myButton" style="position: absolute; top: 12px; left: {{width - 160}}px; background-color: #dd4b39; white-space: nowrap;" flex>
+    <i class="fa fa-google-plus fa-lg"></i><span style="font-size: 20px; font-stretch: extra-expanded; text-transform: none; padding-left: 12px; padding-right: 12px;">Sign in</span>
+  </button>
+  <button ng-show="signedIn" ng-click="signOut()" class="material-button material-button-raised material-button-colored" style="position: absolute; top: 12px; left: {{width - 160}}px; background-color: #dd4b39; white-space: nowrap;" flex>
+    <i class="fa fa-google-plus fa-lg"></i><span style="font-size: 20px; font-stretch: extra-expanded; text-transform: none; padding-left: 14px; padding-right: 14px;">Sign out</span>
+  </button>
+
+</div>

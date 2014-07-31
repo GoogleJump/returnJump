@@ -1,7 +1,21 @@
 .material-theme-frij {
   background-color: #99cc00 !important;
-  color: #f1f1f1 !important; }
+  color: #f1f1f1 !important;
+}
 
 .title {
-    font-size: 48px;
+  font-size: 48px;
+}
+
+.circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 40px;
+  background-color: #99cc00;
+  color: white;
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 24px;
+  font-weight: bold;
 }
