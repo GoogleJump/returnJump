@@ -24,11 +24,6 @@
     <string name="skip">skip</string>
     <string name="dont_show_this_again">don\'t show this again</string>
 
-<<<<<<< HEAD:phrije/res/values/strings.xml
-    <string name="hello_world">Hello world!</string>
-    <string name="title_activity_login">Login Page</string>
-=======
->>>>>>> 5edbf89b52ccebd2a9369d3abc296c8a6efccf4d:frij/res/values/strings.xml
     <string name="processing_image">Your image is being processed&#8230;</string>
     <string name="captured_image">Captured Image</string>
     <string name="calendar">Calendar</string>

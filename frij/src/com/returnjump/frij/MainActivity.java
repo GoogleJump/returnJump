@@ -4,14 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.database.Cursor;
-<<<<<<< HEAD
-<<<<<<< HEAD:phrije/src/com/returnjump/phrije/MainActivity.java
-=======
-import android.graphics.Bitmap;
-import android.graphics.drawable.GradientDrawable;
->>>>>>> 5edbf89b52ccebd2a9369d3abc296c8a6efccf4d:frij/src/com/returnjump/frij/MainActivity.java
-=======
->>>>>>> a6ac7d7860b577374ed35c4423016b80130212ea
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;

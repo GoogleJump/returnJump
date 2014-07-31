@@ -120,15 +120,9 @@ Parse.Cloud.define("sendemails", function(request, response) {
     Mandrill.sendEmail({
         message: {
             text: "Hello Dear User: The following item: " + expiringItems + verb + "about to expire",
-<<<<<<< HEAD
-            subject: "SpoilFoil Notifications",
-            from_email: "parse@cloudcode.com",
-            from_name: "Cloud Code",
-=======
             subject: "Frij Notifications",
             from_email: "returnjump@gmail.com",
             from_name: "Frij",
->>>>>>> 5edbf89b52ccebd2a9369d3abc296c8a6efccf4d
             to: [{
                 email: request.params.address,
                 name: "Arturo"
