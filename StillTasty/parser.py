@@ -86,16 +86,16 @@ def getStrListAvg(exp):
 def convertExpiryAmountToDays(expiry):
     if expiry == '': # For those without dates
         return -1   
-    elif expiry.find('day') != -1 or expiry.find('days') != -1: # Ex. "1 day", "7 days", "3-5 days"
+    elif expiry.find('day') != -1: # Ex. "1 day", "7 days", "3-5 days"
         exp = expiry[:expiry.find(' ')].split('-')
         return getStrListAvg(exp)
-    elif expiry.find('week') != -1 or expiry.find('weeks') != -1: # Ex. "1 week", "3 weeks", "6-8 weeks"
+    elif expiry.find('week') != -1: # Ex. "1 week", "3 weeks", "6-8 weeks"
         exp = expiry[:expiry.find(' ')].split('-')
         return getStrListAvg(exp) * 7
-    elif expiry.find('month') != -1 or expiry.find('months') != -1: # Ex. "1 month", "2 months", "7-10 months"
+    elif expiry.find('month') != -1: # Ex. "1 month", "2 months", "7-10 months"
         exp = expiry[:expiry.find(' ')].split('-')
         return getStrListAvg(exp) * 30
-    elif expiry.find('year') != -1 or expiry.find('years') != -1: # You get the point by now
+    elif expiry.find('year') != -1: # You get the point by now
         exp = expiry[:expiry.find(' ')].split('-')
         return getStrListAvg(exp) * 365
     elif expiry.find('keeps indefinitely') != -1: # Found several with this date set (can be an easter egg)

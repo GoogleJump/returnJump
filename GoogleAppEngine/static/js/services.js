@@ -17,7 +17,6 @@ App.factory('GooglePlusFactory', [
 
         factory.signOut = function () {
             gapi.auth.signOut();
-            console.log('signed out');
         };
 
         return factory;

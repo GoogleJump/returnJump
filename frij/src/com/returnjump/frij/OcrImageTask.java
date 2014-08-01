@@ -195,11 +195,13 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
         for (String recognizedText : recognizedTexts) {
             // Start at the first letter
+            int dollaSignPos = recognizedText.indexOf("$");
             int firstLetterPos = getPositionOfFirstLetter(recognizedText);
-            String recognizedTextFromFirstLetter = recognizedText.substring(firstLetterPos);
+            String recognizedTextStripped = (dollaSignPos == -1) ? recognizedText : recognizedText.substring(0, dollaSignPos);
+            recognizedTextStripped.substring(firstLetterPos);
 
-            if (!recognizedTextFromFirstLetter.equals("")) {
-                String matchedText = findMatchInDatabase(recognizedTextFromFirstLetter);
+            if (!recognizedTextStripped.equals("")) {
+                String matchedText = findMatchInDatabase(recognizedTextStripped);
                 //if a match less than RecieptTODBHelper.MAX_EDIT_DISTANCE_THRESHOLD was found
                 if (matchedText != null) {
                     long rowId = foodTableHelper.getRowIdByName(matchedText);
