@@ -19,6 +19,7 @@ import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -63,7 +64,7 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
     private EditNameFragment editNameFragment;
     private String EDIT_FRAG_TAG = "edit_frag_tag";
     private String CAL_PICKER_TAG = "cal_frag_tag";
-    private Fab fabAdd;
+    private Fab fabCheckout;
     private int mLastFirstVisibleItem = 0;
     private boolean isUndoBarVisible = false;
 
@@ -76,7 +77,6 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
 
         activity = this;
         context = this;
-
 
         // Check if device has a camera, go back if it doesn't
         PackageManager pm = getPackageManager();
@@ -98,10 +98,11 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
         adapter = new MyFridgeAdapter(this, R.layout.list_fooditems, shoppingCart);
         cartListView.setAdapter(adapter);
 
-        fabAdd = (Fab) findViewById(R.id.fab);
-        fabAdd.setFabColor(context.getResources().getColor(R.color.theme));
-        fabAdd.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_checkout));
-        fabAdd.setOnClickListener(addToFridge);
+        // Initialize FAB when we get the image
+        fabCheckout = (Fab) findViewById(R.id.fab_checkout);
+        fabCheckout.setFabColor(context.getResources().getColor(R.color.theme));
+        fabCheckout.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_checkout));
+        fabCheckout.setOnClickListener(addToFridge);
 
         // Open existing camera app, calls onActivityResult() when intent is finished
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -138,13 +139,15 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
                         b.putString("expiryDate", item.getExpiryDate());
                         b.putString("image", item.getImagePath());
                         b.putString("imageBinarized", item.getImageBinarizedPath());
+
+                        isUndoBarVisible = true;
+                        fabCheckout.hideFab();
                         new UndoBarController.UndoBar(activity)
                                 .message("Removed " + item.getName())
                                 .listener((UndoBarController.UndoListener) activity)
                                 .token(b)
                                 .show();
 
-                        isUndoBarVisible = true;
                         adapter.remove(item);
                         adapter.notifyDataSetChanged();
 
@@ -386,8 +389,6 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                // Process image in an AsyncTask
-
                 new BinarizeImageTask(getApplicationContext(), ShoppingCartActivity.this).execute(IMAGE_PATH);
 
                 // Delete the file after processed using file.delete()
@@ -434,6 +435,9 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
 
     @Override
     public void onUndo(Parcelable token) {
+        isUndoBarVisible = false;
+        fabCheckout.showFab();
+
         if (token != null) {
             final int shoppingCartPosition = ((Bundle) token).getInt("shoppingCartPosition");
             final int deletedCartPosition = ((Bundle) token).getInt("deletedCartPosition");
@@ -445,22 +449,18 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
 
             FridgeItem item = new FridgeItem(-1, name, rawName, expiryDate, image, imageBinarized);
 
-            isUndoBarVisible = false;
-
             // Remove the item from deleted and put it back in the shopping cart
             deletedCart.remove(deletedCartPosition);
 
             shoppingCart.add(shoppingCartPosition, item);
             adapter.notifyDataSetChanged();
-
-            // Need to add an ellipsis to long names
-            Toast.makeText(this, "Added back " + name, Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     public void onHide(Parcelable token) {
-
+        isUndoBarVisible = false;
+        fabCheckout.showFab();
     }
 
     @Override
@@ -476,9 +476,9 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
             }
 
             if (firstVisibleItem > mLastFirstVisibleItem) { // Down
-                fabAdd.hideFab();
+                fabCheckout.hideFab();
             } else if (firstVisibleItem < mLastFirstVisibleItem) { // Up
-                fabAdd.showFab();
+                fabCheckout.showFab();
             }
 
             mLastFirstVisibleItem = firstVisibleItem;

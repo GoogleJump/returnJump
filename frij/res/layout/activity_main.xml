@@ -22,24 +22,8 @@
         android:textSize="@dimen/large"
         android:fontFamily="sans-serif-light" />
 
-    <!--Button
-        android:id="@+id/fab_add"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:text="+"
-        android:textSize="40sp"
-        android:textColor="@color/white"
-        android:background="@drawable/fab"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        android:paddingBottom="16dp"
-        android:fontFamily="sans-serif-light"
-        android:layout_alignParentEnd="true" /-->
-
     <com.faizmalkani.floatingactionbutton.Fab
-        android:id="@+id/fab"
+        android:id="@+id/fab_add"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_alignParentBottom="true"

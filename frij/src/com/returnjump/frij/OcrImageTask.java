@@ -25,7 +25,7 @@ import java.util.List;
 
 public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
     private ProgressBar progressBar;
-    private Fab fabCheckoutButton;
+    private Fab fabCheckout;
     private boolean isFirstCall;
     private Context context;
     private Activity activity;
@@ -39,7 +39,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
         this.context = context;
         this.activity = activity;
         this.progressBar = (ProgressBar) this.activity.findViewById(R.id.progress_ocr);
-        this.fabCheckoutButton = (Fab) this.activity.findViewById(R.id.fab);
+        this.fabCheckout = (Fab) this.activity.findViewById(R.id.fab_checkout);
 
         foodTableHelper = new FoodTableHelper(this.activity);
         expiryTableHelper = new ExpiryTableHelper(this.activity);
@@ -237,7 +237,8 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
             new OcrImageTask(false, context, activity).execute(bitmap);
         } else {
             progressBar.setVisibility(View.GONE);
-            fabCheckoutButton.setVisibility(View.VISIBLE);
+            fabCheckout.setVisibility(View.VISIBLE); // Fix to prevent button from appearing at top-right corner (must be set to invisible in the layout)
+            fabCheckout.showFab();
         }
     }
 }

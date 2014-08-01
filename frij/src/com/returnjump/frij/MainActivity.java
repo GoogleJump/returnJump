@@ -77,7 +77,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
 
         populateListView();
 
-        fabAdd = (Fab) findViewById(R.id.fab);
+        fabAdd = (Fab) findViewById(R.id.fab_add);
         fabAdd.setFabColor(getResources().getColor(R.color.theme));
         fabAdd.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_add));
         fabAdd.setOnClickListener(addNewItemOnClickListener);

@@ -331,8 +331,9 @@ public class FridgeItem {
     }
 
     //Overriding the equals method so that two fridge items are the same if they have the same name
+    @Override
     public boolean equals(Object o) {
-        return name.equals(((FridgeItem) o).name);
+        return getName().equals(((FridgeItem) o).getName());
     }
 
 }
