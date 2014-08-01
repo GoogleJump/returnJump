@@ -2,42 +2,23 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:gravity="center"
+    android:background="@color/white" >
 
     <ListView
         android:id="@+id/shoppingCart"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_margin="10dp"
-        android:background="@drawable/bg_card" />
+        android:layout_height="match_parent" />
     
     <ProgressBar
         android:id="@+id/progress_ocr"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_gravity="center"
-        android:layout_marginBottom="10dp" />
-
-    <!---
-    <Button
-        android:id="@+id/checkoutButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginBottom="10dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:text="@string/checkout"
-        android:textColor="@color/white"
-        android:background="@drawable/button"
-        android:visibility="gone" /
-       -->
+        android:layout_gravity="center" />
 
     <com.faizmalkani.floatingactionbutton.Fab
-        android:id="@+id/fab"
+        android:id="@+id/fab_checkout"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_alignParentBottom="true"
