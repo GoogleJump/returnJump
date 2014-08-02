@@ -1,0 +1,18 @@
+<div ng-hide="isFridgeEmpty" ng-repeat="fridgeItem in fridgeItems | orderBy: ['expiryDate', 'name']">
+  <material-card class="material-card-mini">
+    <div layout="horizontal" main-axis="space-between">
+
+      <div class="fridge-item-name">{{ fridgeItem.name | truncate:15 }}</div>
+
+      <div layout="vertical" main-axis="space-between" style="width: 100px;">
+        <div class="fridge-item-expiration-number">{{ fridgeItem.expiryDate | getDaysGood | getExpirationNumber }}</div>
+        <div class="fridge-item-expiration-unit">{{ fridgeItem.expiryDate | getDaysGood | getExpirationUnit }}</div>
+      </div>
+
+    </div>
+  </material-card>
+</div>
+
+<material-card ng-show="isFridgeEmpty" class="fridge-empty material-card-mini">
+  Your fridge is empty :(
+</material-card>

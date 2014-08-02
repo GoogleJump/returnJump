@@ -188,35 +188,18 @@ public class FridgeItem {
 
         if (timeGood >= 365) {
             timeGood = timeGood / 365;
-
-            if (timeGood == 1) {
-                unit = "year";
-            } else {
-                unit = "years";
-            }
+            unit = "year";
         } else if (timeGood >= 28) {
             timeGood = timeGood / 28;
-
-            if (timeGood == 1) {
-                unit = "month";
-            } else {
-                unit = "months";
-            }
+            unit = "month";
         } else if (timeGood >= 7) {
             timeGood = timeGood / 7;
-
-            if (timeGood == 1) {
-                unit = "week";
-            } else {
-                unit = "weeks";
-            }
+            unit = "week";
         } else {
-            if (timeGood == 1) {
-                unit = "day";
-            } else {
-                unit = "days";
-            }
+            unit = "day";
         }
+
+        unit += (timeGood == 1) ? '' :'s';
 
         return unit;
     }

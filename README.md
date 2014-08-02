@@ -4,6 +4,8 @@ return Jump;
 Frij
 -------
 
+http://frij-app.appspot.com/
+
 Google App Engine
 -----------------
 

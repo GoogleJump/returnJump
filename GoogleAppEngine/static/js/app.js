@@ -8,6 +8,9 @@ App.config([
         $routeProvider.when('/', {
             templateUrl: '/static/template/home.tmpl.html',
             controller: 'HomeCtrl'
+        }).when('/fridge', {
+            templateUrl: '/static/template/fridge.tmpl.html',
+            controller: 'FridgeCtrl'
         }).otherwise('/');
     }
 ]);

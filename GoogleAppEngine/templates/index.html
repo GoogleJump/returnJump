@@ -14,6 +14,8 @@
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.14/angular.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.14/angular-animate.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.14/angular-route.js"></script>
+<!--script src="//www.parsecdn.com/js/parse-1.2.19.min.js"></script-->
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js"></script>
 <script src="/static/vendor/js/angular-animate-sequence.js"></script>
 <script src="/static/vendor/js/angular-animate-stylers.js"></script>
 <script src="/static/vendor/js/material-design.js"></script>
@@ -22,6 +24,7 @@
 <script src="/static/js/services.js"></script>
 <script src="/static/js/controllers.js"></script>
 <script src="/static/js/directives.js"></script>
+<script src="/static/js/filters.js"></script>
 <script type='text/javascript'>
   function startApp() {
     angular.bootstrap(document, ['app']);
@@ -34,10 +37,6 @@
   <ng-view></ng-view>
   <ng-include src="'/static/template/footer.tmpl.html'"></ng-include>
 
-<!--material-ink-bar style="width: 500px; height: 100px; background: #99cc00;">
-  <material-ripple initial-opacity="0.9" opacity-decay-velocity="0.89"></material-ripple>
-</material-ink-bar-->
-
   <!-- Google+ SignIn -->
   <script type="text/javascript">
     (function() {
@@ -45,6 +44,17 @@
       po.src = 'https://apis.google.com/js/client:plusone.js?onload=startApp';
       var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
     })();
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45144048-6', 'auto');
+    ga('send', 'pageview');
   </script>
 </body>
 </html>
