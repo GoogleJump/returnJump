@@ -36,13 +36,9 @@ App.controller('GooglePlusCtrl', [
             } else {
                 $scope.signedIn = false;
                 $location.path('/');
-                // Update the app to reflect a signed out user
-                // Possible error values:
-                //   "user_signed_out" - User is signed-out
-                //   "access_denied" - User denied access to your app
-                //   "immediate_failed" - Could not automatically log in the user
+
+                ngProgress.complete();
             }
-            ngProgress.complete();
         };
 
         $scope.start = function () {
@@ -55,21 +51,53 @@ App.controller('GooglePlusCtrl', [
 
 App.controller('FridgeCtrl', [
     '$scope',
-    function ($scope) {
-        $scope.fridgeItems = [
-            { name: 'cupcake', expiryDate: '2014-10-10'},
-            { name: 'doughnut', expiryDate: '2014-08-10'},
-            { name: 'eclair', expiryDate: '2014-08-10'},
-            { name: 'froyo', expiryDate: '2014-08-10'},
-            { name: 'gingerbread', expiryDate: '2014-08-10'},
-            { name: 'honeycomb', expiryDate: '2014-08-10'},
-            { name: 'ice cream sandwich', expiryDate: '2014-08-10'},
-            { name: 'jelly bean', expiryDate: '2014-08-10'},
-            { name: 'kitkat', expiryDate: '2014-08-10'},
-            { name: 'lollipop', expiryDate: '2014-08-10'}
-        ];
+    '$http',
+    '$q',
+    'ngProgress',
+    'GooglePlusFactory',
+    function ($scope, $http, $q, ngProgress, GooglePlusFactory) {
+        $scope.fridgeItems = [];
+        $scope.message = 'Loading...';
 
-        //$scope.isFridgeEmpty = $scope.fridgeItems.length === 0;
-        $scope.isFridgeEmpty = true;
+        var getFridgeItems = function (email) {
+            console.log(email);
+            $http({method: 'GET', url: '/api/fridge', headers : {'Content-Type': 'application/json'}, data: {email: email}}).
+                success(function(data, status, headers, config) {
+                    console.log(data.data);
+                    $scope.fridgeItems = data.data;
+
+                    if ($scope.fridgeItems.length === 0) {
+                        $scope.message = 'Your fridge is empty :(';
+                    }
+
+                    ngProgress.complete();
+                }).
+                error(function(data, status, headers, config) {
+                    $scope.message = 'Something when wrong, try again later.';
+
+                    ngProgress.complete();
+                });
+        };
+
+        if (GooglePlusFactory.getEmail() === null) {
+            // Make this a function to avoid duplicate
+            GooglePlusFactory.setProfile().then(function () {
+                getFridgeItems(GooglePlusFactory.getEmail());
+            }, function () {
+                setTimeout(function () {
+                    // Make this a function to avoid duplicate
+                    GooglePlusFactory.setProfile().then(function () {
+                        getFridgeItems(GooglePlusFactory.getEmail());
+                    }, function () {
+                        $scope.message = 'Something when wrong, try again later.';
+
+                        ngProgress.complete();
+                    });
+                }, 1000);
+            });
+        } else {
+            getFridgeItems(GooglePlusFactory.getEmail());
+        }
+
     }
 ]);

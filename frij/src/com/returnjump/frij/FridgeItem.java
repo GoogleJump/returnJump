@@ -199,7 +199,7 @@ public class FridgeItem {
             unit = "day";
         }
 
-        unit += (timeGood == 1) ? '' :'s';
+        unit += (timeGood == 1) ? "" : "s";
 
         return unit;
     }

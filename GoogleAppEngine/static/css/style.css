@@ -41,6 +41,11 @@
   line-height: 40px;
 }
 
+.fridge-item-expired {
+  padding-right: 12px;
+  color: red;
+}
+
 .fridge-item-expiration-number {
   padding-right: 12px;
   font-size: 24px;

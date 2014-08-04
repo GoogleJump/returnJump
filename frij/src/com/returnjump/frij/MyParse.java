@@ -175,8 +175,8 @@ public class MyParse {
 
             long rowId = parseCloudFridgeItem.getLong("rowId");
             String hash = parseCloudFridgeItem.getString("hash");
-            String foodItem = parseCloudFridgeItem.getString("foodItem");
-            String rawFoodItem = parseCloudFridgeItem.getString("rawFoodItem");
+            String name = parseCloudFridgeItem.getString("name");
+            String rawName = parseCloudFridgeItem.getString("rawName");
             String expiryDate = parseCloudFridgeItem.getString("expiryDate");
             String createdDate = parseCloudFridgeItem.getString("createdDate");
             String updatedDate = parseCloudFridgeItem.getString("updatedDate");
@@ -193,7 +193,7 @@ public class MyParse {
             int notifiedPush = parseCloudFridgeItem.getInt("notifiedPush");
             int notifiedEmail = parseCloudFridgeItem.getInt("notifiedEmail");
 
-            cloudFridge.add(new FridgeItem(rowId, hash, foodItem, rawFoodItem, expiryDate, createdDate, updatedDate, updatedBy,
+            cloudFridge.add(new FridgeItem(rowId, hash, name, rawName, expiryDate, createdDate, updatedDate, updatedBy,
                     fromImage, image, imageBinarized, expired, editedCart, editedFridge, deletedCart,
                     deletedFridge, notifiedPush, notifiedEmail));
         }
@@ -236,7 +236,7 @@ public class MyParse {
         // This data should never be modified
         parseObject.put("rowId", fridgeItem.getRowId());
         parseObject.put("hash", fridgeItem.getHash());
-        parseObject.put("rawFoodItem", fridgeItem.getRawName());
+        parseObject.put("rawName", fridgeItem.getRawName());
         parseObject.put("createdDate", fridgeItem.getCreatedDate());
         parseObject.put("fromImage", fridgeItem.isFromImage());
 
@@ -278,7 +278,7 @@ public class MyParse {
     private static void saveUpdatedFridgeItemEventually(FridgeItem fridgeItem, ParseObject parseObject) {
 
         // Modifiable data
-        parseObject.put("foodItem", fridgeItem.getName());
+        parseObject.put("name", fridgeItem.getName());
         parseObject.put("expiryDate", fridgeItem.getExpiryDate());
         parseObject.put("updatedDate", fridgeItem.getUpdatedDate());
         parseObject.put("updatedBy", fridgeItem.getUpdatedBy());
