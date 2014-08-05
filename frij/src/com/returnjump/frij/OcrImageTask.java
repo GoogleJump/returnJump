@@ -265,13 +265,13 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
         String out = "";
         boolean goodWord = true;
-        int lastWhitespace = 0;
+        int lastWhitespace = -1;
         for(int i = 0; i < stripped.length(); i++) {
             if(!isLetter(stripped.charAt(i))) {
 
                 if(Character.isWhitespace(stripped.charAt(i))) {
-                    if(goodWord && lastWhitespace != i-1)
-                        out += stripped.substring(lastWhitespace, i) + " ";
+                    if(goodWord && lastWhitespace < i-2)
+                        out += stripped.substring((int) Math.max(0, lastWhitespace), i) + " ";
                     lastWhitespace = i;
                     goodWord = true;
                 }
@@ -279,7 +279,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
                     goodWord = false;
             }
         }
-        if(goodWord)
+        if(goodWord && lastWhitespace < stripped.length()-2)
             out += stripped.substring(lastWhitespace, stripped.length());
         out = out.trim();
         Log.wtf(out, " cleanText   out");
