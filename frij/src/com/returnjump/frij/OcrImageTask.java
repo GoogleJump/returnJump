@@ -53,12 +53,12 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
     private Bitmap[] splitBitmap(Bitmap bitmap) {
         int threshold = 32;
+        int blackPixelCount = 0;
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         int pixel;
         boolean started = false;
         boolean isBlankRow;
-        int blackPixelCount;
 
         // Default if height below threshold or no blank row found
         Bitmap first = Bitmap.createBitmap(bitmap, 0, 0, width, height);
@@ -68,7 +68,6 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
             for (int y = 0; y < height; ++y) {
                 isBlankRow = true;
-                blackPixelCount = 0;
 
                 for (int x = 0; x < width; ++x) {
                     pixel = bitmap.getPixel(x, y);
@@ -76,7 +75,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
                     if (pixel == Color.BLACK) {
                         blackPixelCount++;
 
-                        // We consider blank lines if
+                       // Log.wtf("blackPixelCount width", Integer.toString(blackPixelCount) + " " + Integer.toString(width));
                         if (((float) blackPixelCount / width) > 0.1) {
                             started = true;
                             isBlankRow = false;
@@ -265,13 +264,13 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
         String out = "";
         boolean goodWord = true;
-        int lastWhitespace = -1;
+        int lastWhitespace = 0;
         for(int i = 0; i < stripped.length(); i++) {
             if(!isLetter(stripped.charAt(i))) {
 
                 if(Character.isWhitespace(stripped.charAt(i))) {
-                    if(goodWord && lastWhitespace < i-2)
-                        out += stripped.substring((int) Math.max(0, lastWhitespace), i) + " ";
+                    if(goodWord && lastWhitespace != i-1)
+                        out += stripped.substring(lastWhitespace, i) + " ";
                     lastWhitespace = i;
                     goodWord = true;
                 }
@@ -279,7 +278,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
                     goodWord = false;
             }
         }
-        if(goodWord && lastWhitespace < stripped.length()-2)
+        if(goodWord)
             out += stripped.substring(lastWhitespace, stripped.length());
         out = out.trim();
         Log.wtf(out, " cleanText   out");
