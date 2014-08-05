@@ -53,11 +53,12 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
     private Bitmap[] splitBitmap(Bitmap bitmap) {
         int threshold = 32;
+        int blackPixelCount = 0;
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         int pixel;
         boolean started = false;
-        boolean isBlankRow = true;
+        boolean isBlankRow;
 
         // Default if height below threshold or no blank row found
         Bitmap first = Bitmap.createBitmap(bitmap, 0, 0, width, height);
@@ -72,9 +73,14 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
                     pixel = bitmap.getPixel(x, y);
 
                     if (pixel == Color.BLACK) {
-                        started = true;
-                        isBlankRow = false;
-                        break;
+                        blackPixelCount++;
+
+                        Log.wtf("blackPixelCount width", Integer.toString(blackPixelCount) + " " + Integer.toString(width));
+                        if (((float) blackPixelCount / width) > 0.1) {
+                            started = true;
+                            isBlankRow = false;
+                            break;
+                        }
                     }
                 }
 
