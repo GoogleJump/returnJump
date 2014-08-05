@@ -205,6 +205,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
                     int days = getDaysUntilExpiry(rowId);
 
                     Log.wtf("ORIGINAL", recognizedText);
+                    Log.wtf("CLEANED", recognizedTextStripped);
                     Log.wtf("MATCH", matchedText);
 
                     // Add item to list
@@ -252,7 +253,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
         stripped.substring(firstLetterPos);
 
         String out = "";
-        for(char c : stripped) {
+        for(char c : stripped.toCharArray()) {
             if(Character.isLetter(c) || c == ' ')
                 out += c + "";
         }
