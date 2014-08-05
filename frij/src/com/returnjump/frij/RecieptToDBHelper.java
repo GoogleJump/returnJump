@@ -15,9 +15,12 @@ public class RecieptToDBHelper {
         int dbItemLength = dbItem.length()+1;
         int recieptItemLength = recieptItem.length()+1;
 
-        int insertCost = 5;
+        int insertCost = 10;
         int deleteCost = 1;
 
+        if(dbItem.length() < recieptItem.length())
+            return Integer.MAX_VALUE;
+        
         // the array of distances
         int[] cost = new int[dbItemLength];
         int[] newcost = new int[dbItemLength];
