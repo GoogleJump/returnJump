@@ -54,6 +54,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
     private Fab fabAdd;
     private int mLastFirstVisibleItem = 0;
     private boolean isUndoBarVisible = false;
+    private boolean isAtLeastOneExpired = false;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,7 +88,6 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sd = new ShakeDetector(this);
-        sd.start(sensorManager);
 
         // Initialize the alarm if it hasn't been initialized before and the user wants a notif
         if (!SettingsActivity.getAlarmSet(this) && SettingsActivity.isUserNotificationEnabled(this)) {
@@ -105,14 +105,19 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
     protected void onResume() {
         super.onResume();
 
-        sd.start(sensorManager);
+        if (isAtLeastOneExpired) {
+            sd.start(sensorManager);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         UndoBarController.clear(this);
-        sd.stop();
+
+        if (isAtLeastOneExpired) {
+            sd.stop();
+        }
     }
 
     private class InitializeDatabaseTask extends AsyncTask<Void, Void, String> {
@@ -238,8 +243,6 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
     }
 
     private void copyDatabaseToList() {
-        boolean isAtLeastOneExpired = false;
-
         Cursor c = fridgeDbHelper.read(null);
         c.moveToFirst();
         fridgeItems.clear();
@@ -269,6 +272,7 @@ public class MainActivity extends FragmentActivity implements CalendarDatePicker
         }
 
         if (isAtLeastOneExpired) {
+            sd.start(sensorManager);
             Toast.makeText(this, "Shake to dismiss expired food.", Toast.LENGTH_SHORT).show();
         }
     }
