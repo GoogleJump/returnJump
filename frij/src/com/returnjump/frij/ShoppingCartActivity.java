@@ -71,7 +71,6 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
     private boolean isUndoBarVisible = false;
     private boolean addClicked=false;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -414,8 +413,8 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
 
         @Override
         public void onClick(View view) {
-            addClicked = true;
             if(!addClicked) {
+                addClicked = true;
                 int n = shoppingCart.size();
                 int m = deletedCart.size();
 

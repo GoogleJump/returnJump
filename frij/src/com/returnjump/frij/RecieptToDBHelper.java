@@ -8,6 +8,7 @@ import java.util.List;
 public class RecieptToDBHelper {
 
     public static final int MAX_EDIT_DISTANCE_THRESHOLD = 20;
+    public static final int WIGGLE_ROOM =4;
 
     public static int editDistance (String dbItem, String recieptItem) {
         dbItem=dbItem.toLowerCase();
@@ -18,7 +19,7 @@ public class RecieptToDBHelper {
         int insertCost = 10;
         int deleteCost = 1;
 
-        if(dbItem.length() < recieptItem.length())
+        if(dbItem.length() < recieptItem.length()-WIGGLE_ROOM)
             return Integer.MAX_VALUE;
         
         // the array of distances

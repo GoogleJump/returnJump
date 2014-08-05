@@ -195,6 +195,11 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
         for (String recognizedText : recognizedTexts) {
             //removing non-letter characters and stuff after the $
+            if(recognizedText.equals(""))
+            {
+                continue;
+            }
+
             String recognizedTextStripped = cleanText(recognizedText);
 
             if (!recognizedTextStripped.equals("")) {
@@ -245,6 +250,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
     //Takes in s, a line of text from a receipt, and removes unwanted characters
     private static String cleanText(String s) {
+        Log.wtf(s, "  cleanText   in");
         int dollaSignPos = s.indexOf("$");
         int firstLetterPos = getPositionOfFirstLetter(s);
         if(firstLetterPos == -1)
@@ -259,6 +265,8 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
                 out += c + "";
         }
         out = out.trim();
+        Log.wtf(out, " cleanText   out");
+
         return out;
     }
 }
