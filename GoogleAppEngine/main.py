@@ -120,13 +120,14 @@ def getUsersUnexpiredFridgeItems(installationObjectId):
     else:
         return False, None, myResponse({'error': result.content})
 
-@app.route('/api/fridge', methods=['GET'])
+@app.route('/api/fridge', methods=['POST'])
 def fridge():
     # Need authentication here (https://developers.google.com/+/web/signin/server-side-flow)
 
-    #print 'email', request.json['email']
+    if not request.json.get('email'):
+        return myResponse({'error': 'No email given.'})
 
-    success, installationObjectId, error = getUsersInstallationObjectid('tasti.zakarie@gmail.com')
+    success, installationObjectId, error = getUsersInstallationObjectid(request.json['email'])
     if not success:
         return error
 
