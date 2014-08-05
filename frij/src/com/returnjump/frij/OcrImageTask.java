@@ -194,11 +194,8 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
         baseApi.end();
 
         for (String recognizedText : recognizedTexts) {
-            // Start at the first letter
-            int dollaSignPos = recognizedText.indexOf("$");
-            int firstLetterPos = getPositionOfFirstLetter(recognizedText);
-            String recognizedTextStripped = (dollaSignPos == -1) ? recognizedText : recognizedText.substring(0, dollaSignPos);
-            recognizedTextStripped.substring(firstLetterPos);
+            //removing non-letter characters and stuff after the $
+            String recognizedTextStripped = cleanText(recognizedText);
 
             if (!recognizedTextStripped.equals("")) {
                 String matchedText = findMatchInDatabase(recognizedTextStripped);
@@ -242,5 +239,24 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
             fabCheckout.setVisibility(View.VISIBLE); // Fix to prevent button from appearing at top-right corner (must be set to invisible in the layout)
             fabCheckout.showFab();
         }
+    }
+
+
+    //Takes in s, a line of text from a receipt, and removes unwanted characters
+    private static String cleanText(String s) {
+        int dollaSignPos = s.indexOf("$");
+        int firstLetterPos = getPositionOfFirstLetter(s);
+        String stripped = (dollaSignPos == -1) ? s : s.substring(0, dollaSignPos);
+        if(firstLetterPos == -1)
+            return "";
+        stripped.substring(firstLetterPos);
+
+        String out = "";
+        for(char c : stripped) {
+            if(Character.isLetter(c) || c == ' ')
+                out += c + "";
+        }
+        out = out.trim();
+        return out;
     }
 }
