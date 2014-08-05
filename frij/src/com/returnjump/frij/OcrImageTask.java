@@ -75,7 +75,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
                     if (pixel == Color.BLACK) {
                         blackPixelCount++;
 
-                       // Log.wtf("blackPixelCount width", Integer.toString(blackPixelCount) + " " + Integer.toString(width));
+                        // Log.wtf("blackPixelCount width", Integer.toString(blackPixelCount) + " " + Integer.toString(width));
                         if (((float) blackPixelCount / width) > 0.1) {
                             started = true;
                             isBlankRow = false;
@@ -94,9 +94,8 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
         }
 
-        Bitmap[] splittedBitmap = {first, rest};
-
-        return splittedBitmap;
+        return new Bitmap[]{first, rest};
+        
     }
 
     // Name should be set to the fridgeItem's hash later
