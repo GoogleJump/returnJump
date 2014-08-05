@@ -247,10 +247,11 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
     private static String cleanText(String s) {
         int dollaSignPos = s.indexOf("$");
         int firstLetterPos = getPositionOfFirstLetter(s);
-        String stripped = (dollaSignPos == -1) ? s : s.substring(0, dollaSignPos);
         if(firstLetterPos == -1)
             return "";
-        stripped.substring(firstLetterPos);
+        String stripped = s.substring(firstLetterPos);
+        stripped = (dollaSignPos == -1) ? s : stripped.substring(0, dollaSignPos);
+
 
         String out = "";
         for(char c : stripped.toCharArray()) {

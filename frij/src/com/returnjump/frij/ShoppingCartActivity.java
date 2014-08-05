@@ -44,7 +44,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ShoppingCartActivity extends FragmentActivity implements CalendarDatePickerDialog.OnDateSetListener, EditNameFragment.OnEditNameButtonClickedListener, UndoBarController.AdvancedUndoListener {
 
@@ -67,6 +69,8 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
     private Fab fabCheckout;
     private int mLastFirstVisibleItem = 0;
     private boolean isUndoBarVisible = false;
+    private boolean addClicked=false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -410,25 +414,39 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
 
         @Override
         public void onClick(View view) {
-            int n = shoppingCart.size();
-            int m = deletedCart.size();
+            addClicked = true;
+            if(!addClicked) {
+                int n = shoppingCart.size();
+                int m = deletedCart.size();
 
-            // Add the shopping cart to the database
-            for (int i = 0; i < n; ++i) {
-                FridgeItem item = shoppingCart.get(i);
+                //prevent duplicates from being added to list
+                Set<FridgeItem> tempSet = new HashSet<FridgeItem>();
+                for (FridgeItem item : shoppingCart) {
+                    tempSet.add(item);
+                }
+                shoppingCart.clear();
 
-                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
+                for (FridgeItem item : tempSet) {
+                    shoppingCart.add(item);
+                }
+
+                // Add the shopping cart to the database
+                for (int i = 0; i < n; ++i) {
+                    FridgeItem item = shoppingCart.get(i);
+
+                    long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
+                }
+
+                // Add the deleted cart to the database, setting deleted_cart to True
+                for (int j = 0; j < m; ++j) {
+                    FridgeItem item = deletedCart.get(j);
+
+                    long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
+                    dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
+                }
+
+                finish();
             }
-
-            // Add the deleted cart to the database, setting deleted_cart to True
-            for (int j = 0; j < m; ++j) {
-                FridgeItem item = deletedCart.get(j);
-
-                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
-                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
-            }
-
-            finish();
         }
 
     };
