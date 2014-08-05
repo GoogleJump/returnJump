@@ -12,8 +12,7 @@ App.factory('GooglePlusFactory', [
                     'callback': scope.signInCallback,
                     'clientid': '849916535788-9t8ki2lmeiivrs2dtiou280gdup3c9et.apps.googleusercontent.com',
                     'scope': 'email',
-                    'cookiepolicy': 'single_host_origin'/*,
-                    'data-approvalprompt': 'force'*/
+                    'cookiepolicy': 'single_host_origin'
                 }
             );
         };
@@ -28,8 +27,7 @@ App.factory('GooglePlusFactory', [
 
             gapi.client.load('oauth2', 'v2', function (response) {
                 gapi.client.oauth2.userinfo.get().execute(function (response) {
-                    if (response.code && (response.code === 401)) {
-                        console.log(response.message);
+                    if (response.code === 401) {
                         deferred.reject();    
                     } else {
                         profile = response;
@@ -42,7 +40,6 @@ App.factory('GooglePlusFactory', [
         };
 
         factory.getEmail = function () {
-            console.log(profile);
             return (profile === null) ? null: profile.email ;
         };
 

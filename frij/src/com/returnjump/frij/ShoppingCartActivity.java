@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -28,6 +29,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.cocosw.undobar.UndoBarController;
@@ -67,9 +69,9 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
     private String EDIT_FRAG_TAG = "edit_frag_tag";
     private String CAL_PICKER_TAG = "cal_frag_tag";
     private Fab fabCheckout;
+    private ProgressBar progressBar;
     private int mLastFirstVisibleItem = 0;
     private boolean isUndoBarVisible = false;
-    private boolean addClicked=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +108,8 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
         fabCheckout.setFabColor(context.getResources().getColor(R.color.theme));
         fabCheckout.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_checkout));
         fabCheckout.setOnClickListener(addToFridge);
+
+        progressBar = (ProgressBar) findViewById(R.id.progress_ocr);
 
         // Open existing camera app, calls onActivityResult() when intent is finished
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -408,47 +412,62 @@ public class ShoppingCartActivity extends FragmentActivity implements CalendarDa
         }
     }
 
-    // Async task this!
     private OnClickListener addToFridge = new OnClickListener() {
 
         @Override
         public void onClick(View view) {
-            if(!addClicked) {
-                addClicked = true;
-                int n = shoppingCart.size();
-                int m = deletedCart.size();
-
-                //prevent duplicates from being added to list
-                Set<FridgeItem> tempSet = new HashSet<FridgeItem>();
-                for (FridgeItem item : shoppingCart) {
-                    tempSet.add(item);
-                }
-                shoppingCart.clear();
-
-                for (FridgeItem item : tempSet) {
-                    shoppingCart.add(item);
-                }
-
-                // Add the shopping cart to the database
-                for (int i = 0; i < n; ++i) {
-                    FridgeItem item = shoppingCart.get(i);
-
-                    long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
-                }
-
-                // Add the deleted cart to the database, setting deleted_cart to True
-                for (int j = 0; j < m; ++j) {
-                    FridgeItem item = deletedCart.get(j);
-
-                    long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
-                    dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
-                }
-
-                finish();
-            }
+            new WriteShoppingCartToDatabaseTask().execute();
         }
 
     };
+
+    private class WriteShoppingCartToDatabaseTask extends AsyncTask<Void, Void, Void> {
+
+        protected void onPreExecute() {
+            fabCheckout.hideFab();
+            fabCheckout.setVisibility(View.GONE);
+            cartListView.setVisibility(View.GONE);
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            int n = shoppingCart.size();
+            int m = deletedCart.size();
+
+            //prevent duplicates from being added to list
+            Set<FridgeItem> tempSet = new HashSet<FridgeItem>();
+            for (FridgeItem item : shoppingCart) {
+                tempSet.add(item);
+            }
+            shoppingCart.clear();
+
+            for (FridgeItem item : tempSet) {
+                shoppingCart.add(item);
+            }
+
+            // Add the shopping cart to the database
+            for (int i = 0; i < n; ++i) {
+                FridgeItem item = shoppingCart.get(i);
+
+                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
+            }
+
+            // Add the deleted cart to the database, setting deleted_cart to True
+            for (int j = 0; j < m; ++j) {
+                FridgeItem item = deletedCart.get(j);
+
+                long id = dbHelper.put(item.getName(), FridgeDbHelper.stringToCalendar(item.getExpiryDate(), DatabaseContract.FORMAT_DATE), item.getRawName(), DatabaseContract.BOOL_TRUE, item.getImagePath(), item.getImageBinarizedPath());
+                dbHelper.update(id, null, null, DatabaseContract.BOOL_TRUE, null, null, null, DatabaseContract.BOOL_TRUE, null, null, null);
+            }
+
+            return null;
+        }
+
+        protected void onPostExecute(Void v) {
+            finish();
+        }
+    }
 
     @Override
     public void onUndo(Parcelable token) {
