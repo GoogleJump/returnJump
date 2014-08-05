@@ -248,25 +248,40 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
     }
 
 
-    //Takes in s, a line of text from a receipt, and removes unwanted characters
+    //Takes in s, a line of text from a receipt, and removes unwanted character
     private static String cleanText(String s) {
         Log.wtf(s, "  cleanText   in");
-        int dollaSignPos = s.indexOf("$");
         int firstLetterPos = getPositionOfFirstLetter(s);
         if(firstLetterPos == -1)
             return "";
         String stripped = s.substring(firstLetterPos);
-        stripped = (dollaSignPos == -1) ? s : stripped.substring(0, dollaSignPos);
-
 
         String out = "";
-        for(char c : stripped.toCharArray()) {
-            if(Character.isLetter(c) || c == ' ')
-                out += c + "";
+        boolean goodWord = true;
+        int lastWhitespace = 0;
+        for(int i = 0; i < stripped.length(); i++) {
+            if(!isLetter(stripped.charAt(i))) {
+
+                if(Character.isWhitespace(stripped.charAt(i))) {
+                    if(goodWord && lastWhitespace != i-1)
+                        out += stripped.substring(lastWhitespace, i) + " ";
+                    lastWhitespace = i;
+                    goodWord = true;
+                }
+                else
+                    goodWord = false;
+            }
         }
+        if(goodWord)
+            out += stripped.substring(lastWhitespace, stripped.length());
         out = out.trim();
         Log.wtf(out, " cleanText   out");
-
         return out;
     }
+
+    private static boolean isLetter(char c) {
+            return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
+    }
 }
+
+
