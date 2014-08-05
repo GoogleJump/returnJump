@@ -46,6 +46,10 @@ def generateBody(expiredFridgeItems):
     return plain, html
 
 def sendEmail(email, expiredFridgeItems):
+    # If nothing's expired, don't send an email
+    if len(expiredFridgeItems) == 0:
+        return myResponse({'error': 'You have nothing that expired.', 'email': email, 'exp': expiredFridgeItems})
+
     message = mail.EmailMessage(sender='Return Jump <returnjump@gmail.com>', subject='Frij')
 
     plain, html = generateBody(expiredFridgeItems)
@@ -58,7 +62,8 @@ Hey,
 
 %s
 %s
-''' % plain
+''' % (header, plain)
+
     message.html = '''
 <html>
     <head></head>
@@ -72,7 +77,7 @@ Hey,
         </ul>
     </body>
 </html>
-''' % html
+''' % (header, html)
 
     message.send()
     return myResponse({'success': 'Email sent.', 'email': email, 'exp': expiredFridgeItems})
@@ -114,20 +119,21 @@ def getUsersUnexpiredFridgeItems(installationObjectId):
         body = json.loads(result.content)['results']
 
         # Strip out the data we need
-        body = map(lambda x: {'name': x['foodItem'], 'expiryDate': x['expiryDate']}, body)
+        body = map(lambda x: {'name': x['name'], 'expiryDate': x['expiryDate']}, body)
 
         return True, body, None
     else:
         return False, None, myResponse({'error': result.content})
 
-@app.route('/api/fridge', methods=['POST'])
-def fridge():
+@app.route('/api/fridge/<email>', methods=['GET'])
+def fridge(email):
     # Need authentication here (https://developers.google.com/+/web/signin/server-side-flow)
 
-    if not request.json.get('email'):
+    print 'email', email
+    if not mail.is_email_valid(email):
         return myResponse({'error': 'No email given.'})
 
-    success, installationObjectId, error = getUsersInstallationObjectid(request.json['email'])
+    success, installationObjectId, error = getUsersInstallationObjectid(email)
     if not success:
         return error
 

@@ -29,18 +29,16 @@ App.controller('GooglePlusCtrl', [
         $scope.signOut = GooglePlusFactory.signOut;
 
         $scope.signInCallback = function (authResult) {
-            $scope.$apply(function () {
-                console.log(authResult);
-                if (authResult['status']['signed_in']) {
-                    $scope.signedIn = true;
-                    $location.path('/fridge');
-                } else {
-                    $scope.signedIn = false;
-                    $location.path('/');
+            console.log(authResult);
+            if (authResult['status']['signed_in']) {
+                $scope.signedIn = true;
+                $location.path('/fridge');
+            } else {
+                $scope.signedIn = false;
+                $location.path('/');
 
-                    ngProgress.complete();
-                }
-            });
+                ngProgress.complete();
+            }
         };
 
         $scope.start = function () {
@@ -63,10 +61,14 @@ App.controller('FridgeCtrl', [
 
         var getFridgeItems = function (email) {
             console.log(email);
-            $http({method: 'POST', url: '/api/fridge', headers : {'Content-Type': 'application/json'}, data: {email: email}}).
+            $http({method: 'GET', url: '/api/fridge/' + email, headers : {'Content-Type': 'application/json'}}).
                 success(function(data, status, headers, config) {
                     console.log(data.data);
                     $scope.fridgeItems = data.data;
+
+                    if (!Array.isArray($scope.fridgeItems)) {
+                        $scope.fridgeItems = [];                        
+                    }
 
                     if ($scope.fridgeItems.length === 0) {
                         $scope.message = 'Your fridge is empty :(';
