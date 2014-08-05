@@ -52,7 +52,7 @@ public class BinarizeImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView binaryImageView = new ImageView(context);
         binaryImageView.setImageBitmap(bitmap);
 
-        new AlertDialog.Builder(activity)
+        /*new AlertDialog.Builder(activity)
                 .setTitle("Binarized Image:")
                 .setView(binaryImageView)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -62,7 +62,7 @@ public class BinarizeImageTask extends AsyncTask<String, Void, Bitmap> {
                         dialogInterface.dismiss();
                     }
                 })
-                .show();
+                .show();*/
 
         new OcrImageTask(true, context, activity).execute(bitmap);
     }
