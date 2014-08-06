@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.parse.FindCallback;
@@ -411,7 +410,7 @@ public class MyParse {
                         // Java NullPointer Exception error gets toasted here with e.getCode() == -1
                         // (Can't find a reason)
                         //myCallback.fallback(e.getMessage());
-                        myCallback.fallback("An unknown error occurred.");
+                       // myCallback.fallback("An unknown error occurred.");
                     }
                 }
             });

@@ -1,9 +1,7 @@
 package com.returnjump.frij;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -43,7 +41,7 @@ public class BinarizeImageTask extends AsyncTask<String, Void, Bitmap> {
         pix = Binarize.otsuAdaptiveThreshold(pix, 32, 32, 2, 2, 0.9F);
         //pix = Binarize.otsuAdaptiveThreshold(pix);
         bitmap = WriteFile.writeBitmap(pix);
-
+        //remove dust here
         return bitmap;
     }
 
@@ -52,7 +50,7 @@ public class BinarizeImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView binaryImageView = new ImageView(context);
         binaryImageView.setImageBitmap(bitmap);
 
-        new AlertDialog.Builder(activity)
+        /*new AlertDialog.Builder(activity)
                 .setTitle("Binarized Image:")
                 .setView(binaryImageView)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -62,8 +60,9 @@ public class BinarizeImageTask extends AsyncTask<String, Void, Bitmap> {
                         dialogInterface.dismiss();
                     }
                 })
-                .show();
+                .show();*/
 
         new OcrImageTask(true, context, activity).execute(bitmap);
     }
+
 }
