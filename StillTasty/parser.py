@@ -61,7 +61,7 @@ if not True:
     # This will not execute, see cleanUpJson()
     data = jsonFileToDict('raw.json')['data']
     cleanUpJson(data)
-    dictToJsonFile({ 'data': data }, 'clean.json')
+    dictToJsonFile({ 'data': data }, 'clean_original.json')
 else:
     data = jsonFileToDict('clean.json')['data']
 

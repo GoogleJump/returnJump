@@ -76,7 +76,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
                     if (pixel == Color.BLACK) {
                         blackPixelCount++;
 
-                        // We consider blank lines if
+                        // We consider blank lines if less than 10% of the has black pixels
                         if (((float) blackPixelCount / width) > 0.1) {
                             started = true;
                             isBlankRow = false;
@@ -95,9 +95,8 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
         }
 
-        Bitmap[] splittedBitmap = {first, rest};
+        return new Bitmap[]{first, rest};
 
-        return splittedBitmap;
     }
 
     // Name should be set to the fridgeItem's hash later
@@ -265,13 +264,13 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
         String out = "";
         boolean goodWord = true;
-        int lastWhitespace = -1;
+        int lastWhitespace = 0;
         for(int i = 0; i < stripped.length(); i++) {
             if(!isLetter(stripped.charAt(i))) {
 
                 if(Character.isWhitespace(stripped.charAt(i))) {
-                    if(goodWord && lastWhitespace < i-2)
-                        out += stripped.substring((int) Math.max(0, lastWhitespace), i) + " ";
+                    if(goodWord && lastWhitespace != i-1)
+                        out += stripped.substring(lastWhitespace, i) + " ";
                     lastWhitespace = i;
                     goodWord = true;
                 }
@@ -279,7 +278,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
                     goodWord = false;
             }
         }
-        if(goodWord && lastWhitespace < stripped.length()-2)
+        if(goodWord)
             out += stripped.substring(lastWhitespace, stripped.length());
         out = out.trim();
         Log.wtf(out, " cleanText   out");

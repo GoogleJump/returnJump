@@ -411,7 +411,7 @@ public class MyParse {
                         // Java NullPointer Exception error gets toasted here with e.getCode() == -1
                         // (Can't find a reason)
                         //myCallback.fallback(e.getMessage());
-                        myCallback.fallback("An unknown error occurred.");
+                       // myCallback.fallback("An unknown error occurred.");
                     }
                 }
             });

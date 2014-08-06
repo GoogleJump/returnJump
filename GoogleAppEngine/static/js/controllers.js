@@ -29,10 +29,12 @@ App.controller('GooglePlusCtrl', [
         $scope.signOut = GooglePlusFactory.signOut;
 
         $scope.signInCallback = function (authResult) {
-            console.log(authResult);
             if (authResult['status']['signed_in']) {
-                $scope.signedIn = true;
-                $location.path('/fridge');
+                // Needs to digest (prevents it from doing nothing after you sign in)
+                $scope.$apply(function () {
+                    $scope.signedIn = true;
+                    $location.path('/fridge');
+                });
             } else {
                 $scope.signedIn = false;
                 $location.path('/');
@@ -60,10 +62,8 @@ App.controller('FridgeCtrl', [
         $scope.message = 'Loading...';
 
         var getFridgeItems = function (email) {
-            console.log(email);
             $http({method: 'GET', url: '/api/fridge/' + email, headers : {'Content-Type': 'application/json'}}).
                 success(function(data, status, headers, config) {
-                    console.log(data.data);
                     $scope.fridgeItems = data.data;
 
                     if (!Array.isArray($scope.fridgeItems)) {
