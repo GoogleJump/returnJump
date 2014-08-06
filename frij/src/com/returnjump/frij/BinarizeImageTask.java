@@ -96,20 +96,26 @@ public class BinarizeImageTask extends AsyncTask<String, Void, Bitmap> {
     }
 
     protected void dustOff(Bitmap b) {
-        LinkedList<Point> blackPixels = new LinkedList<Point>();
+        // LinkedList<Point> blackPixels = new LinkedList<Point>();
+        // for(int x = 0; x < b.getWidth(); x++) {
+        //     for(int y = 0; y < b.getHeight(); y++) {
+        //         if(b.getPixel(x, y) == Color.Black)
+        //             blackPixels.add(new Point(x, y));
+        //     }
+        // }
+        // while(blackPixels.size() != 0) {
+        //     Point p = blackPixels.removeFirst();
+        //     if(numBlackNeighbors(b, p.x, p.y) < 2) {
+        //         b.setPixel(p.x, p.y, Color.WHITE);
+        //         Point temp = getBlackNeighbor(b, p.x, p.y);
+        //         if(temp != null && !blackPixels.contains(temp))
+        //             blackPixels.addLast(temp);
+        //     }
+        // }
         for(int x = 0; x < b.getWidth(); x++) {
             for(int y = 0; y < b.getHeight(); y++) {
-                if(b.getPixel(x, y) == Color.Black)
-                    blackPixels.add(new Point(x, y));
-            }
-        }
-        while(blackPixels.size() != 0) {
-            Point p = blackPixels.removeFirst();
-            if(numBlackNeighbors(b, p.x, p.y) < 2) {
-                b.setPixel(p.x, p.y, Color.WHITE);
-                Point temp = getBlackNeighbor(b, p.x, p.y);
-                if(temp != null && !blackPixels.contains(temp))
-                    blackPixels.addLast(temp);
+                if(b.getPixel(x, y) == Color.BLACK && numBlackNeighbors(b, x, y) < 2)
+                    b.setPixel(x, y, Color.WHITE);
             }
         }
     }
