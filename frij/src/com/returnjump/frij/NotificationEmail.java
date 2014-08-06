@@ -3,7 +3,6 @@ package com.returnjump.frij;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.parse.FunctionCallback;
@@ -14,7 +13,6 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by arturomenacruz on 2014-06-28.
