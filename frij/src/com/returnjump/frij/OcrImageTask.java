@@ -57,8 +57,7 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
         int height = bitmap.getHeight();
         int pixel;
         boolean started = false;
-        boolean isBlankRow;
-        int blackPixelCount;
+        boolean isBlankRow = true;
 
         // Default if height below threshold or no blank row found
         Bitmap first = Bitmap.createBitmap(bitmap, 0, 0, width, height);
@@ -68,20 +67,14 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
             for (int y = 0; y < height; ++y) {
                 isBlankRow = true;
-                blackPixelCount = 0;
 
                 for (int x = 0; x < width; ++x) {
                     pixel = bitmap.getPixel(x, y);
 
                     if (pixel == Color.BLACK) {
-                        blackPixelCount++;
-
-                        // We consider blank lines if less than 10% of the has black pixels
-                        if (((float) blackPixelCount / width) > 0.1) {
-                            started = true;
-                            isBlankRow = false;
-                            break;
-                        }
+                        started = true;
+                        isBlankRow = false;
+                        break;
                     }
                 }
 
@@ -95,7 +88,9 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
         }
 
-        return new Bitmap[]{first, rest};
+        Bitmap[] splittedBitmap = {first, rest};
+
+        return splittedBitmap;
 
     }
 
