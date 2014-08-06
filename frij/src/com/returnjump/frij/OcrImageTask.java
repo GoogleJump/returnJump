@@ -167,73 +167,78 @@ public class OcrImageTask extends AsyncTask<Bitmap, Void, Bitmap> {
     }
 
     protected Bitmap doInBackground(Bitmap... bitmaps) {
-        Bitmap[] splittedBitmap = splitBitmap(bitmaps[0]);
-        Bitmap bitmap = splittedBitmap[0];
-        Bitmap restBitmap = splittedBitmap[1];
+        Bitmap restBitmap = null;
+        try {
+            Bitmap[] splittedBitmap = splitBitmap(bitmaps[0]);
+            Bitmap bitmap = splittedBitmap[0];
+            restBitmap = splittedBitmap[1];
 
-        String fileName = saveBitmapToFileSystem(bitmap);
+            String fileName = saveBitmapToFileSystem(bitmap);
 
-        // Convert to ARGB_8888, required by tess
-        bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+            // Convert to ARGB_8888, required by tess
+            bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 
-        TessBaseAPI baseApi = new TessBaseAPI();
+            TessBaseAPI baseApi = new TessBaseAPI();
 
-        File dataStorageDir = new File(Environment.getExternalStorageDirectory(), "frij");
+            File dataStorageDir = new File(Environment.getExternalStorageDirectory(), "frij");
 
-        // Create the storage directory if writable and it does not exist
-        if (ShoppingCartActivity.isExternalStorageWritable() && !dataStorageDir.exists()){
-            if (!dataStorageDir.mkdirs()){
-                Toast.makeText(context, "Failed to create directory.", Toast.LENGTH_LONG).show();
-            }
-        }
-
-        String DATA_PATH = dataStorageDir.getPath();
-        baseApi.init(DATA_PATH, ShoppingCartActivity.LANG);
-        baseApi.setImage(bitmap);
-        String[] recognizedTexts = baseApi.getUTF8Text().trim().split("\n");
-        baseApi.end();
-
-        for (String recognizedText : recognizedTexts) {
-            //removing non-letter characters and stuff after the $
-            if(recognizedText.equals(""))
-            {
-                continue;
+            // Create the storage directory if writable and it does not exist
+            if (ShoppingCartActivity.isExternalStorageWritable() && !dataStorageDir.exists()) {
+                if (!dataStorageDir.mkdirs()) {
+                    Toast.makeText(context, "Failed to create directory.", Toast.LENGTH_LONG).show();
+                }
             }
 
-            String recognizedTextStripped = cleanText(recognizedText);
+            String DATA_PATH = dataStorageDir.getPath();
+            baseApi.init(DATA_PATH, ShoppingCartActivity.LANG);
+            baseApi.setImage(bitmap);
+            String[] recognizedTexts = baseApi.getUTF8Text().trim().split("\n");
+            baseApi.end();
 
-            if (!recognizedTextStripped.equals("")) {
-                String matchedText = findMatchInDatabase(recognizedTextStripped);
-                //if a match less than RecieptTODBHelper.MAX_EDIT_DISTANCE_THRESHOLD was found
-                if (matchedText != null) {
-                    long rowId = foodTableHelper.getRowIdByName(matchedText);
-                    int days = getDaysUntilExpiry(rowId);
+            for (String recognizedText : recognizedTexts) {
+                //removing non-letter characters and stuff after the $
+                if (recognizedText.equals("")) {
+                    continue;
+                }
 
-                    Log.wtf("ORIGINAL", recognizedText);
-                    Log.wtf("CLEANED", recognizedTextStripped);
-                    Log.wtf("MATCH", matchedText);
+                String recognizedTextStripped = cleanText(recognizedText);
 
-                    // Add item to list
-                    Calendar c = GregorianCalendar.getInstance();
-                    c.add(Calendar.DATE, days);
-                    FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, recognizedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE), ShoppingCartActivity.IMAGE_PATH, fileName);
+                if (!recognizedTextStripped.equals("")) {
+                    String matchedText = findMatchInDatabase(recognizedTextStripped);
+                    //if a match less than RecieptTODBHelper.MAX_EDIT_DISTANCE_THRESHOLD was found
+                    if (matchedText != null) {
+                        long rowId = foodTableHelper.getRowIdByName(matchedText);
+                        int days = getDaysUntilExpiry(rowId);
 
-                    //check if the item is in the list, if not, do nothing as we don't need to add you again
+                        Log.wtf("ORIGINAL", recognizedText);
+                        Log.wtf("CLEANED", recognizedTextStripped);
+                        Log.wtf("MATCH", matchedText);
 
-                    if(!((ShoppingCartActivity) activity).shoppingCart.contains(newFridgeItem)) {
-                        ((ShoppingCartActivity) activity).shoppingCart.add(newFridgeItem);
+                        // Add item to list
+                        Calendar c = GregorianCalendar.getInstance();
+                        c.add(Calendar.DATE, days);
+                        FridgeItem newFridgeItem = new FridgeItem(-1, matchedText, recognizedText, FridgeDbHelper.calendarToString(c, DatabaseContract.FORMAT_DATE), ShoppingCartActivity.IMAGE_PATH, fileName);
 
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((ShoppingCartActivity) activity).adapter.notifyDataSetChanged();
-                            }
-                        });
+                        //check if the item is in the list, if not, do nothing as we don't need to add you again
+
+                        if (!((ShoppingCartActivity) activity).shoppingCart.contains(newFridgeItem)) {
+                            ((ShoppingCartActivity) activity).shoppingCart.add(newFridgeItem);
+
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ((ShoppingCartActivity) activity).adapter.notifyDataSetChanged();
+                                }
+                            });
+                        }
                     }
                 }
             }
-        }
 
+        }
+        catch (Exception e){
+            Toast.makeText(context, "Give us something to work with here", Toast.LENGTH_SHORT);
+        }
         return restBitmap;
     }
 

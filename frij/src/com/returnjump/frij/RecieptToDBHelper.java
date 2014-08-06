@@ -1,5 +1,7 @@
 package com.returnjump.frij;
 
+import android.util.Log;
+
 import java.util.List;
 
 /**
@@ -65,7 +67,7 @@ public class RecieptToDBHelper {
                 minCost = cost;
             }
         }
-
+        Log.wtf( "    "+minimum + "   ", minCost+"   " );
         return minCost < MAX_EDIT_DISTANCE_THRESHOLD ? minimum : null;
     }
 

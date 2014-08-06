@@ -161,8 +161,12 @@ public class CalendarDatePickerDialog extends DialogFragment implements
 
     public boolean selectedDateBeforeToday() {
         Calendar c = Calendar.getInstance();
-        int  compare = mCalendar.compareTo(c);
-        return compare <= 0;
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+
+        return mCalendar.before(c);
     }
 
     @Override
